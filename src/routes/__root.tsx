@@ -12,6 +12,7 @@ import TanstackQueryProvider from '../integrations/tanstack-query/root-provider'
 import appCss from '../styles.css?url'
 
 import type { QueryClient } from '@tanstack/react-query'
+import Header from '#/components/Header'
 
 interface MyRouterContext {
   queryClient: QueryClient
@@ -51,6 +52,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body className="bg-cuperz-neutral-50 text-slate-900 dark:bg-slate-900 dark:text-slate-50">
         <TanstackQueryProvider queryClient={queryClient}>
+          <Header />
           {children}
           <TanStackDevtools
             config={{
