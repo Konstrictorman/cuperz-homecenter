@@ -4,30 +4,6 @@
  */
 
 :root {
-  --cirkus-neutral-25: #ffffff;
-  --cirkus-neutral-50: #f5f5f5;
-  --cirkus-neutral-100: #e8e8e8;
-  --cirkus-neutral-200: #d1d1d1;
-  --cirkus-neutral-300: #b5b5b5;
-  --cirkus-neutral-400: #999999;
-  --cirkus-neutral-500: #808080;
-  --cirkus-neutral-600: #6b6b6b;
-  --cirkus-neutral-700: #575757;
-  --cirkus-neutral-800: #424242;
-  --cirkus-neutral-900: #2e2e2e;
-  --cirkus-neutral-1000: #000000;
-  --cirkus-primary-25: #fbf9f9;
-  --cirkus-primary-50: #f8f1f2;
-  --cirkus-primary-100: #f1dfdf;
-  --cirkus-primary-200: #e9babb;
-  --cirkus-primary-300: #e3878a;
-  --cirkus-primary-400: #e05256;
-  --cirkus-primary-500: #cf2025;
-  --cirkus-primary-600: #ba1d21;
-  --cirkus-primary-700: #931a1e;
-  --cirkus-primary-800: #6e1719;
-  --cirkus-primary-900: #4a1113;
-  --cirkus-primary-1000: #280b0c;
   --color-amber-25: #fcfaf8;
   --color-amber-50: #f9f6f1;
   --color-amber-100: #f4ebdc;

@@ -46,7 +46,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <head>
         <HeadContent />
       </head>
-      <body>
+      <body className="bg-cuperz-neutral-50 text-slate-900 dark:bg-slate-900 dark:text-slate-50">
         {children}
         <TanStackDevtools
           config={{
