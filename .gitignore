@@ -1,0 +1,44 @@
+# Dependencies
+node_modules
+
+# Build output
+dist
+dist-ssr
+.output
+.vinxi
+.nitro
+.wrangler
+.vercel
+.netlify
+
+# TanStack
+.tanstack
+
+# Env files
+.env
+.env.*
+!.env.example
+*.local
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Caches
+.cache
+.turbo
+.eslintcache
+*.tsbuildinfo
+
+# Editor / OS
+.DS_Store
+.idea
+*.swp
+
+# Misc
+__unconfig*
+todos.json
+coverage
