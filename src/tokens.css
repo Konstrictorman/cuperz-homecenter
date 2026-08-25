@@ -293,6 +293,7 @@
   --overlay-black-12: rgba(0, 0, 0, 0.12);
   --overlay-black-26: rgba(0, 0, 0, 0.26);
   --overlay-black-54: rgba(0, 0, 0, 0.54);
+  --overlay-black-80: rgba(0, 0, 0, 0.8);
   --overlay-white-08: rgba(255, 255, 255, 0.08);
   --overlay-white-12: rgba(255, 255, 255, 0.12);
   --overlay-white-16: rgba(255, 255, 255, 0.16);
@@ -315,7 +316,7 @@
   --palette-info-dark: #0e72a0;
   --palette-info-light: #7dcaed;
   --palette-info-main: #0eaaf1;
-  --palette-primary-contrastText: #00ffbc;
+  --palette-primary-contrastText: #ffffff;
   --palette-primary-dark: #931a1e;
   --palette-primary-light: #e3878a;
   --palette-primary-main: #cf2025;

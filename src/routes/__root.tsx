@@ -13,6 +13,7 @@ import appCss from '../styles.css?url'
 
 import type { QueryClient } from '@tanstack/react-query'
 import Header from '#/components/Header'
+import Footer from '#/components/Footer'
 
 interface MyRouterContext {
   queryClient: QueryClient
@@ -54,6 +55,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <TanstackQueryProvider queryClient={queryClient}>
           <Header />
           {children}
+          <Footer />
           <TanStackDevtools
             config={{
               position: 'bottom-right',

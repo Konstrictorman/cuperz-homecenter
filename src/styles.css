@@ -184,11 +184,17 @@
 :root {
   --header-bg: var(--color-cuperz-primary-500);
   --header-text: var(--color-palette-primary-contrast-text);
+  --footer-bg: var(--overlay-black-80);
+  --footer-text: var(--color-palette-primary-contrast-text);
+  --line: var(--overlay-black-04);
 }
 
 :root[data-theme='dark'] {
   --header-bg: var(--color-cuperz-neutral-600);
   --header-text: var(--color-palette-primary-contrast-text);
+  --footer-bg: var(--overlay-white-08);
+  --footer-text: var(--color-palette-primary-contrast-text);
+  --line: var(--overlay-white-16);
 }
 
 * {
