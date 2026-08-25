@@ -14,6 +14,21 @@ import appCss from '../styles.css?url'
 import type { QueryClient } from '@tanstack/react-query'
 import Header from '#/components/Header'
 import Footer from '#/components/Footer'
+import { ThemeProvider } from '#/contexts/ThemeContext'
+
+const themeInitScript = `
+(function () {
+  try {
+    var theme = localStorage.getItem('cuperz-theme');
+    if (theme !== 'light' && theme !== 'dark') {
+      theme = window.matchMedia('(prefers-color-scheme: dark)').matches
+        ? 'dark'
+        : 'light';
+    }
+    document.documentElement.setAttribute('data-theme', theme);
+  } catch (e) {}
+})();
+`
 
 interface MyRouterContext {
   queryClient: QueryClient
@@ -47,15 +62,18 @@ function RootDocument({ children }: { children: React.ReactNode }) {
   const { queryClient } = Route.useRouteContext()
 
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         <HeadContent />
       </head>
-      <body className="bg-cuperz-neutral-50 text-slate-900 dark:bg-slate-900 dark:text-slate-50">
+      <body className="bg-cuperz-neutral-50 text-[var(--color-palette-text-primary)] dark:bg-[var(--color-cuperz-neutral-900)] dark:text-[var(--color-palette-text-primary)]">
         <TanstackQueryProvider queryClient={queryClient}>
-          <Header />
-          {children}
-          <Footer />
+          <ThemeProvider>
+            <Header />
+            {children}
+            <Footer />
+          </ThemeProvider>
           <TanStackDevtools
             config={{
               position: 'bottom-right',

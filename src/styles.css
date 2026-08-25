@@ -190,9 +190,9 @@
 }
 
 :root[data-theme='dark'] {
-  --header-bg: var(--color-cuperz-neutral-600);
+  --header-bg: var(--color-cuperz-neutral-1000);
   --header-text: var(--color-palette-primary-contrast-text);
-  --footer-bg: var(--overlay-white-08);
+  --footer-bg: var(--overlay-black-54);
   --footer-text: var(--color-palette-primary-contrast-text);
   --line: var(--overlay-white-16);
 }
