@@ -188,7 +188,8 @@
   --header-text: var(--color-palette-primary-contrast-text);
   --footer-bg: var(--overlay-black-80);
   --footer-text: var(--color-palette-primary-contrast-text);
-  --line: var(--overlay-black-04);
+  --line: var(--color-overlay-white-12);
+  --menu-hover: var(--color-amber-300);
 }
 
 :root[data-theme='dark'] {
@@ -210,6 +211,7 @@
   --footer-bg: var(--overlay-black-54);
   --footer-text: var(--color-palette-primary-contrast-text);
   --line: var(--overlay-white-30);
+  --menu-hover: var(--color-overlay-white-30);
 }
 
 * {

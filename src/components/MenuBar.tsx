@@ -1,4 +1,5 @@
 import { Link } from '@tanstack/react-router'
+import './MenuBar.css'
 
 const MenuBar = () => {
   return (
