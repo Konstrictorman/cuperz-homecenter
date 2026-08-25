@@ -1,5 +1,7 @@
 import { Link } from '@tanstack/react-router'
 import logo from '../assets/logo-cuperz.png'
+import Typography from '@mui/material/Typography'
+import ThemeSwitch from './ThemeSwitch'
 
 const Header = () => {
   return (
@@ -76,7 +78,13 @@ const Header = () => {
             </div>
           </details>
         </div>
-        <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
+        <div className="ml-auto flex items-center gap-2">
+          <Typography>Light</Typography>
+          <ThemeSwitch size="small" />
+
+          <Typography>Dark</Typography>
+        </div>
+        <div className="flex items-center gap-1.5 sm:gap-2">
           <a
             href="https://x.com/tan_stack"
             target="_blank"
