@@ -8,7 +8,7 @@ export const Route = createFileRoute('/')({ component: Home })
 function Home() {
   return (
     <div className="p-8">
-      <Card className="w-[240px] sm:w-[480px]">
+      <Card className="w-[240px] sm:w-[480px] dark:bg-palette-background-default! dark:text-palette-text-primary! border-[var(--line)] dark:border-[var(--line)] border-1">
         <CardContent>
           <Typography variant="h5" component="h2" gutterBottom>
             Welcome to Cuperz Home Center!

@@ -1,6 +1,7 @@
 @import 'tailwindcss';
 @import './tokens.css';
 
+/* css-lsp-disable-next-line unknownAtRules */
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 @theme {
@@ -199,7 +200,7 @@
       transparent 85%
     ),
     radial-gradient(
-      ellipse 70% 55% at 95% 95%,
+      ellipse 70% 55% at 95% 5%,
       rgba(120, 145, 150, 0.16),
       transparent 60%
     ),
@@ -208,7 +209,7 @@
   --header-text: var(--color-palette-primary-contrast-text);
   --footer-bg: var(--overlay-black-54);
   --footer-text: var(--color-palette-primary-contrast-text);
-  --line: var(--overlay-white-16);
+  --line: var(--overlay-white-30);
 }
 
 * {
