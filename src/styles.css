@@ -1,6 +1,5 @@
-
-@import "tailwindcss";
-@import "./tokens.css";
+@import 'tailwindcss';
+@import './tokens.css';
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
@@ -39,7 +38,9 @@
   --color-palette-secondary-main: var(--palette-secondary-main);
   --color-palette-secondary-dark: var(--palette-secondary-dark);
   --color-palette-secondary-light: var(--palette-secondary-light);
-  --color-palette-secondary-contrast-text: var(--palette-secondary-contrastText);
+  --color-palette-secondary-contrast-text: var(
+    --palette-secondary-contrastText
+  );
   --color-palette-error-main: var(--palette-error-main);
   --color-palette-error-dark: var(--palette-error-dark);
   --color-palette-error-light: var(--palette-error-light);
@@ -67,7 +68,9 @@
   --color-palette-action-selected: var(--palette-action-selected);
   --color-palette-action-focus: var(--palette-action-focus);
   --color-palette-action-disabled: var(--palette-action-disabled);
-  --color-palette-action-disabled-background: var(--palette-action-disabledBackground);
+  --color-palette-action-disabled-background: var(
+    --palette-action-disabledBackground
+  );
 
   /* Status colors */
   --color-status-error-25: var(--status-error-25);
@@ -178,6 +181,16 @@
   --font-weight-light: 300;
 }
 
+:root {
+  --header-bg: var(--color-cuperz-primary-500);
+  --header-text: var(--color-palette-primary-contrast-text);
+}
+
+:root[data-theme='dark'] {
+  --header-bg: var(--color-cuperz-neutral-600);
+  --header-text: var(--color-palette-primary-contrast-text);
+}
+
 * {
   box-sizing: border-box;
 }
@@ -191,4 +204,3 @@ body,
 body {
   margin: 0;
 }
-
