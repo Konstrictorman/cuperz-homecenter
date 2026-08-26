@@ -24,7 +24,14 @@ const MenuBar = () => {
           className="nav-link"
           activeProps={{ className: 'nav-link is-active' }}
         >
-          Avisos de Despacho
+          Despachos
+        </Link>
+        <Link
+          to="/receipt-notices"
+          className="nav-link"
+          activeProps={{ className: 'nav-link is-active' }}
+        >
+          Avisos de Recepción
         </Link>
       </div>
     </div>

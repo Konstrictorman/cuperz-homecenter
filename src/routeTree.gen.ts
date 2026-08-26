@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DispatchIndexRouteImport } from './routes/dispatch/index'
 import { Route as PurchaseOrdersIndexRouteImport } from './routes/purchase-orders/index'
+import { Route as ReceiptNoticesIndexRouteImport } from './routes/receipt-notices/index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
 const IndexRoute = IndexRouteImport.update({
@@ -29,6 +30,11 @@ const PurchaseOrdersIndexRoute = PurchaseOrdersIndexRouteImport.update({
   path: '/purchase-orders/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ReceiptNoticesIndexRoute = ReceiptNoticesIndexRouteImport.update({
+  id: '/receipt-notices/',
+  path: '/receipt-notices/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -39,12 +45,14 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dispatch/': typeof DispatchIndexRoute
   '/purchase-orders/': typeof PurchaseOrdersIndexRoute
+  '/receipt-notices/': typeof ReceiptNoticesIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dispatch': typeof DispatchIndexRoute
   '/purchase-orders': typeof PurchaseOrdersIndexRoute
+  '/receipt-notices': typeof ReceiptNoticesIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesById {
@@ -52,20 +60,34 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/dispatch/': typeof DispatchIndexRoute
   '/purchase-orders/': typeof PurchaseOrdersIndexRoute
+  '/receipt-notices/': typeof ReceiptNoticesIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dispatch/' | '/purchase-orders/' | '/api/auth/$'
+  fullPaths:
+    | '/'
+    | '/dispatch/'
+    | '/purchase-orders/'
+    | '/receipt-notices/'
+    | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dispatch' | '/purchase-orders' | '/api/auth/$'
-  id: '__root__' | '/' | '/dispatch/' | '/purchase-orders/' | '/api/auth/$'
+  to:
+    '/' | '/dispatch' | '/purchase-orders' | '/receipt-notices' | '/api/auth/$'
+  id:
+    | '__root__'
+    | '/'
+    | '/dispatch/'
+    | '/purchase-orders/'
+    | '/receipt-notices/'
+    | '/api/auth/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DispatchIndexRoute: typeof DispatchIndexRoute
   PurchaseOrdersIndexRoute: typeof PurchaseOrdersIndexRoute
+  ReceiptNoticesIndexRoute: typeof ReceiptNoticesIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
@@ -92,6 +114,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PurchaseOrdersIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/receipt-notices/': {
+      id: '/receipt-notices/'
+      path: '/receipt-notices'
+      fullPath: '/receipt-notices/'
+      preLoaderRoute: typeof ReceiptNoticesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -106,6 +135,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DispatchIndexRoute: DispatchIndexRoute,
   PurchaseOrdersIndexRoute: PurchaseOrdersIndexRoute,
+  ReceiptNoticesIndexRoute: ReceiptNoticesIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport
