@@ -159,9 +159,13 @@
   --text-16: var(--font-size-16);
   --text-20: var(--font-size-20);
   --text-24: var(--font-size-24);
-  --text-34: var(--font-size-34);
+  --text-36: var(--font-size-36);
   --text-48: var(--font-size-48);
+  --text-54: var(--font-size-54);
   --text-60: var(--font-size-60);
+  --text-64: var(--font-size-64);
+  --text-72: var(--font-size-72);
+  --text-80: var(--font-size-80);
   --text-96: var(--font-size-96);
 
   /*
@@ -222,6 +226,11 @@ html,
 body,
 #app {
   min-height: 100%;
+}
+
+html,
+body {
+  overflow-x: hidden;
 }
 
 body {

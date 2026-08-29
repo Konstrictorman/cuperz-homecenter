@@ -7,7 +7,7 @@ import { useState } from 'react'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import { useTheme } from '#/contexts/ThemeContext'
-import MenuBar from './MenuBar'
+import MenuBar from './menuBar/MenuBar'
 
 const Header = () => {
   const { theme, toggleTheme } = useTheme()
