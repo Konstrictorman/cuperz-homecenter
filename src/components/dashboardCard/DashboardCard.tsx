@@ -25,14 +25,14 @@ const DashboardCard = ({
             {title}
           </Typography>
 
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center justify-between mb-2 mt-2">
             {Icon && (
               <Icon className="text-36! sm:text-48! md:text-60! text-cuperz-primary-500 dark:text-[var(--cuperz-neutral-25)]" />
             )}
             <Typography
               variant="h1"
               component="h1"
-              className="font-weight-large text-cuperz-primary-500 dark:text-[var(--cuperz-neutral-25)] text-4xl! sm:text-5xl! md:text-6xl!"
+              className="font-bold! text-cuperz-primary-500 dark:text-[var(--cuperz-neutral-25)] text-4xl! sm:text-5xl! md:text-6xl!"
             >
               {highlight}
             </Typography>
