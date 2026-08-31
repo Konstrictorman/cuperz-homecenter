@@ -1,0 +1,43 @@
+.status-badge {
+  font-weight: var(--font-weight-medium);
+}
+
+.status-badge--pending {
+  background-color: var(--status-warning-100) !important;
+  color: var(--status-warning-800) !important;
+}
+
+.status-badge--dispatched {
+  background-color: var(--status-success-400) !important;
+  color: var(--status-success-800) !important;
+}
+
+.status-badge--error {
+  background-color: var(--status-error-300) !important;
+  color: var(--status-error-50) !important;
+}
+
+.status-badge--processing {
+  background-color: var(--color-grey-100) !important;
+  color: var(--color-grey-800) !important;
+}
+
+[data-theme='dark'] .status-badge--pending {
+  background-color: var(--status-warning-600) !important;
+  color: var(--status-warning-200) !important;
+}
+
+[data-theme='dark'] .status-badge--dispatched {
+  background-color: var(--status-success-400) !important;
+  color: var(--status-success-800) !important;
+}
+
+[data-theme='dark'] .status-badge--error {
+  background-color: var(--status-error-300) !important;
+  color: var(--status-error-50) !important;
+}
+
+[data-theme='dark'] .status-badge--processing {
+  background-color: var(--color-grey-900) !important;
+  color: var(--color-grey-200) !important;
+}
