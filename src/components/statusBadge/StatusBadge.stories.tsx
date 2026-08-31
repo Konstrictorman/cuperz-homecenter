@@ -52,7 +52,7 @@ export const Dispatched: Story = {
 
 export const Error: Story = {
   args: {
-    label: 'Error integración',
+    label: 'Error',
     tone: 'error',
   },
 }
@@ -66,7 +66,7 @@ export const Processing: Story = {
 
 export const AllTones: Story = {
   args: {
-    label: 'Pendiente despacho',
+    label: 'Pendiente',
     tone: 'pending',
   },
   parameters: {
@@ -79,9 +79,9 @@ export const AllTones: Story = {
   },
   render: () => (
     <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-      <StatusBadge label="Pendiente despacho" tone="pending" />
+      <StatusBadge label="Pendiente" tone="pending" />
       <StatusBadge label="Despachada" tone="dispatched" />
-      <StatusBadge label="Error integración" tone="error" />
+      <StatusBadge label="Error" tone="error" />
       <StatusBadge label="Procesando" tone="processing" />
     </div>
   ),
