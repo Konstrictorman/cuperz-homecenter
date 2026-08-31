@@ -192,7 +192,7 @@
   --header-text: var(--color-palette-primary-contrast-text);
   --footer-bg: var(--overlay-black-80);
   --footer-text: var(--color-palette-primary-contrast-text);
-  --line: var(--color-overlay-white-12);
+  --line: var(--cuperz-primary-200);
   --menu-hover: var(--color-amber-300);
 }
 

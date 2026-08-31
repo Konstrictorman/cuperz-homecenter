@@ -4,7 +4,9 @@ import PendingActionsIcon from '@mui/icons-material/PendingActions'
 import LocalShippingIcon from '@mui/icons-material/LocalShipping'
 import LocalPostOfficeIcon from '@mui/icons-material/LocalPostOffice'
 
-export const Route = createFileRoute('/')({ component: Home })
+export const Route = createFileRoute('/')({
+  component: Home,
+})
 
 function Home() {
   return (

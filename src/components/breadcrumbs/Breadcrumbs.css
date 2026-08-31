@@ -1,0 +1,13 @@
+.cuperz-breadcrumbs {
+  border-bottom: 1px solid var(--line);
+}
+
+.cuperz-breadcrumbs__link {
+  color: var(--color-palette-text-secondary);
+  text-decoration: none;
+  transition: color 170ms ease;
+}
+
+.cuperz-breadcrumbs__link:hover {
+  color: var(--color-cuperz-primary-500);
+}

@@ -10,7 +10,7 @@ const MenuBar = () => {
           className="nav-link"
           activeProps={{ className: 'nav-link is-active' }}
         >
-          Home
+          Inicio
         </Link>
         <Link
           to="/purchase-orders"

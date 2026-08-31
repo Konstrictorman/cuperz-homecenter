@@ -15,6 +15,7 @@ import type { QueryClient } from '@tanstack/react-query'
 import Header from '#/components/Header'
 import Footer from '#/components/Footer'
 import { ThemeProvider } from '#/contexts/ThemeContext'
+import Breadcrumbs from '#/components/breadcrumbs/Breadcrumbs'
 
 const themeInitScript = `
 (function () {
@@ -35,6 +36,9 @@ interface MyRouterContext {
 }
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
+  staticData: {
+    crumb: 'Inicio',
+  },
   head: () => ({
     meta: [
       {
@@ -71,6 +75,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <TanstackQueryProvider queryClient={queryClient}>
           <ThemeProvider>
             <Header />
+            <Breadcrumbs />
             {children}
             <Footer />
           </ThemeProvider>
