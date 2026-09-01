@@ -4,64 +4,10 @@ import OrdersFilterBar, {
   DEFAULT_ORDERS_FILTER_VALUES,
 } from './OrdersFilterBar'
 import PurchaseOrdersTable from './PurchaseOrdersTable'
+import PurchaseOrderDetailModal from './PurchaseOrderDetailModal'
 import type { OrdersFilterValues } from './OrdersFilterBar'
 import type { PurchaseOrder } from './PurchaseOrdersTable'
-
-export const Route = createFileRoute('/purchase-orders/')({
-  staticData: {
-    crumb: 'Órdenes de compra',
-  },
-  component: PurchaseOrdersPage,
-})
-
-// Stands in for GetOrdenesDeCompra until the Homecenter integration backend
-// exists (see CLAUDE.md's "Domain model reference" / hc_orden_compra).
-const MOCK_PURCHASE_ORDERS: PurchaseOrder[] = [
-  {
-    id: '8467343',
-    ordenCompra: '8467343',
-    cliente: 'Cali Sur',
-    ciudadEntrega: 'Cali',
-    tiendas: 2,
-    cantidadTotal: 60,
-    estadoTone: 'pending',
-    estadoLabel: 'Pendiente',
-    fecha: '2026-08-18',
-  },
-  {
-    id: '17302836',
-    ordenCompra: '17302836',
-    cliente: 'Bogotá Norte',
-    ciudadEntrega: 'Bogotá',
-    tiendas: 2,
-    cantidadTotal: 39,
-    estadoTone: 'dispatched',
-    estadoLabel: 'Despachado',
-    fecha: '2026-08-20',
-  },
-  {
-    id: '12174949',
-    ordenCompra: '12174949',
-    cliente: 'Bloque Cero S.A.S.',
-    ciudadEntrega: 'Tunja',
-    tiendas: 1,
-    cantidadTotal: 317,
-    estadoTone: 'error',
-    estadoLabel: 'Error',
-    fecha: '2026-08-22',
-  },
-  {
-    id: '12175804',
-    ordenCompra: '12175804',
-    cliente: 'Bogotá D.C.',
-    ciudadEntrega: 'Bogotá',
-    tiendas: 1,
-    cantidadTotal: 250,
-    estadoTone: 'processing',
-    estadoLabel: 'Procesando',
-    fecha: '2026-08-25',
-  },
-]
+import { MOCK_PURCHASE_ORDERS } from './MOCK_PURCHASE_ORDERS'
 
 function filterPurchaseOrders(
   orders: PurchaseOrder[],
@@ -88,16 +34,35 @@ const PurchaseOrdersPage = () => {
   const [filters, setFilters] = useState<OrdersFilterValues>(
     DEFAULT_ORDERS_FILTER_VALUES,
   )
+  const [selectedOrder, setSelectedOrder] = useState<PurchaseOrder | null>(
+    null,
+  )
 
   const rows = useMemo(
     () => filterPurchaseOrders(MOCK_PURCHASE_ORDERS, filters),
     [filters],
   )
 
+  const onViewDetail = (order: PurchaseOrder) => {
+    setSelectedOrder(order)
+  }
+
   return (
     <div className="@container flex flex-col gap-4 p-4 sm:p-6">
       <OrdersFilterBar onFilter={setFilters} />
-      <PurchaseOrdersTable rows={rows} />
+      <PurchaseOrdersTable rows={rows} onViewDetail={onViewDetail} />
+      <PurchaseOrderDetailModal
+        order={selectedOrder}
+        open={selectedOrder !== null}
+        onClose={() => setSelectedOrder(null)}
+      />
     </div>
   )
 }
+
+export const Route = createFileRoute('/purchase-orders/')({
+  staticData: {
+    crumb: 'Órdenes de compra',
+  },
+  component: PurchaseOrdersPage,
+})

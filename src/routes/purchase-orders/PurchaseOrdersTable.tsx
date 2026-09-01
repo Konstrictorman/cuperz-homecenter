@@ -1,6 +1,5 @@
-import { DataGrid } from '@mui/x-data-grid'
+import DataTable from '#/components/dataTable/DataTable'
 import type { StatusBadgeTone } from '#/components/statusBadge/StatusBadge'
-import './PurchaseOrdersTable.css'
 import { usePurchaseOrdersColumns } from './usePurchaseOrdersColumns'
 
 export interface PurchaseOrder {
@@ -26,20 +25,7 @@ const PurchaseOrdersTable = ({
 }: PurchaseOrdersTableProps) => {
   const columns = usePurchaseOrdersColumns(onViewDetail)
 
-  return (
-    <div className="purchase-orders-table w-full overflow-x-auto">
-      <DataGrid
-        rows={rows}
-        columns={columns}
-        checkboxSelection
-        disableRowSelectionOnClick
-        autoHeight
-        hideFooterSelectedRowCount
-        initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
-        pageSizeOptions={[10, 25, 50]}
-      />
-    </div>
-  )
+  return <DataTable rows={rows} columns={columns} />
 }
 
 export default PurchaseOrdersTable

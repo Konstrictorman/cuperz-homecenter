@@ -1,5 +1,4 @@
 import { useMemo } from 'react'
-import Link from '@mui/material/Link'
 import StatusBadge from '#/components/statusBadge/StatusBadge'
 import {
   GridActionsCellItem,
@@ -82,18 +81,6 @@ export const usePurchaseOrdersColumns = (
             onClick={() => onViewDetail?.(params.row)}
           />,
         ],
-        // renderCell: (params: GridRenderCellParams<PurchaseOrder>) =>
-        //   onViewDetail ? (
-        //     <Link
-        //       component="button"
-        //       type="button"
-        //       onClick={() => onViewDetail(params.row)}
-        //     >
-        //       Ver detalle
-        //     </Link>
-        //   ) : (
-        //     <VisibilityIcon />
-        //   ),
         headerAlign: 'center',
         align: 'center',
       },

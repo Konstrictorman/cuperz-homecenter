@@ -188,16 +188,19 @@
 
 :root {
   --bg-base: var(--color-palette-background-default);
+  --body-text: var(--color-palette-text-primary);
   --header-bg: var(--color-cuperz-primary-500);
   --header-text: var(--color-palette-primary-contrast-text);
   --footer-bg: var(--overlay-black-80);
   --footer-text: var(--color-palette-primary-contrast-text);
+  --label-text: var(--color-palette-text-secondary);
   --line: var(--cuperz-primary-200);
   --menu-hover: var(--color-amber-300);
 }
 
 :root[data-theme='dark'] {
   --bg-base: var(--color-palette-background-default);
+  --body-text: var(--color-palette-primary-contrast-text);
   --bg-gradient:
     radial-gradient(
       ellipse 90% 60% at 25% 0%,
@@ -214,6 +217,7 @@
   --header-text: var(--color-palette-primary-contrast-text);
   --footer-bg: var(--overlay-black-54);
   --footer-text: var(--color-palette-primary-contrast-text);
+  --label-text: var(--color-palette-text-secondary);
   --line: var(--overlay-white-30);
   --menu-hover: var(--color-overlay-white-30);
 }

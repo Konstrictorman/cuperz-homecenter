@@ -1,0 +1,26 @@
+.purchase-order-detail-modal {
+  border-radius: var(--border-radius-lg) !important;
+  padding: 16px;
+}
+
+.purchase-order-detail-modal__content {
+  padding: 16px;
+  border: 1px solid red;
+  background-color: var(--bg-base) !important;
+  color: var(--body-text) !important;
+}
+
+.purchase-order-detail-modal__label {
+  font-size: 0.75rem;
+  color: var(--label-text) !important;
+  margin-bottom: 4px;
+  font-weight: var(--font-weight-medium) !important;
+}
+
+.purchase-order-detail-modal__lines {
+  margin-top: 24px;
+}
+
+
+
+[data-theme='dark']
