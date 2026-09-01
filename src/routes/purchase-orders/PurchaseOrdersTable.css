@@ -1,0 +1,52 @@
+.purchase-orders-table .MuiDataGrid-root {
+  background-color: var(--color-grey-50);
+  border-color: var(--color-grey-200);
+}
+
+.purchase-orders-table .MuiDataGrid-columnHeaders {
+  background-color: var(--color-grey-100);
+}
+
+.purchase-orders-table .MuiDataGrid-cell {
+  border-color: var(--color-grey-200);
+}
+
+.purchase-orders-table .MuiDataGrid-footerContainer {
+  background-color: var(--color-grey-100);
+  border-color: var(--color-grey-200);
+}
+
+/***************************************
+ * Dark theme overrides
+ */
+
+[data-theme='dark'] .purchase-orders-table .MuiDataGrid-root {
+  background-color: var(--color-grey-700) !important;
+  border-color: var(--color-grey-700) !important;
+  /* color: var(--color-palette-primary-contrast-text) !important; */
+}
+[data-theme='dark'] .purchase-orders-table .MuiDataGrid-columnHeaders,
+[data-theme='dark'] .purchase-orders-table .MuiDataGrid-columnHeader,
+[data-theme='dark'] .purchase-orders-table .MuiDataGrid-scrollbarFiller,
+[data-theme='dark'] .purchase-orders-table .MuiDataGrid-filler {
+  background-color: var(--color-grey-800) !important;
+  color: var(--color-palette-primary-contrast-text) !important;
+  border-color: var(--line) !important;
+}
+[data-theme='dark'] .purchase-orders-table .MuiDataGrid-cell {
+  border-color: var(--color-grey-700) !important;
+  color: var(--color-palette-primary-contrast-text) !important;
+}
+[data-theme='dark'] .purchase-orders-table .MuiDataGrid-footerContainer {
+  background-color: var(--color-grey-800) !important;
+  border-color: var(--color-grey-700) !important;
+  color: var(--color-palette-primary-contrast-text) !important;
+}
+[data-theme='dark'] .purchase-orders-table .MuiTablePagination-root,
+[data-theme='dark'] .purchase-orders-table .MuiTablePagination-selectIcon,
+[data-theme='dark']
+  .purchase-orders-table
+  .MuiTablePagination-actions
+  .MuiIconButton-root {
+  color: var(--color-palette-primary-contrast-text) !important;
+}

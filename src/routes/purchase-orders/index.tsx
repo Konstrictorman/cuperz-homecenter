@@ -25,7 +25,7 @@ const MOCK_PURCHASE_ORDERS: PurchaseOrder[] = [
     tiendas: 2,
     cantidadTotal: 60,
     estadoTone: 'pending',
-    estadoLabel: 'Pendiente despacho',
+    estadoLabel: 'Pendiente',
     fecha: '2026-08-18',
   },
   {
@@ -36,7 +36,7 @@ const MOCK_PURCHASE_ORDERS: PurchaseOrder[] = [
     tiendas: 2,
     cantidadTotal: 39,
     estadoTone: 'dispatched',
-    estadoLabel: 'Despachada',
+    estadoLabel: 'Despachado',
     fecha: '2026-08-20',
   },
   {
@@ -47,7 +47,7 @@ const MOCK_PURCHASE_ORDERS: PurchaseOrder[] = [
     tiendas: 1,
     cantidadTotal: 317,
     estadoTone: 'error',
-    estadoLabel: 'Error integración',
+    estadoLabel: 'Error',
     fecha: '2026-08-22',
   },
   {
@@ -84,7 +84,7 @@ function filterPurchaseOrders(
   })
 }
 
-function PurchaseOrdersPage() {
+const PurchaseOrdersPage = () => {
   const [filters, setFilters] = useState<OrdersFilterValues>(
     DEFAULT_ORDERS_FILTER_VALUES,
   )
@@ -95,7 +95,7 @@ function PurchaseOrdersPage() {
   )
 
   return (
-    <div className="flex flex-col gap-4 p-4 sm:p-6">
+    <div className="@container flex flex-col gap-4 p-4 sm:p-6">
       <OrdersFilterBar onFilter={setFilters} />
       <PurchaseOrdersTable rows={rows} />
     </div>

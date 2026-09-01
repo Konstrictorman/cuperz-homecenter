@@ -1,0 +1,61 @@
+[data-theme='dark'] .orders-filter-bar .MuiOutlinedInput-root {
+  background-color: var(--palette-background-paper);
+  color: var(--palette-text-primary);
+}
+
+[data-theme='dark']
+  .orders-filter-bar
+  .MuiOutlinedInput-root
+  .MuiOutlinedInput-notchedOutline {
+  border-color: var(--palette-divider);
+}
+
+[data-theme='dark']
+  .orders-filter-bar
+  .MuiOutlinedInput-root:hover:not(.Mui-disabled)
+  .MuiOutlinedInput-notchedOutline {
+  border-color: var(--palette-text-secondary);
+}
+
+[data-theme='dark']
+  .orders-filter-bar
+  .MuiOutlinedInput-root.Mui-focused
+  .MuiOutlinedInput-notchedOutline {
+  border-color: var(--palette-info-main);
+}
+
+[data-theme='dark'] .orders-filter-bar .MuiInputLabel-root {
+  color: var(--palette-text-secondary);
+}
+
+[data-theme='dark'] .orders-filter-bar .MuiInputLabel-root.Mui-focused {
+  color: var(--palette-info-main);
+}
+
+[data-theme='dark'] .orders-filter-bar input::placeholder {
+  color: var(--palette-text-secondary);
+  opacity: 1;
+}
+
+[data-theme='dark'] .orders-filter-bar .MuiSvgIcon-root {
+  color: var(--palette-text-secondary);
+}
+
+/* Flips the native date-picker icon/UI to a light-on-dark rendering */
+[data-theme='dark'] .orders-filter-bar input[type='date'] {
+  color-scheme: dark;
+}
+
+/* Select's option list renders in a portal, outside .orders-filter-bar */
+[data-theme='dark'] .MuiMenu-paper {
+  background-color: var(--palette-background-paper);
+  color: var(--palette-text-primary);
+}
+
+[data-theme='dark'] .MuiMenu-paper .MuiMenuItem-root:hover {
+  background-color: var(--palette-action-hover);
+}
+
+[data-theme='dark'] .MuiMenu-paper .MuiMenuItem-root.Mui-selected {
+  background-color: var(--palette-action-selected);
+}

@@ -5,6 +5,7 @@ import type { StatusBadgeTone } from '#/components/statusBadge/StatusBadge'
 import Button from '#/components/button/Button'
 import FilterAltIcon from '@mui/icons-material/FilterAlt'
 import FilterAltOffIcon from '@mui/icons-material/FilterAltOff'
+import './OrdersFilterBar.css'
 
 export type OrdersFilterStatus = StatusBadgeTone | 'all'
 
@@ -44,7 +45,7 @@ const OrdersFilterBar = ({ onFilter }: OrdersFilterBarProps) => {
 
   return (
     <form
-      className="flex flex-wrap items-end gap-4"
+      className="orders-filter-bar flex flex-col @lg:flex-row @lg:flex-wrap @lg:items-end gap-4"
       onSubmit={(event) => {
         event.preventDefault()
         event.stopPropagation()
@@ -57,6 +58,7 @@ const OrdersFilterBar = ({ onFilter }: OrdersFilterBarProps) => {
             label="Orden de compra"
             placeholder="Buscar OC"
             size="small"
+            className="w-full @lg:w-56"
             value={field.state.value}
             onChange={(event) => field.handleChange(event.target.value)}
             onBlur={field.handleBlur}
@@ -70,7 +72,7 @@ const OrdersFilterBar = ({ onFilter }: OrdersFilterBarProps) => {
             select
             label="Estado"
             size="small"
-            className="min-w-48!"
+            className="w-full @lg:w-56"
             value={field.state.value}
             onChange={(event) =>
               field.handleChange(event.target.value as OrdersFilterStatus)
@@ -92,6 +94,7 @@ const OrdersFilterBar = ({ onFilter }: OrdersFilterBarProps) => {
             label="Fecha desde"
             type="date"
             size="small"
+            className="w-full @lg:w-48"
             slotProps={{ inputLabel: { shrink: true } }}
             value={field.state.value}
             onChange={(event) => field.handleChange(event.target.value)}
@@ -106,6 +109,7 @@ const OrdersFilterBar = ({ onFilter }: OrdersFilterBarProps) => {
             label="Fecha hasta"
             type="date"
             size="small"
+            className="w-full @lg:w-48"
             slotProps={{ inputLabel: { shrink: true } }}
             value={field.state.value}
             onChange={(event) => field.handleChange(event.target.value)}
@@ -118,7 +122,7 @@ const OrdersFilterBar = ({ onFilter }: OrdersFilterBarProps) => {
         type="submit"
         variant="contained"
         endIcon={<FilterAltIcon />}
-        className="mt-1"
+        className="mt-1 w-full @lg:w-auto"
       >
         Filtrar
       </Button>
@@ -137,7 +141,7 @@ const OrdersFilterBar = ({ onFilter }: OrdersFilterBarProps) => {
             type="button"
             variant="outlined"
             endIcon={<FilterAltOffIcon />}
-            className="mt-1"
+            className="mt-1 w-full @lg:w-auto"
             disabled={!isFiltered}
             onClick={() => {
               form.reset()
