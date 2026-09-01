@@ -1,8 +1,13 @@
 import { useMemo } from 'react'
 import Link from '@mui/material/Link'
 import StatusBadge from '#/components/statusBadge/StatusBadge'
-import type { GridColDef, GridRenderCellParams } from '@mui/x-data-grid'
+import {
+  GridActionsCellItem,
+  type GridColDef,
+  type GridRenderCellParams,
+} from '@mui/x-data-grid'
 import type { PurchaseOrder } from './PurchaseOrdersTable'
+import VisibilityIcon from '@mui/icons-material/Visibility'
 
 export const usePurchaseOrdersColumns = (
   onViewDetail?: (order: PurchaseOrder) => void,
@@ -69,18 +74,26 @@ export const usePurchaseOrdersColumns = (
         width: 110,
         sortable: false,
         filterable: false,
-        renderCell: (params: GridRenderCellParams<PurchaseOrder>) =>
-          onViewDetail ? (
-            <Link
-              component="button"
-              type="button"
-              onClick={() => onViewDetail(params.row)}
-            >
-              Ver detalle
-            </Link>
-          ) : (
-            'Ver detalle'
-          ),
+        type: 'actions',
+        getActions: (params) => [
+          <GridActionsCellItem
+            icon={<VisibilityIcon />}
+            label="Ver detalle"
+            onClick={() => onViewDetail?.(params.row)}
+          />,
+        ],
+        // renderCell: (params: GridRenderCellParams<PurchaseOrder>) =>
+        //   onViewDetail ? (
+        //     <Link
+        //       component="button"
+        //       type="button"
+        //       onClick={() => onViewDetail(params.row)}
+        //     >
+        //       Ver detalle
+        //     </Link>
+        //   ) : (
+        //     <VisibilityIcon />
+        //   ),
         headerAlign: 'center',
         align: 'center',
       },
