@@ -1,10 +1,15 @@
 .purchase-orders-table .MuiDataGrid-root {
   background-color: var(--color-grey-50);
   border-color: var(--color-grey-200);
+  --DataGrid-t-color-interactive-focus: var(--line);
 }
 
 .purchase-orders-table .MuiDataGrid-columnHeaders {
   background-color: var(--color-grey-100);
+}
+
+.purchase-orders-table .MuiDataGrid-columnHeaderTitle {
+  font-weight: var(--font-weight-medium) !important;
 }
 
 .purchase-orders-table .MuiDataGrid-cell {
@@ -14,6 +19,11 @@
 .purchase-orders-table .MuiDataGrid-footerContainer {
   background-color: var(--color-grey-100);
   border-color: var(--color-grey-200);
+}
+
+.purchase-orders-table .MuiDataGrid-iconButtonContainer,
+.purchase-orders-table .MuiDataGrid-sortIcon {
+  display: none;
 }
 
 /***************************************
@@ -36,6 +46,9 @@
 [data-theme='dark'] .purchase-orders-table .MuiDataGrid-cell {
   border-color: var(--color-grey-700) !important;
   color: var(--color-palette-primary-contrast-text) !important;
+}
+[data-theme='dark'] .purchase-orders-table .MuiDataGrid-row:hover {
+  background-color: var(--color-grey-600) !important;
 }
 [data-theme='dark'] .purchase-orders-table .MuiDataGrid-footerContainer {
   background-color: var(--color-grey-800) !important;

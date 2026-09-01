@@ -181,9 +181,9 @@
   --radius-lg: 16px;
   --radius-xl: 24px;
   --radius-full: 9999px;
-  --font-weight-regular: 400;
-  --font-weight-medium: 500;
-  --font-weight-light: 300;
+  /* --font-weight-regular: 400;
+  --font-weight-medium: 700;
+  --font-weight-light: 300; */
 }
 
 :root {
