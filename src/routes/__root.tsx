@@ -71,7 +71,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         <HeadContent />
       </head>
-      <body className="bg-[var(--bg-base)] text-[var(--color-palette-text-primary)] dark:bg-[var(--bg-base)] dark:text-[var(--color-palette-text-primary)]">
+      <body className="bg-[var(--bg-base)] text-[var(--header-text)]">
         <TanstackQueryProvider queryClient={queryClient}>
           <ThemeProvider>
             <Header />

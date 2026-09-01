@@ -3,7 +3,7 @@
   display: inline-flex;
   align-items: center;
   text-decoration: none;
-  color: var(--color-palette-primary-contrast-text);
+  color: var(--palette-primary-contrastText);
 }
 
 .nav-link::after {
@@ -15,17 +15,12 @@
   height: 2px;
   transform: scaleX(0);
   transform-origin: left;
-  /* background: linear-gradient(
-    90deg,
-    var(--color-palette-primary-main),
-    var(--color-palette-primary-light)
-  ); */
-  background: var(--color-palette-primary-contrast-text);
+  background: var(--palette-primary-contrastText);
   transition: transform 170ms ease;
 }
 
 .nav-link.is-active {
-  color: var(--color-palette-primary-contrast-text);
+  color: var(--palette-primary-contrastText);
 }
 
 .nav-link:hover:not(.is-active) {

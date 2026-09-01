@@ -33,7 +33,7 @@
 .data-table .MuiDataGrid-columnHeader,
 .data-table .MuiDataGrid-scrollbarFiller,
 .data-table .MuiDataGrid-filler {
-  background-color: var(--color-palette-background-paper) !important;
+  background-color: var(--palette-background-paper) !important;
   color: var(--body-text) !important;
   border-color: var(--line) !important;
 }
@@ -63,45 +63,3 @@
 .data-table .MuiDataGrid-sortIcon {
   display: none;
 }
-
-/***************************************
- * Dark theme overrides
- */
-/*
-[data-theme='dark'] .data-table .MuiDataGrid-root {
-  background-color: var(--color-grey-700) !important;
-  border-color: var(--color-grey-700) !important;
-  --DataGrid-t-color-interactive-selected: var(--color-grey-600);
-  --DataGrid-t-color-interactive-selected-opacity: 1;
-}
-
-
-[data-theme='dark'] .data-table .MuiCheckbox-root.Mui-checked .MuiSvgIcon-root {
-  font-weight: var(--font-weight-medium) !important;
-  color: var(--color-palette-primary-contrast-text) !important;
-}
-
-[data-theme='dark']
-  .data-table
-  .MuiCheckbox-root.MuiCheckbox-indeterminate
-  .MuiSvgIcon-root {
-  color: var(--color-palette-primary-contrast-text) !important;
-}
-
-[data-theme='dark'] .data-table .MuiDataGrid-cell {
-  border-color: var(--color-grey-700) !important;
-  color: var(--color-palette-primary-contrast-text) !important;
-}
-
-
-
-
-[data-theme='dark'] .data-table .MuiTablePagination-root,
-[data-theme='dark'] .data-table .MuiTablePagination-selectIcon,
-[data-theme='dark']
-  .data-table
-  .MuiTablePagination-actions
-  .MuiIconButton-root {
-  color: var(--color-palette-primary-contrast-text) !important;
-}
-*/

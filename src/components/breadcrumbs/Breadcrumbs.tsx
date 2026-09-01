@@ -43,7 +43,7 @@ const Breadcrumbs = () => {
       ))}
       <Typography
         component="span"
-        className="font-bold! text-palette-text-primary! dark:text-palette-text-primary!"
+        className="font-bold! text-[var(--palette-text-primary)]!"
       >
         {current.label}
       </Typography>

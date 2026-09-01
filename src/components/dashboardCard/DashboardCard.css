@@ -1,0 +1,6 @@
+.dashboardCard {
+  background-color: var(--palette-background-default) !important;
+  color: var(--palette-text-primary);
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+}

@@ -3,6 +3,7 @@ import CardContent from '@mui/material/CardContent'
 import Typography from '@mui/material/Typography'
 import type { SvgIconProps } from '@mui/material/SvgIcon'
 import type { ComponentType } from 'react'
+import './DashboardCard.css'
 
 interface DashboardCardProps {
   title: string
@@ -19,7 +20,10 @@ const DashboardCard = ({
 }: DashboardCardProps) => {
   return (
     <div className="p-8">
-      <MuiCard className="w-[240px] sm:w-[320px] md:w-[360px] dark:bg-palette-background-default! dark:text-palette-text-primary! border-[var(--line)] dark:border-[var(--line)] border-1 rounded-2xl!">
+      <MuiCard
+        className="w-[240px] sm:w-[320px] md:w-[360px] 
+        dashboardCard"
+      >
         <CardContent>
           <Typography className="h-12 sm:h-16 md:h-24 text-lg! sm:text-xl! md:text-2xl! font-weight-medium">
             {title}
@@ -27,12 +31,12 @@ const DashboardCard = ({
 
           <div className="flex items-center justify-between mb-2 mt-2">
             {Icon && (
-              <Icon className="text-36! sm:text-48! md:text-60! text-cuperz-primary-500 dark:text-[var(--cuperz-neutral-25)]" />
+              <Icon className="text-36! sm:text-48! md:text-60! text-[var(--cuperz-primary-500)] dark:text-[var(--cuperz-neutral-25)]" />
             )}
             <Typography
               variant="h1"
               component="h1"
-              className="font-bold! text-cuperz-primary-500 dark:text-[var(--cuperz-neutral-25)] text-4xl! sm:text-5xl! md:text-6xl!"
+              className="font-bold! text-[var(--cuperz-primary-500)] dark:text-[var(--cuperz-neutral-25)] text-4xl! sm:text-5xl! md:text-6xl!"
             >
               {highlight}
             </Typography>

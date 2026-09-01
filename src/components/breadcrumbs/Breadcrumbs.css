@@ -4,7 +4,7 @@
 }
 
 .cuperz-breadcrumbs__link {
-  color: var(--color-palette-text-secondary);
+  color: var(--palette-text-secondary);
   text-decoration: none;
   transition: color 170ms ease;
 }
@@ -14,5 +14,5 @@
 }
 
 .MuiBreadcrumbs-separator {
-  color: var(--color-palette-text-secondary);
+  color: var(--palette-text-secondary);
 }
