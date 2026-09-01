@@ -5,7 +5,7 @@
 
 .purchase-order-detail-modal__content {
   padding: 16px;
-  border: 1px solid red;
+  border: 1px solid var(--line) !important;
   background-color: var(--bg-base) !important;
   color: var(--body-text) !important;
 }
@@ -21,6 +21,17 @@
   margin-top: 24px;
 }
 
+.MuiDialogTitle-root {
+  background-color: var(--title-bg) !important;
+  color: var(--body-text) !important;
+  font-weight: var(--font-weight-medium) !important;
+  border: 1px solid var(--line) !important;
+}
 
+.MuiDialogTitle-root .MuiIconButton-root {
+  color: var(--body-text) !important;
+}
 
-[data-theme='dark']
+.MuiDialogTitle-root .MuiIconButton-root:hover {
+  background-color: var(--line) !important;
+}

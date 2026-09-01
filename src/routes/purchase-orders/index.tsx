@@ -34,9 +34,7 @@ const PurchaseOrdersPage = () => {
   const [filters, setFilters] = useState<OrdersFilterValues>(
     DEFAULT_ORDERS_FILTER_VALUES,
   )
-  const [selectedOrder, setSelectedOrder] = useState<PurchaseOrder | null>(
-    null,
-  )
+  const [selectedOrder, setSelectedOrder] = useState<PurchaseOrder | null>(null)
 
   const rows = useMemo(
     () => filterPurchaseOrders(MOCK_PURCHASE_ORDERS, filters),
@@ -48,7 +46,7 @@ const PurchaseOrdersPage = () => {
   }
 
   return (
-    <div className="@container flex flex-col gap-4 p-4 sm:p-6">
+    <div className="@container flex flex-col mt-8 gap-4 p-4 sm:p-6">
       <OrdersFilterBar onFilter={setFilters} />
       <PurchaseOrdersTable rows={rows} onViewDetail={onViewDetail} />
       <PurchaseOrderDetailModal

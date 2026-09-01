@@ -1,5 +1,6 @@
 .cuperz-breadcrumbs {
   border-bottom: 1px solid var(--line);
+  background-color: var(--title-bg) !important;
 }
 
 .cuperz-breadcrumbs__link {
