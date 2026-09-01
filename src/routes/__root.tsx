@@ -76,7 +76,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
           <ThemeProvider>
             <Header />
             <Breadcrumbs />
-            {children}
+            <main className="pb-12">{children}</main>
             <Footer />
           </ThemeProvider>
           <TanStackDevtools

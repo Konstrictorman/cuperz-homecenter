@@ -192,10 +192,13 @@
   --header-bg: var(--color-cuperz-primary-500);
   --header-text: var(--color-palette-primary-contrast-text);
   --footer-bg: var(--overlay-black-80);
-  --footer-text: var(--color-palette-primary-contrast-text);
   --label-text: var(--color-palette-text-secondary);
   --line: var(--cuperz-primary-200);
   --menu-hover: var(--color-amber-300);
+  --table-bg: var(--color-grey-50);
+  --table-hover-bg: var(--color-grey-100);
+  --table-footer-bg: var(--color-grey-100);
+  --table-selected-row-bg: var(--color-grey-200);
   --title-bg: var(--color-palette-background-paper);
 }
 
@@ -217,10 +220,13 @@
   --header-bg: var(--color-cuperz-neutral-1000);
   --header-text: var(--color-palette-primary-contrast-text);
   --footer-bg: var(--overlay-black-54);
-  --footer-text: var(--color-palette-primary-contrast-text);
   --label-text: var(--color-palette-text-secondary);
   --line: var(--overlay-white-30);
   --menu-hover: var(--color-overlay-white-30);
+  --table-bg: var(--color-grey-700);
+  --table-hover-bg: var(--color-grey-600);
+  --table-footer-bg: var(--color-grey-800);
+  --table-selected-row-bg: var(--color-grey-500);
   --title-bg: var(--color-palette-background-paper);
 }
 
