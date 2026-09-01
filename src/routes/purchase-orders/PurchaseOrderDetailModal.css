@@ -1,37 +1,10 @@
-.purchase-order-detail-modal {
-  border-radius: var(--border-radius-lg) !important;
-  padding: 16px;
-}
-
-.purchase-order-detail-modal__content {
-  padding: 16px;
-  border: 1px solid var(--line) !important;
-  background-color: var(--bg-base) !important;
-  color: var(--body-text) !important;
-}
-
 .purchase-order-detail-modal__label {
-  font-size: 0.75rem;
+  font-size: var(--font-size-12) !important;
   color: var(--label-text) !important;
-  margin-bottom: 4px;
+  margin-bottom: var(--spacing-3xs) !important;
   font-weight: var(--font-weight-medium) !important;
 }
 
 .purchase-order-detail-modal__lines {
-  margin-top: 24px;
-}
-
-.MuiDialogTitle-root {
-  background-color: var(--title-bg) !important;
-  color: var(--body-text) !important;
-  font-weight: var(--font-weight-medium) !important;
-  border: 1px solid var(--line) !important;
-}
-
-.MuiDialogTitle-root .MuiIconButton-root {
-  color: var(--body-text) !important;
-}
-
-.MuiDialogTitle-root .MuiIconButton-root:hover {
-  background-color: var(--line) !important;
+  margin-top: var(--spacing-lg) !important;
 }

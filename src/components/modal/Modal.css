@@ -1,0 +1,29 @@
+.modal .MuiPaper-root {
+  border-radius: var(--radius-md) !important;
+}
+
+.modal__title {
+  background-color: var(--title-bg) !important;
+  color: var(--body-text) !important;
+  font-weight: var(--font-weight-medium) !important;
+  border: 1px solid var(--line) !important;
+  border-top-left-radius: var(--radius-md) !important;
+  border-top-right-radius: var(--radius-md) !important;
+}
+
+.modal__title .MuiIconButton-root {
+  color: var(--body-text) !important;
+}
+
+.modal__title .MuiIconButton-root:hover {
+  background-color: var(--line) !important;
+}
+
+.modal__content {
+  padding: 16px;
+  border: 1px solid var(--line) !important;
+  background-color: var(--bg-base) !important;
+  color: var(--body-text) !important;
+  border-bottom-left-radius: var(--radius-md) !important;
+  border-bottom-right-radius: var(--radius-md) !important;
+}

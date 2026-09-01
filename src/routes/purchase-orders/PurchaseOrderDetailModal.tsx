@@ -1,13 +1,6 @@
-import Dialog from '@mui/material/Dialog'
-import DialogTitle from '@mui/material/DialogTitle'
-import DialogContent from '@mui/material/DialogContent'
-import DialogActions from '@mui/material/DialogActions'
-import IconButton from '@mui/material/IconButton'
-import CloseIcon from '@mui/icons-material/Close'
-import { DataGrid } from '@mui/x-data-grid'
 import type { GridColDef, GridRenderCellParams } from '@mui/x-data-grid'
 import StatusBadge from '#/components/statusBadge/StatusBadge'
-import Button from '#/components/button/Button'
+import Modal from '#/components/modal/Modal'
 import type { PurchaseOrder } from './PurchaseOrdersTable'
 import { getPurchaseOrderDetail } from './MOCK_PURCHASE_ORDER_DETAILS'
 import type { PurchaseOrderLine } from './MOCK_PURCHASE_ORDER_DETAILS'
@@ -66,64 +59,59 @@ const PurchaseOrderDetailModal = ({
   const detail = getPurchaseOrderDetail(order.id)
 
   return (
-    <Dialog className="" open={open} onClose={onClose} fullWidth maxWidth="lg">
-      <DialogTitle className="flex items-center justify-between gap-4">
-        Detalle OC {order.ordenCompra}
-        <IconButton onClick={onClose} size="small" aria-label="Cerrar">
-          <CloseIcon fontSize="small" />
-        </IconButton>
-      </DialogTitle>
-
-      <DialogContent dividers className="purchase-order-detail-modal__content">
-        <div className="purchase-order-detail-modal__summary grid grid-cols-1 gap-x-8 gap-y-3 sm:grid-cols-2">
-          <div>
-            <div className="purchase-order-detail-modal__label">
-              EAN punto de entrega
-            </div>
-            <div>{detail?.eanPuntoEntrega ?? '—'}</div>
+    <Modal
+      title={`Detalle OC ${order.ordenCompra}`}
+      onOpen={open}
+      onClose={onClose}
+    >
+      <div className="purchase-order-detail-modal__summary grid grid-cols-1 gap-x-8 gap-y-3 sm:grid-cols-2">
+        <div>
+          <div className="purchase-order-detail-modal__label">
+            EAN punto de entrega
           </div>
-          <div>
-            <div className="purchase-order-detail-modal__label">Estado OC</div>
-            <StatusBadge label={order.estadoLabel} tone={order.estadoTone} />
-          </div>
-          <div>
-            <div className="purchase-order-detail-modal__label">
-              Cliente / cadena
-            </div>
-            <div>{order.cliente}</div>
-          </div>
-          <div>
-            <div className="purchase-order-detail-modal__label">
-              Transportadora
-            </div>
-            <div>{detail?.transportadora ?? '—'}</div>
-          </div>
-          <div>
-            <div className="purchase-order-detail-modal__label">
-              Dirección de entrega
-            </div>
-            <div>{detail?.direccionEntrega ?? '—'}</div>
-          </div>
-          <div>
-            <div className="purchase-order-detail-modal__label">
-              Código sesión recibo
-            </div>
-            <div>{detail?.codigoSesionRecibo ?? '—'}</div>
-          </div>
+          <div>{detail?.eanPuntoEntrega ?? '—'}</div>
         </div>
-
-        <div className="purchase-order-detail-modal__lines">
-          <DataTable
-            rows={detail?.lineas ?? []}
-            columns={lineColumns}
-            getRowId={(row) => row.sku}
-            hideFooter
-            disableRowSelectionOnClick
-            autoHeight
-          />
+        <div>
+          <div className="purchase-order-detail-modal__label">Estado OC</div>
+          <StatusBadge label={order.estadoLabel} tone={order.estadoTone} />
         </div>
-      </DialogContent>
-    </Dialog>
+        <div>
+          <div className="purchase-order-detail-modal__label">
+            Cliente / cadena
+          </div>
+          <div>{order.cliente}</div>
+        </div>
+        <div>
+          <div className="purchase-order-detail-modal__label">
+            Transportadora
+          </div>
+          <div>{detail?.transportadora ?? '—'}</div>
+        </div>
+        <div>
+          <div className="purchase-order-detail-modal__label">
+            Dirección de entrega
+          </div>
+          <div>{detail?.direccionEntrega ?? '—'}</div>
+        </div>
+        <div>
+          <div className="purchase-order-detail-modal__label">
+            Código sesión recibo
+          </div>
+          <div>{detail?.codigoSesionRecibo ?? '—'}</div>
+        </div>
+      </div>
+
+      <div className="purchase-order-detail-modal__lines">
+        <DataTable
+          rows={detail?.lineas ?? []}
+          columns={lineColumns}
+          getRowId={(row) => row.sku}
+          hideFooter
+          disableRowSelectionOnClick
+          autoHeight
+        />
+      </div>
+    </Modal>
   )
 }
 
