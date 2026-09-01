@@ -10,5 +10,9 @@
 }
 
 .cuperz-breadcrumbs__link:hover {
-  color: var(--color-cuperz-primary-500);
+  color: var(--menu-hover);
+}
+
+.MuiBreadcrumbs-separator {
+  color: var(--color-palette-text-secondary);
 }
