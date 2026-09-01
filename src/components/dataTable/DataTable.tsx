@@ -2,11 +2,10 @@ import { DataGrid } from '@mui/x-data-grid'
 import type { DataGridProps, GridValidRowModel } from '@mui/x-data-grid'
 import './DataTable.css'
 
-export type DataTableProps<
-  TRow extends GridValidRowModel = GridValidRowModel,
-> = DataGridProps<TRow> & {
-  className?: string
-}
+export type DataTableProps<TRow extends GridValidRowModel = GridValidRowModel> =
+  DataGridProps<TRow> & {
+    className?: string
+  }
 
 const DataTable = <TRow extends GridValidRowModel>({
   className,

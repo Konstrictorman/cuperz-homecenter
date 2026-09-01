@@ -247,6 +247,15 @@ body {
 
 body {
   margin: 0;
+  /*
+   * The page's scrollbar lives on <html>, not <body> (see the overflow-x
+   * rule above). MUI's Modal/Popover scroll-lock (used by Select menus,
+   * e.g. the DataGrid "rows per page" dropdown) still measures against
+   * <body> and adds a compensating padding-right there, which shrinks
+   * page content for no reason since body never had its own scrollbar to
+   * compensate for. Force it off.
+   */
+  padding-right: 0 !important;
 }
 
 :root[data-theme='dark'] body {
