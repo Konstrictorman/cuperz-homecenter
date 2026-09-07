@@ -5,13 +5,14 @@
   transform: translateX(-50%);
   z-index: 1301;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: var(--space-md);
+  gap: var(--space-xs) var(--space-md);
   width: max-content;
   max-width: calc(100vw - 2 * var(--space-md));
-  height: 54px;
-  padding: 0 var(--space-md);
+  min-height: 54px;
+  padding: var(--space-xs) var(--space-md);
   border-radius: var(--radius-xl);
   background-color: var(--title-bg);
   color: var(--body-text);
@@ -26,11 +27,12 @@
 .tool-bar__text {
   color: var(--body-text);
   font-weight: var(--font-weight-medium);
-  white-space: nowrap;
+  text-align: center;
 }
 
 .tool-bar__selection-actions {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
   gap: var(--space-xs);
@@ -39,10 +41,12 @@
 
 .tool-bar__divider.MuiDivider-root {
   border-color: var(--line) !important;
+  min-height: 24px;
 }
 
 .tool-bar__actions {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
   gap: var(--space-xs);
@@ -55,4 +59,16 @@
 
 .tool-bar__icon-button.MuiIconButton-root:hover {
   background-color: var(--line);
+}
+
+/*
+ * Below the compact breakpoint the bar is already in its icon-only layout
+ * (see `COMPACT_QUERY` in `ToolBar.tsx`); the vertical divider between the
+ * selection controls and the actions reads as noise once everything is a
+ * small icon button and the bar has wrapped, so drop it there.
+ */
+@media (max-width: 640px) {
+  .tool-bar__divider.MuiDivider-root {
+    display: none;
+  }
 }
