@@ -10,6 +10,7 @@ import type { ReactNode } from 'react'
 import Button from '#/components/button/Button'
 import type { ButtonColor } from '#/components/button/Button'
 import './ToolBar.css'
+import Typography from '@mui/material/Typography'
 
 /**
  * Below this viewport width the bar collapses to its icon-only layout
@@ -105,7 +106,9 @@ const ToolBar = ({
         className={['tool-bar', className].filter(Boolean).join(' ')}
       >
         <span className="tool-bar__text">
-          {selected} {text}
+          <Typography>
+            {selected} {text}
+          </Typography>
         </span>
 
         {(onSelectAll || onClearSelection) && (
