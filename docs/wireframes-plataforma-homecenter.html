@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Wireframes — Plataforma Integración Homecenter</title>
+<style>
+  :root{
+    --wf-page:#f2f2f0;
+    --wf-panel:#ffffff;
+    --wf-border:#c9c9c4;
+    --wf-border-strong:#9a9a94;
+    --wf-text:#2b2b28;
+    --wf-text-mid:#6b6b64;
+    --wf-text-faint:#a3a39c;
+    --wf-accent:#3a5ba0;
+    --wf-accent-bg:#e4e9f4;
+    --wf-warn:#8a6a2e;
+    --wf-warn-bg:#f2e9d4;
+    --wf-err:#9a3b3b;
+    --wf-err-bg:#f4e0e0;
+    --wf-ok:#3f6b45;
+    --wf-ok-bg:#e2ecdf;
+    --sidebar-w:220px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--wf-page);color:var(--wf-text);font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;font-size:13px;}
+  .app{display:flex;min-height:600px;border:1px solid var(--wf-border-strong);}
+  .sidebar{width:var(--sidebar-w);flex-shrink:0;background:#e9e9e5;border-right:1px solid var(--wf-border-strong);padding:16px 0;}
+  .brand{padding:0 16px 16px;border-bottom:1px dashed var(--wf-border);margin-bottom:12px;}
+  .brand-box{width:100%;height:34px;border:1px dashed var(--wf-border-strong);display:flex;align-items:center;justify-content:center;color:var(--wf-text-mid);font-size:11px;letter-spacing:.5px;}
+  .env-toggle{margin-top:8px;display:flex;gap:4px;}
+  .env-btn{flex:1;text-align:center;padding:4px 0;border:1px solid var(--wf-border-strong);font-size:10px;cursor:pointer;background:#fff;color:var(--wf-text-mid);}
+  .env-btn.active{background:var(--wf-text);color:#fff;border-color:var(--wf-text);}
+  .nav-item{padding:9px 16px;cursor:pointer;color:var(--wf-text-mid);border-left:3px solid transparent;font-size:12.5px;display:flex;align-items:center;gap:8px;}
+  .nav-item:hover{background:#dfdfda;}
+  .nav-item.active{background:var(--wf-panel);color:var(--wf-text);border-left-color:var(--wf-accent);font-weight:600;}
+  .nav-dot{width:6px;height:6px;border-radius:50%;background:var(--wf-border-strong);flex-shrink:0;}
+  .nav-item.active .nav-dot{background:var(--wf-accent);}
+  .nav-section-label{padding:14px 16px 4px;font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--wf-text-faint);}
+
+  .main{flex:1;background:var(--wf-page);display:flex;flex-direction:column;min-width:0;}
+  .topbar{height:44px;border-bottom:1px solid var(--wf-border-strong);display:flex;align-items:center;justify-content:space-between;padding:0 18px;background:var(--wf-panel);flex-shrink:0;}
+  .topbar-title{font-weight:600;font-size:13.5px;}
+  .topbar-crumb{color:var(--wf-text-faint);font-weight:400;}
+  .topbar-right{display:flex;gap:8px;align-items:center;}
+  .avatar{width:26px;height:26px;border-radius:50%;border:1px dashed var(--wf-border-strong);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--wf-text-mid);}
+  .content{flex:1;overflow:auto;padding:20px;}
+  .screen{display:none;}
+  .screen.active{display:block;}
+
+  .annot{background:#fffbe0;border:1px dashed #d8c46a;color:#6b5a1c;font-size:11px;padding:6px 10px;margin-bottom:14px;border-radius:2px;}
+  .annot b{font-weight:600;}
+
+  .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px;}
+  .metric{background:var(--wf-panel);border:1px solid var(--wf-border);padding:12px 14px;}
+  .metric-label{font-size:10.5px;color:var(--wf-text-faint);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px;}
+  .metric-val{font-size:22px;font-weight:600;}
+  .metric-sub{font-size:11px;color:var(--wf-text-mid);margin-top:4px;}
+
+  .panel{background:var(--wf-panel);border:1px solid var(--wf-border);margin-bottom:16px;}
+  .panel-head{padding:10px 14px;border-bottom:1px solid var(--wf-border);display:flex;justify-content:space-between;align-items:center;}
+  .panel-head h3{margin:0;font-size:13px;font-weight:600;}
+  .panel-body{padding:14px;}
+  .link{color:var(--wf-accent);font-size:11.5px;cursor:pointer;}
+
+  table{width:100%;border-collapse:collapse;font-size:12px;}
+  th{text-align:left;padding:8px 10px;background:#f5f5f3;border-bottom:1px solid var(--wf-border-strong);color:var(--wf-text-mid);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.3px;}
+  td{padding:9px 10px;border-bottom:1px solid var(--wf-border);vertical-align:middle;}
+  tr.row-click{cursor:pointer;}
+  tr.row-click:hover{background:#f7f7f5;}
+
+  .badge{display:inline-block;padding:2px 8px;font-size:10.5px;border:1px solid;white-space:nowrap;}
+  .badge-pending{color:var(--wf-warn);background:var(--wf-warn-bg);border-color:#d8c48a;}
+  .badge-ok{color:var(--wf-ok);background:var(--wf-ok-bg);border-color:#9dbf9a;}
+  .badge-err{color:var(--wf-err);background:var(--wf-err-bg);border-color:#d69a9a;}
+  .badge-neutral{color:var(--wf-text-mid);background:#efefeb;border-color:var(--wf-border-strong);}
+
+  .toolbar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center;}
+  .field{display:flex;flex-direction:column;gap:3px;}
+  .field label{font-size:10.5px;color:var(--wf-text-mid);}
+  .wf-input,.wf-select{border:1px solid var(--wf-border-strong);background:#fff;padding:6px 8px;font-size:12px;min-width:150px;color:var(--wf-text);}
+  .btn{border:1px solid var(--wf-border-strong);background:#fff;padding:7px 14px;font-size:12px;cursor:pointer;color:var(--wf-text);}
+  .btn:hover{background:#f2f2ee;}
+  .btn-primary{background:var(--wf-text);color:#fff;border-color:var(--wf-text);}
+  .btn-primary:hover{background:#454540;}
+  .btn-danger-o{border-color:var(--wf-err);color:var(--wf-err);background:#fff;}
+
+  .checkbox-cell{width:28px;text-align:center;}
+
+  .steps{display:flex;margin-bottom:18px;border:1px solid var(--wf-border);background:var(--wf-panel);}
+  .step{flex:1;padding:10px 12px;border-right:1px solid var(--wf-border);font-size:11.5px;color:var(--wf-text-faint);position:relative;}
+  .step:last-child{border-right:none;}
+  .step .num{display:inline-block;width:18px;height:18px;border-radius:50%;border:1px solid var(--wf-border-strong);text-align:center;line-height:16px;font-size:10px;margin-right:6px;}
+  .step.active{color:var(--wf-text);font-weight:600;background:var(--wf-accent-bg);}
+  .step.active .num{background:var(--wf-accent);border-color:var(--wf-accent);color:#fff;}
+  .step.done{color:var(--wf-text-mid);}
+  .step.done .num{background:var(--wf-text-mid);border-color:var(--wf-text-mid);color:#fff;}
+
+  .tree{font-size:12px;}
+  .tree-order{border:1px solid var(--wf-border-strong);margin-bottom:10px;}
+  .tree-order-head{background:#f5f5f3;padding:8px 12px;font-weight:600;display:flex;justify-content:space-between;}
+  .tree-tienda{margin:10px 12px;border:1px dashed var(--wf-border-strong);}
+  .tree-tienda-head{padding:6px 10px;background:#fafaf8;font-weight:600;font-size:11.5px;display:flex;justify-content:space-between;}
+  .tree-cont{margin:8px 10px;border:1px solid var(--wf-border);}
+  .tree-cont-head{padding:5px 9px;background:#f0f0ee;font-size:11px;color:var(--wf-text-mid);display:flex;justify-content:space-between;align-items:center;}
+  .tree-prod-row{display:flex;justify-content:space-between;padding:6px 9px;border-top:1px solid var(--wf-border);font-size:11.5px;}
+  .prod-warn{background:var(--wf-err-bg);}
+  .add-line{padding:6px 9px;font-size:11px;color:var(--wf-accent);border-top:1px dashed var(--wf-border);cursor:pointer;}
+
+  .two-col{display:grid;grid-template-columns:1.3fr 1fr;gap:16px;align-items:start;}
+
+  .log-row{display:grid;grid-template-columns:110px 90px 1fr 90px;gap:10px;padding:8px 10px;border-bottom:1px solid var(--wf-border);font-size:11.5px;align-items:center;}
+  .log-row.head{background:#f5f5f3;font-weight:600;color:var(--wf-text-mid);text-transform:uppercase;font-size:10px;}
+  .mono{font-family:ui-monospace,Consolas,monospace;font-size:11px;color:var(--wf-text-mid);}
+
+  .empty-ph{border:1px dashed var(--wf-border-strong);color:var(--wf-text-faint);text-align:center;padding:26px;font-size:11.5px;}
+
+  .pill-tab{display:inline-flex;border:1px solid var(--wf-border-strong);margin-bottom:14px;}
+  .pill-tab div{padding:6px 14px;font-size:11.5px;cursor:pointer;color:var(--wf-text-mid);border-right:1px solid var(--wf-border-strong);}
+  .pill-tab div:last-child{border-right:none;}
+  .pill-tab div.active{background:var(--wf-text);color:#fff;}
+
+  .modal-wrap{min-height:400px;background:rgba(0,0,0,0.4);display:none;align-items:center;justify-content:center;position:absolute;inset:0;}
+  .modal-wrap.open{display:flex;}
+  .modal{background:#fff;border:1px solid var(--wf-border-strong);width:420px;max-width:90%;}
+  .modal-head{padding:12px 16px;border-bottom:1px solid var(--wf-border);font-weight:600;display:flex;justify-content:space-between;}
+  .modal-body{padding:16px;font-size:12px;}
+  .modal-foot{padding:12px 16px;border-top:1px solid var(--wf-border);display:flex;justify-content:flex-end;gap:8px;}
+  .content-rel{position:relative;}
+</style>
+</head>
+<body>
+
+<h2 class="sr-only" style="position:absolute;left:-9999px;">Wireframes de baja fidelidad para la plataforma independiente de integración con Homecenter, con seis pantallas navegables: panel principal, órdenes de compra, generación de aviso de despacho, consulta de avisos y EAN128, avisos de recibo, y bitácora de integración.</h2>
+
+<div class="app">
+  <div class="sidebar">
+    <div class="brand">
+      <div class="brand-box">LOGO PLATAFORMA</div>
+      <div class="env-toggle">
+        <div class="env-btn active" id="envQA">QA</div>
+        <div class="env-btn" id="envPROD">PROD</div>
+      </div>
+    </div>
+    <div class="nav-section-label">Operación</div>
+    <div class="nav-item active" data-screen="dashboard"><span class="nav-dot"></span>Panel principal</div>
+    <div class="nav-item" data-screen="ordenes"><span class="nav-dot"></span>Órdenes de compra</div>
+    <div class="nav-item" data-screen="aviso"><span class="nav-dot"></span>Generar aviso despacho</div>
+    <div class="nav-item" data-screen="consulta"><span class="nav-dot"></span>Avisos y EAN128</div>
+    <div class="nav-item" data-screen="recibo"><span class="nav-dot"></span>Avisos de recibo</div>
+    <div class="nav-section-label">Sistema</div>
+    <div class="nav-item" data-screen="bitacora"><span class="nav-dot"></span>Bitácora e integración</div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title" id="topTitle">Panel principal <span class="topbar-crumb">/ Plataforma Homecenter</span></div>
+      <div class="topbar-right">
+        <div class="avatar">JD</div>
+      </div>
+    </div>
+
+    <div class="content content-rel" id="content">
+
+      <!-- DASHBOARD -->
+      <div class="screen active" data-screen="dashboard">
+        <div class="annot"><b>Nota de wireframe:</b> resumen operativo del día. Objetivo: que el usuario detecte en 5 segundos si hay algo pendiente de acción.</div>
+        <div class="grid-4">
+          <div class="metric"><div class="metric-label">OC sin procesar</div><div class="metric-val">7</div><div class="metric-sub">últimas 24h</div></div>
+          <div class="metric"><div class="metric-label">Avisos por generar</div><div class="metric-val">14</div><div class="metric-sub">paquetes despachados sin notificar</div></div>
+          <div class="metric"><div class="metric-label">Avisos con novedad</div><div class="metric-val">3</div><div class="metric-sub">requieren revisión</div></div>
+          <div class="metric"><div class="metric-label">Recibos pendientes</div><div class="metric-val">2</div><div class="metric-sub">sin sesión de recibo</div></div>
+        </div>
+
+        <div class="two-col">
+          <div class="panel">
+            <div class="panel-head"><h3>Órdenes recientes</h3><span class="link">Ver todas →</span></div>
+            <div class="panel-body" style="padding:0;">
+              <table>
+                <tr><th>OC</th><th>Tienda(s)</th><th>Fecha</th><th>Estado</th></tr>
+                <tr><td>8467343</td><td>2</td><td>06/05/2025</td><td><span class="badge badge-pending">Pendiente despacho</span></td></tr>
+                <tr><td>17302836</td><td>2</td><td>06/05/2025</td><td><span class="badge badge-ok">Aviso enviado</span></td></tr>
+                <tr><td>12174949</td><td>1</td><td>05/05/2025</td><td><span class="badge badge-err">Con novedad</span></td></tr>
+              </table>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head"><h3>Errores recientes</h3><span class="link">Ver bitácora →</span></div>
+            <div class="panel-body">
+              <div style="font-size:11.5px;margin-bottom:10px;">
+                <b>OC 8467343</b> · producto 7703670004288<br>
+                <span style="color:var(--wf-text-mid);">supera cantidad solicitada (30)</span>
+              </div>
+              <div style="font-size:11.5px;">
+                <b>OC 12648065</b> · reintento fallido (3/3)<br>
+                <span style="color:var(--wf-text-mid);">timeout de conexión</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ORDENES -->
+      <div class="screen" data-screen="ordenes">
+        <div class="annot"><b>Nota de wireframe:</b> listado de <span class="mono">GetOrdenesDeCompra</span>. Permite filtrar y reinyectar (<span class="mono">SetReinyectarOC</span>) cuando una orden quedó atascada.</div>
+        <div class="toolbar">
+          <div class="field"><label>Orden de compra</label><input class="wf-input" placeholder="Buscar OC"></div>
+          <div class="field"><label>Estado</label><select class="wf-select"><option>Todos</option><option>Pendiente</option><option>Procesada</option><option>Con error</option></select></div>
+          <div class="field"><label>Fecha desde</label><input class="wf-input" placeholder="dd/mm/aaaa" style="min-width:110px;"></div>
+          <div class="field"><label>Fecha hasta</label><input class="wf-input" placeholder="dd/mm/aaaa" style="min-width:110px;"></div>
+          <div style="align-self:flex-end;"><button class="btn">Filtrar</button></div>
+          <div style="align-self:flex-end;margin-left:auto;"><button class="btn">Descarga manual ↻</button></div>
+        </div>
+
+        <div class="panel">
+          <table>
+            <tr>
+              <th class="checkbox-cell"><input type="checkbox"></th>
+              <th>Orden compra</th><th>Cliente</th><th>Ciudad entrega</th><th>Tienda(s)</th><th>Cant. total</th><th>Estado</th><th></th>
+            </tr>
+            <tr class="row-click" onclick="openOC()">
+              <td class="checkbox-cell"><input type="checkbox"></td>
+              <td>8467343</td><td>Cali Sur</td><td>Cali</td><td>2</td><td>60</td>
+              <td><span class="badge badge-pending">Pendiente despacho</span></td>
+              <td class="link">Ver detalle</td>
+            </tr>
+            <tr class="row-click">
+              <td class="checkbox-cell"><input type="checkbox"></td>
+              <td>17302836</td><td>Bogotá Norte</td><td>Bogotá</td><td>2</td><td>39</td>
+              <td><span class="badge badge-ok">Despachada</span></td>
+              <td class="link">Ver detalle</td>
+            </tr>
+            <tr class="row-click">
+              <td class="checkbox-cell"><input type="checkbox"></td>
+              <td>12174949</td><td>Bloque Cero S.A.S.</td><td>Tunja</td><td>1</td><td>317</td>
+              <td><span class="badge badge-err">Error integración</span></td>
+              <td class="link">Ver detalle</td>
+            </tr>
+            <tr class="row-click">
+              <td class="checkbox-cell"><input type="checkbox"></td>
+              <td>12175804</td><td>Bogotá D.C.</td><td>Bogotá</td><td>1</td><td>250</td>
+              <td><span class="badge badge-neutral">Procesando</span></td>
+              <td class="link">Ver detalle</td>
+            </tr>
+          </table>
+        </div>
+        <div class="toolbar">
+          <button class="btn">Reinyectar seleccionadas</button>
+          <button class="btn">Exportar Excel</button>
+        </div>
+
+        <!-- DETALLE OC (dentro del mismo screen, alternable) -->
+        <div class="panel" id="ocDetail" style="display:none;">
+          <div class="panel-head">
+            <h3>Detalle OC 8467343</h3>
+            <span class="link" onclick="closeOC()">← Volver al listado</span>
+          </div>
+          <div class="panel-body">
+            <div class="two-col" style="margin-bottom:16px;">
+              <div>
+                <div style="font-size:11px;color:var(--wf-text-mid);margin-bottom:4px;">EAN punto de entrega</div>
+                <div style="margin-bottom:10px;">7703670529804</div>
+                <div style="font-size:11px;color:var(--wf-text-mid);margin-bottom:4px;">Cliente / cadena</div>
+                <div style="margin-bottom:10px;">Cali Sur</div>
+                <div style="font-size:11px;color:var(--wf-text-mid);margin-bottom:4px;">Dirección de entrega</div>
+                <div>Cra 12 N27-31, Tunja</div>
+              </div>
+              <div>
+                <div style="font-size:11px;color:var(--wf-text-mid);margin-bottom:4px;">Estado OC</div>
+                <div style="margin-bottom:10px;"><span class="badge badge-pending">Pendiente despacho</span></div>
+                <div style="font-size:11px;color:var(--wf-text-mid);margin-bottom:4px;">Transportadora</div>
+                <div style="margin-bottom:10px;">Logística propia</div>
+                <div style="font-size:11px;color:var(--wf-text-mid);margin-bottom:4px;">Código sesión recibo</div>
+                <div>— (sin recibir aún)</div>
+              </div>
+            </div>
+            <table>
+              <tr><th>SKU</th><th>Producto</th><th>Tienda</th><th>Cant. solicitada</th><th>Cant. cancelada</th><th>Estado línea</th></tr>
+              <tr><td>478618</td><td>Piso cerámica Calama 51x51</td><td>7703670900306</td><td>30</td><td>0</td><td><span class="badge badge-pending">Pendiente</span></td></tr>
+              <tr><td>297474</td><td>Pared Salma plana beige 25x35</td><td>7703670900306</td><td>30</td><td>0</td><td><span class="badge badge-pending">Pendiente</span></td></tr>
+            </table>
+            <div class="toolbar" style="margin-top:14px;">
+              <button class="btn btn-primary" onclick="go('aviso')">Generar aviso de despacho →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- GENERAR AVISO -->
+      <div class="screen" data-screen="aviso">
+        <div class="annot"><b>Nota de wireframe:</b> constructor de <span class="mono">POST /api/AvisoDespacho</span>. Sigue el flujo Orden → agrupar por tienda → contenedores → productos → enviar. La mayoría de campos se heredan de la OC; el usuario confirma más que digita.</div>
+
+        <div class="steps">
+          <div class="step done"><span class="num">✓</span>1. Seleccionar orden</div>
+          <div class="step active"><span class="num">2</span>2. Tiendas y contenedores</div>
+          <div class="step"><span class="num">3</span>3. Revisar y enviar</div>
+        </div>
+
+        <div class="toolbar">
+          <div class="field"><label>Orden de compra</label><input class="wf-input" value="8467343" style="min-width:120px;"></div>
+          <div class="field"><label>EAN punto de entrega</label><input class="wf-input" value="7703670529804" disabled style="min-width:150px;color:var(--wf-text-faint);"></div>
+          <div class="field"><label>Fecha real despacho</label><input class="wf-input" value="20/08/2026" style="min-width:120px;"></div>
+        </div>
+
+        <div class="tree">
+          <div class="tree-order">
+            <div class="tree-order-head"><span>Orden 8467343</span><span style="font-weight:400;color:var(--wf-text-mid);font-size:11px;">2 tiendas · 4 contenedores</span></div>
+
+            <div class="tree-tienda">
+              <div class="tree-tienda-head"><span>Tienda 7703670900306 · Cali Sur</span><span class="link">+ agregar contenedor</span></div>
+
+              <div class="tree-cont">
+                <div class="tree-cont-head"><span>Contenedor CONT001</span><span>peso 150.5 kg · vol 1.75 m³</span></div>
+                <div class="tree-prod-row"><span>SKU 7703670004288 · Malla eslabonada 1.8x10m</span><span>cant. <b>10</b></span></div>
+                <div class="add-line">+ agregar producto</div>
+              </div>
+
+              <div class="tree-cont">
+                <div class="tree-cont-head"><span>Contenedor CONT002</span><span>peso 150.5 kg · vol 1.75 m³</span></div>
+                <div class="tree-prod-row prod-warn">
+                  <span>SKU 7703670004288 · Malla eslabonada 1.8x10m</span>
+                  <span>cant. <b>20</b> <span class="badge badge-err" style="margin-left:6px;">supera solicitado (30)</span></span>
+                </div>
+                <div class="add-line">+ agregar producto</div>
+              </div>
+            </div>
+
+            <div class="tree-tienda">
+              <div class="tree-tienda-head"><span>Tienda 7703670900580</span><span class="link">+ agregar contenedor</span></div>
+              <div class="tree-cont">
+                <div class="tree-cont-head"><span>Contenedor CONT001</span><span>peso 150.5 kg · vol 0.75 m³</span></div>
+                <div class="tree-prod-row"><span>SKU 7702098035553</span><span>cant. <b>1</b></span></div>
+                <div class="tree-prod-row"><span>SKU 7702098038660</span><span>cant. <b>2</b></span></div>
+                <div class="add-line">+ agregar producto</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="toolbar" style="justify-content:space-between;margin-top:16px;">
+          <button class="btn">← Volver a la orden</button>
+          <div style="display:flex;gap:8px;">
+            <button class="btn">Guardar borrador</button>
+            <button class="btn btn-primary" onclick="openModal()">Revisar y enviar aviso →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONSULTA AVISOS / EAN128 -->
+      <div class="screen" data-screen="consulta">
+        <div class="annot"><b>Nota de wireframe:</b> pantalla de solo lectura sobre <span class="mono">GetAvisosDespachoPorTienda</span>. Sirve como auditoría antes de decidir un reenvío.</div>
+        <div class="toolbar">
+          <div class="field"><label>Orden de compra</label><input class="wf-input" value="8467343"></div>
+          <div class="field"><label>Tienda (opcional)</label><select class="wf-select"><option>Todas</option><option>7703670900306</option></select></div>
+          <div style="align-self:flex-end;"><button class="btn btn-primary">Consultar</button></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><h3>Resultado — OC 8467343</h3><span class="badge badge-neutral">Cali Sur</span></div>
+          <table>
+            <tr><th>Contenedor</th><th>SKU</th><th>Cant. solicitada</th><th>Cant. despachada</th><th>Peso</th><th>Volumen</th><th>EAN128</th></tr>
+            <tr><td>CONT001</td><td>7703670004288</td><td>30</td><td>10</td><td>150.5</td><td>1.75</td><td class="mono">377000269300030093</td></tr>
+            <tr><td>CONT002</td><td>7703670004288</td><td>30</td><td>10</td><td>150.5</td><td>1.75</td><td class="mono">377000269300030094</td></tr>
+            <tr><td>CONT003</td><td>7703670004288</td><td>30</td><td>10</td><td>150.5</td><td>1.75</td><td class="mono">377000269300030095</td></tr>
+          </table>
+          <div class="panel-body" style="border-top:1px solid var(--wf-border);">
+            <span style="font-size:11.5px;color:var(--wf-text-mid);">Total despachado: 30 / 30 solicitado</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- AVISOS DE RECIBO -->
+      <div class="screen" data-screen="recibo">
+        <div class="annot"><b>Nota de wireframe:</b> proceso Homecenter → Plataforma, aún sin documentación técnica formal — campos marcados <span class="mono">(?)</span> son supuestos a validar.</div>
+        <div class="toolbar">
+          <div class="field"><label>Orden de compra</label><input class="wf-input" placeholder="Buscar OC"></div>
+          <div class="field"><label>Estado</label><select class="wf-select"><option>Todos</option><option>Recibido</option><option>Con diferencia</option></select></div>
+          <div style="align-self:flex-end;"><button class="btn">Filtrar</button></div>
+        </div>
+        <div class="panel">
+          <table>
+            <tr><th>OC</th><th>Tienda</th><th>Código sesión recibo</th><th>Fecha recibo <span class="mono">(?)</span></th><th>Cant. recibida <span class="mono">(?)</span></th><th>Estado</th></tr>
+            <tr><td>17302836</td><td>7703670900153</td><td class="mono">SES-88213</td><td>07/05/2025</td><td>39 / 39</td><td><span class="badge badge-ok">Completo</span></td></tr>
+            <tr><td>12174949</td><td>7703670901228</td><td class="mono">SES-88214</td><td>06/05/2025</td><td>310 / 317</td><td><span class="badge badge-err">Con diferencia</span></td></tr>
+            <tr><td>8467343</td><td>—</td><td class="mono">—</td><td>—</td><td>—</td><td><span class="badge badge-neutral">Sin recibir</span></td></tr>
+          </table>
+        </div>
+      </div>
+
+      <!-- BITACORA -->
+      <div class="screen" data-screen="bitacora">
+        <div class="annot"><b>Nota de wireframe:</b> trazabilidad y reprocesos — módulo transversal para las 3 integraciones (OC, Aviso Despacho, Aviso Recibo).</div>
+        <div class="pill-tab">
+          <div class="active">Todos</div><div>Órdenes de compra</div><div>Avisos de despacho</div><div>Avisos de recibo</div>
+        </div>
+        <div class="panel">
+          <div class="log-row head"><span>Fecha</span><span>Tipo</span><span>Detalle</span><span>Estado</span></div>
+          <div class="log-row">
+            <span class="mono">20/08 09:14</span><span>Aviso despacho</span>
+            <span>OC 8467343 · producto 7703670004288 supera cantidad solicitada (30)</span>
+            <span><span class="badge badge-err">Con novedad</span></span>
+          </div>
+          <div class="log-row">
+            <span class="mono">20/08 08:52</span><span>Reinyección OC</span>
+            <span>OC 12648065 · reintento 3 de 3 · timeout de conexión</span>
+            <span><span class="badge badge-err">Fallido</span></span>
+          </div>
+          <div class="log-row">
+            <span class="mono">20/08 08:40</span><span>Aviso despacho</span>
+            <span>OC 17302836 · 2 tiendas · 3 contenedores enviados</span>
+            <span><span class="badge badge-ok">Exitoso</span></span>
+          </div>
+          <div class="log-row">
+            <span class="mono">20/08 07:15</span><span>Descarga OC</span>
+            <span>15 órdenes nuevas descargadas de Homecenter</span>
+            <span><span class="badge badge-ok">Exitoso</span></span>
+          </div>
+          <div class="log-row">
+            <span class="mono">19/08 22:03</span><span>Aviso recibo</span>
+            <span>OC 12174949 · diferencia detectada (310 de 317)</span>
+            <span><span class="badge badge-err">Con novedad</span></span>
+          </div>
+        </div>
+        <div class="toolbar">
+          <button class="btn">Exportar log</button>
+          <button class="btn btn-danger-o">Reintentar seleccionados</button>
+        </div>
+      </div>
+
+      <!-- MODAL confirmar envio -->
+      <div class="modal-wrap" id="modalWrap">
+        <div class="modal">
+          <div class="modal-head"><span>Confirmar envío de aviso</span><span style="cursor:pointer;color:var(--wf-text-mid);" onclick="closeModal()">✕</span></div>
+          <div class="modal-body">
+            <p style="margin-top:0;">Se enviará el aviso de despacho para la <b>OC 8467343</b>, 2 tiendas, 3 contenedores.</p>
+            <div class="annot" style="margin-bottom:0;background:var(--wf-err-bg);border-color:#d69a9a;color:var(--wf-err);">
+              1 línea supera la cantidad solicitada. Homecenter podría rechazar ese ítem — revisa el contenedor CONT002 antes de continuar.
+            </div>
+          </div>
+          <div class="modal-foot">
+            <button class="btn" onclick="closeModal()">Volver a revisar</button>
+            <button class="btn btn-primary" onclick="closeModal()">Enviar de todos modos</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+function go(name){
+  document.querySelectorAll('.nav-item').forEach(function(el){el.classList.toggle('active', el.dataset.screen===name);});
+  document.querySelectorAll('.screen').forEach(function(el){el.classList.toggle('active', el.dataset.screen===name);});
+  var titles = {
+    dashboard:'Panel principal',
+    ordenes:'Órdenes de compra',
+    aviso:'Generar aviso de despacho',
+    consulta:'Avisos y EAN128',
+    recibo:'Avisos de recibo',
+    bitacora:'Bitácora e integración'
+  };
+  document.getElementById('topTitle').innerHTML = titles[name] + ' <span class="topbar-crumb">/ Plataforma Homecenter</span>';
+}
+document.querySelectorAll('.nav-item').forEach(function(el){
+  el.addEventListener('click', function(){ go(el.dataset.screen); });
+});
+
+document.getElementById('envQA').addEventListener('click', function(){
+  this.classList.add('active');
+  document.getElementById('envPROD').classList.remove('active');
+});
+document.getElementById('envPROD').addEventListener('click', function(){
+  this.classList.add('active');
+  document.getElementById('envQA').classList.remove('active');
+});
+
+function openOC(){ document.getElementById('ocDetail').style.display='block'; document.getElementById('ocDetail').scrollIntoView({behavior:'smooth'}); }
+function closeOC(){ document.getElementById('ocDetail').style.display='none'; }
+
+function openModal(){ document.getElementById('modalWrap').classList.add('open'); }
+function closeModal(){ document.getElementById('modalWrap').classList.remove('open'); }
+</script>
+
+</body>
+</html>
