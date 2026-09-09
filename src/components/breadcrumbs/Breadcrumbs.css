@@ -3,7 +3,7 @@
   align-items: center;
   height: 3rem;
   padding: var(--space-2xs) var(--space-md);
-  font-size: 0.875rem;
+  font-size: var(--font-size-14);
   border-bottom: 1px solid var(--line);
   background-color: var(--title-bg);
 }
@@ -19,7 +19,7 @@
 }
 
 .cuperz-breadcrumbs__current {
-  font-weight: 700;
+  font-weight: var(--font-weight-medium);
   color: var(--palette-text-primary);
 }
 
@@ -30,6 +30,6 @@
 @media (min-width: 640px) {
   .cuperz-breadcrumbs {
     padding: var(--space-sm) var(--space-lg);
-    font-size: 1rem;
+    font-size: var(--font-size-16);
   }
 }

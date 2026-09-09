@@ -4,7 +4,6 @@
   "typescript": true,
   "packageManager": "npm",
   "includeExamples": false,
-  "tailwind": false,
   "projectPreset": "default",
   "addOnOptions": {},
   "git": false,

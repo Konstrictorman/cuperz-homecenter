@@ -1,19 +1,34 @@
 .dashboardCard__wrap {
-  padding: 2rem;
+  padding: var(--space-xl);
 }
 
+/*
+ * Component-local responsive knobs. Defined once on the card and overridden per
+ * breakpoint below, so each element rule just reads a variable instead of
+ * repeating a `!important` declaration at every breakpoint.
+ *
+ * `--card-width` / `--card-title-height` are card-specific dimensions and stay
+ * here rather than in the token layer. `--card-figure-size` is shared by the
+ * icon and the highlight number, which use the same ramp.
+ */
 .dashboardCard {
-  width: 240px;
+  --card-width: 240px;
+  --card-title-size: var(--font-size-18);
+  --card-title-height: 3rem;
+  --card-figure-size: var(--font-size-36);
+  --card-desc-size: var(--font-size-14);
+
+  width: var(--card-width);
   background-color: var(--palette-background-default) !important;
   color: var(--palette-text-primary);
   border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-16);
 }
 
 .dashboardCard__title {
   display: block;
-  height: 3rem;
-  font-size: 1.125rem !important;
+  height: var(--card-title-height);
+  font-size: var(--card-title-size) !important;
   font-weight: var(--font-weight-bold);
 }
 
@@ -21,22 +36,22 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-block: 0.5rem;
+  margin-block: var(--space-2xs);
 }
 
 .dashboardCard__icon {
-  font-size: 36px !important;
+  font-size: var(--card-figure-size) !important;
   color: var(--cuperz-primary-500);
 }
 
 .dashboardCard__value {
   font-weight: var(--font-weight-medium) !important;
-  font-size: 2.25rem !important;
+  font-size: var(--card-figure-size) !important;
   color: var(--cuperz-primary-500);
 }
 
 .dashboardCard__desc {
-  font-size: 0.875rem !important;
+  font-size: var(--card-desc-size) !important;
 }
 
 [data-theme='dark'] .dashboardCard__icon,
@@ -46,42 +61,19 @@
 
 @media (min-width: 640px) {
   .dashboardCard {
-    width: 320px;
-  }
-
-  .dashboardCard__title {
-    height: 4rem;
-    font-size: 1.25rem !important;
-  }
-
-  .dashboardCard__icon {
-    font-size: 48px !important;
-  }
-
-  .dashboardCard__value {
-    font-size: 3rem !important;
-  }
-
-  .dashboardCard__desc {
-    font-size: 1rem !important;
+    --card-width: 320px;
+    --card-title-size: var(--font-size-20);
+    --card-title-height: 4rem;
+    --card-figure-size: var(--font-size-48);
+    --card-desc-size: var(--font-size-16);
   }
 }
 
 @media (min-width: 768px) {
   .dashboardCard {
-    width: 360px;
-  }
-
-  .dashboardCard__title {
-    height: 6rem;
-    font-size: 2rem !important;
-  }
-
-  .dashboardCard__icon {
-    font-size: 60px !important;
-  }
-
-  .dashboardCard__value {
-    font-size: 3.75rem !important;
+    --card-width: 360px;
+    --card-title-size: var(--font-size-32);
+    --card-title-height: 6rem;
+    --card-figure-size: var(--font-size-60);
   }
 }

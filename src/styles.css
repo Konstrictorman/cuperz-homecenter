@@ -23,6 +23,33 @@
   --title-bg: var(--palette-background-paper);
 }
 
+/*
+ * Hand-maintained layout primitives — values the Figma token export
+ * (tokens.css) doesn't cover: component-chrome dimensions and stacking order.
+ * Not theme-reactive, so there is no [data-theme='dark'] counterpart.
+ */
+:root {
+  /* Height of the fixed footer; .app-main pads its bottom by the same amount. */
+  --footer-height: 3rem;
+
+  /*
+   * Stacking order. 1300 is MUI's modal layer (theme.zIndex.modal); the
+   * floating ToolBar deliberately sits one above it and its backdrop one below.
+   */
+  --z-header: 50;
+  --z-toolbar-backdrop: 1300;
+  --z-toolbar: 1301;
+}
+
+/*
+ * Breakpoint reference — CSS custom properties can't be used inside @media /
+ * @container preludes, so these are documented here, not tokenised:
+ *   640px  (sm:)  phone  → small tablet
+ *   768px  (md:)  tablet → desktop  (also where tokens.css re-scales spacing/type)
+ * Container queries use 28rem / 32rem, evaluated against `.dashboard` and
+ * `.purchase-orders` (both `container-type: inline-size`).
+ */
+
 :root[data-theme='dark'] {
   --bg-base: var(--palette-background-default);
   --body-text: var(--palette-text-primary);
@@ -88,8 +115,8 @@ body {
   background-size: cover;
 }
 
-/* Clears the fixed 48px footer (see Footer.css); was Tailwind `pb-12`. */
+/* Clears the fixed footer (see Footer.css). */
 .app-main {
   display: block;
-  padding-bottom: 3rem;
+  padding-bottom: var(--footer-height);
 }

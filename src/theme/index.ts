@@ -163,7 +163,7 @@ export const theme = createTheme({
   },
   defaultColorScheme: 'light',
   shape: {
-    // --radius-md
+    // --radius-8
     borderRadius: 8,
   },
   typography: {

@@ -3,7 +3,7 @@
   left: 50%;
   bottom: var(--space-lg);
   transform: translateX(-50%);
-  z-index: 1301;
+  z-index: var(--z-toolbar);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -22,7 +22,7 @@
 }
 
 .tool-bar__backdrop.MuiBackdrop-root {
-  z-index: 1300 !important;
+  z-index: var(--z-toolbar-backdrop) !important;
 }
 
 .tool-bar__text {

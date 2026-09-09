@@ -35,7 +35,7 @@ controls render as icon buttons regardless of \`iconOnly\` /
 \`selectionActionsIconOnly\` — so the floating bar never overflows a phone
 screen. Actions without an icon keep their label.
 
-Corners are the shared \`--radius-lg\` (16px) token, matching \`Modal\`.
+Corners use the \`--radius-12\` (12px) token.
         `,
       },
     },
