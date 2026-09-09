@@ -1,30 +1,41 @@
 import { useEffect } from 'react'
 import '../src/styles.css'
 
+import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles'
+import { theme } from '../src/theme'
 import type { Decorator } from '@storybook/react'
 import type { Preview } from '@storybook/tanstack-react'
 
-// Mirrors src/routes/__root.tsx's themeInitScript / ThemeContext: the app
-// switches themes by flipping `data-theme` on the document root, and every
-// CSS token (--line, --color-palette-*, etc.) is scoped off that attribute.
+// Mirrors src/routes/__root.tsx / ThemeContext: the app switches themes by
+// flipping `data-theme` on the document root, and both the CSS tokens
+// (--line, --palette-*, …) and the MUI theme's CSS variables are scoped off
+// that attribute. The MUI provider is configured (colorSchemeNode/storageManager
+// nulled) not to touch the attribute itself, so the toolbar toggle below stays
+// the single source of truth here too.
 const withTheme: Decorator = (Story, context) => {
-  const theme = context.globals.theme === 'dark' ? 'dark' : 'light'
+  const mode = context.globals.theme === 'dark' ? 'dark' : 'light'
 
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme)
-  }, [theme])
+    document.documentElement.setAttribute('data-theme', mode)
+  }, [mode])
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        padding: '1rem',
-        background: 'var(--bg-base)',
-        color: 'var(--color-palette-text-primary)',
-      }}
+    <MuiThemeProvider
+      theme={theme}
+      colorSchemeNode={null}
+      storageManager={null}
     >
-      <Story />
-    </div>
+      <div
+        style={{
+          minHeight: '100vh',
+          padding: '1rem',
+          background: 'var(--bg-base)',
+          color: 'var(--body-text)',
+        }}
+      >
+        <Story />
+      </div>
+    </MuiThemeProvider>
   )
 }
 

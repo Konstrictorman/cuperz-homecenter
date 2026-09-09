@@ -21,6 +21,8 @@ const simulateMobileWidth = () => {
     }) as MediaQueryList
 }
 
+const noop = () => {}
+
 describe('ToolBar', () => {
   const originalMatchMedia = window.matchMedia
 
@@ -28,16 +30,17 @@ describe('ToolBar', () => {
     window.matchMedia = originalMatchMedia
   })
 
-  it('renders the text and actions when open', () => {
+  it('renders the selection count and actions when open', () => {
     render(
       <ToolBar
         open
-        text="3 seleccionados"
-        actions={[{ key: 'export', label: 'Exportar', onClick: () => {} }]}
+        selected={3}
+        onClose={noop}
+        actions={[{ key: 'export', label: 'Exportar', onClick: noop }]}
       />,
     )
 
-    expect(screen.getByText('3 seleccionados')).toBeInTheDocument()
+    expect(screen.getByText('3 Registros Seleccionados')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Exportar' })).toBeInTheDocument()
   })
 
@@ -45,12 +48,13 @@ describe('ToolBar', () => {
     render(
       <ToolBar
         open={false}
-        text="3 seleccionados"
-        actions={[{ key: 'export', label: 'Exportar', onClick: () => {} }]}
+        selected={3}
+        onClose={noop}
+        actions={[{ key: 'export', label: 'Exportar', onClick: noop }]}
       />,
     )
 
-    expect(screen.queryByText('3 seleccionados')).not.toBeInTheDocument()
+    expect(screen.queryByText(/Seleccionados/)).not.toBeInTheDocument()
     expect(document.querySelector('.MuiBackdrop-root')).not.toBeInTheDocument()
   })
 
@@ -61,7 +65,8 @@ describe('ToolBar', () => {
     render(
       <ToolBar
         open
-        text="1 seleccionado"
+        selected={1}
+        onClose={noop}
         actions={[{ key: 'export', label: 'Exportar', onClick: handleClick }]}
       />,
     )
@@ -74,13 +79,14 @@ describe('ToolBar', () => {
     render(
       <ToolBar
         open
-        text="1 seleccionado"
+        selected={1}
+        onClose={noop}
         actions={[
           {
             key: 'delete',
             label: 'Eliminar',
             iconOnly: true,
-            onClick: () => {},
+            onClick: noop,
           },
         ]}
       />,
@@ -96,7 +102,8 @@ describe('ToolBar', () => {
     render(
       <ToolBar
         open
-        text="1 seleccionado"
+        selected={1}
+        onClose={noop}
         actions={[
           {
             key: 'export',
@@ -115,8 +122,9 @@ describe('ToolBar', () => {
     render(
       <ToolBar
         open
-        text="1 seleccionado"
-        actions={[{ key: 'export', label: 'Exportar', onClick: () => {} }]}
+        selected={1}
+        onClose={noop}
+        actions={[{ key: 'export', label: 'Exportar', onClick: noop }]}
       />,
     )
 
@@ -128,8 +136,9 @@ describe('ToolBar', () => {
     render(
       <ToolBar
         open
-        text="1 seleccionado"
-        actions={[{ key: 'export', label: 'Exportar', onClick: () => {} }]}
+        selected={1}
+        onClose={noop}
+        actions={[{ key: 'export', label: 'Exportar', onClick: noop }]}
       />,
     )
 
@@ -148,7 +157,8 @@ describe('ToolBar', () => {
     render(
       <ToolBar
         open
-        text="1 seleccionado"
+        selected={1}
+        onClose={noop}
         onSelectAll={handleSelectAll}
         actions={[]}
       />,
@@ -165,7 +175,8 @@ describe('ToolBar', () => {
     render(
       <ToolBar
         open
-        text="1 seleccionado"
+        selected={1}
+        onClose={noop}
         onClearSelection={handleClearSelection}
         actions={[]}
       />,
@@ -183,7 +194,8 @@ describe('ToolBar', () => {
     render(
       <ToolBar
         open
-        text="1 seleccionado"
+        selected={1}
+        onClose={noop}
         selectionActionsIconOnly
         onSelectAll={handleSelectAll}
         onClearSelection={handleClearSelection}
@@ -212,7 +224,8 @@ describe('ToolBar', () => {
     render(
       <ToolBar
         open
-        text="2 seleccionados"
+        selected={2}
+        onClose={noop}
         actions={[
           {
             key: 'delete',
@@ -234,8 +247,9 @@ describe('ToolBar', () => {
     render(
       <ToolBar
         open
-        text="2 seleccionados"
-        actions={[{ key: 'export', label: 'Exportar', onClick: () => {} }]}
+        selected={2}
+        onClose={noop}
+        actions={[{ key: 'export', label: 'Exportar', onClick: noop }]}
       />,
     )
 
@@ -250,9 +264,10 @@ describe('ToolBar', () => {
     render(
       <ToolBar
         open
-        text="2 seleccionados"
-        onSelectAll={() => {}}
-        onClearSelection={() => {}}
+        selected={2}
+        onClose={noop}
+        onSelectAll={noop}
+        onClearSelection={noop}
         actions={[]}
       />,
     )
@@ -269,12 +284,30 @@ describe('ToolBar', () => {
     render(
       <ToolBar
         open
+        selected={1}
+        onClose={noop}
         blockInteraction={false}
-        text="1 seleccionado"
-        actions={[{ key: 'export', label: 'Exportar', onClick: () => {} }]}
+        actions={[{ key: 'export', label: 'Exportar', onClick: noop }]}
       />,
     )
 
     expect(document.querySelector('.MuiBackdrop-root')).not.toBeInTheDocument()
+  })
+
+  it('calls onClose when the close button is clicked', async () => {
+    const user = userEvent.setup()
+    const handleClose = jest.fn()
+
+    render(
+      <ToolBar
+        open
+        selected={1}
+        onClose={handleClose}
+        actions={[{ key: 'export', label: 'Exportar', onClick: noop }]}
+      />,
+    )
+
+    await user.click(screen.getByRole('button', { name: 'Cerrar' }))
+    expect(handleClose).toHaveBeenCalledTimes(1)
   })
 })

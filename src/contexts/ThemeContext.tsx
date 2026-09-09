@@ -1,5 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
+import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles'
+import { theme } from '#/theme'
 
 type Theme = 'light' | 'dark'
 
@@ -22,20 +24,33 @@ function getInitialTheme(): Theme {
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setTheme] = useState<Theme>(getInitialTheme)
+  const [mode, setMode] = useState<Theme>(getInitialTheme)
 
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme)
-    localStorage.setItem(STORAGE_KEY, theme)
-  }, [theme])
+    document.documentElement.setAttribute('data-theme', mode)
+    localStorage.setItem(STORAGE_KEY, mode)
+  }, [mode])
 
   const toggleTheme = () => {
-    setTheme((current) => (current === 'dark' ? 'light' : 'dark'))
+    setMode((current) => (current === 'dark' ? 'light' : 'dark'))
   }
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
-      {children}
+    <ThemeContext.Provider value={{ theme: mode, toggleTheme }}>
+      {/*
+        One MUI theme carries both colour schemes as CSS variables scoped to the
+        `data-theme` attribute (see `theme.cssVariables.colorSchemeSelector`).
+        `colorSchemeNode`/`storageManager` are nulled so MUI never reads or
+        writes the attribute itself — this component stays the single authority
+        over `data-theme`, matching the blocking script in `__root.tsx`.
+      */}
+      <MuiThemeProvider
+        theme={theme}
+        colorSchemeNode={null}
+        storageManager={null}
+      >
+        {children}
+      </MuiThemeProvider>
     </ThemeContext.Provider>
   )
 }

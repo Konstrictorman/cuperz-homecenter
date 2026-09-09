@@ -36,7 +36,7 @@ const Modal = ({
       maxWidth={maxWidth}
       className={['modal', className].filter(Boolean).join(' ')}
     >
-      <DialogTitle className="modal__title flex items-center justify-between gap-4">
+      <DialogTitle className="modal__title">
         {title}
         <IconButton onClick={onClose} size="small" aria-label="Cerrar">
           <CloseIcon fontSize="small" />

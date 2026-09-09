@@ -1,3 +1,16 @@
+.menu-bar__nav {
+  order: 3;
+  display: flex;
+  width: 100%;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: var(--space-md);
+  row-gap: var(--space-3xs);
+  padding-bottom: var(--space-3xs);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
 .nav-link {
   position: relative;
   display: inline-flex;
@@ -34,6 +47,15 @@
 
 .nav-link:hover:not(.is-active)::after {
   background: var(--menu-hover);
+}
+
+@media (min-width: 640px) {
+  .menu-bar__nav {
+    order: 0;
+    width: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 0;
+  }
 }
 
 @media (max-width: 640px) {

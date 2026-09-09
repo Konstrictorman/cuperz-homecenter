@@ -64,7 +64,7 @@ const PurchaseOrderDetailModal = ({
       onOpen={open}
       onClose={onClose}
     >
-      <div className="purchase-order-detail-modal__summary grid grid-cols-1 gap-x-8 gap-y-3 sm:grid-cols-2">
+      <div className="purchase-order-detail-modal__summary">
         <div>
           <div className="purchase-order-detail-modal__label">
             EAN punto de entrega

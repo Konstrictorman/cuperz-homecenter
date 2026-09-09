@@ -18,11 +18,7 @@ const DataTable = <TRow extends GridValidRowModel>({
   ...props
 }: DataTableProps<TRow>) => {
   return (
-    <div
-      className={['data-table', 'w-full overflow-x-auto', className]
-        .filter(Boolean)
-        .join(' ')}
-    >
+    <div className={['data-table', className].filter(Boolean).join(' ')}>
       <DataGrid<TRow>
         {...props}
         checkboxSelection={checkboxSelection}

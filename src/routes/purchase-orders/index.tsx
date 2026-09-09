@@ -8,6 +8,7 @@ import PurchaseOrderDetailModal from './PurchaseOrderDetailModal'
 import type { OrdersFilterValues } from './OrdersFilterBar'
 import type { PurchaseOrder } from './PurchaseOrdersTable'
 import { MOCK_PURCHASE_ORDERS } from './MOCK_PURCHASE_ORDERS'
+import './index.css'
 
 function filterPurchaseOrders(
   orders: PurchaseOrder[],
@@ -46,7 +47,7 @@ const PurchaseOrdersPage = () => {
   }
 
   return (
-    <div className="@container flex flex-col mt-8 gap-4 p-4 sm:p-6">
+    <div className="purchase-orders">
       <OrdersFilterBar onFilter={setFilters} />
       <PurchaseOrdersTable rows={rows} onViewDetail={onViewDetail} />
       <PurchaseOrderDetailModal

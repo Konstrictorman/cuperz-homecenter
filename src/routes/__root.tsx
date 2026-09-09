@@ -71,12 +71,12 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         <HeadContent />
       </head>
-      <body className="bg-[var(--bg-base)] text-[var(--header-text)]">
+      <body>
         <TanstackQueryProvider queryClient={queryClient}>
           <ThemeProvider>
             <Header />
             <Breadcrumbs />
-            <main className="pb-12">{children}</main>
+            <main className="app-main">{children}</main>
             <Footer />
           </ThemeProvider>
           <TanStackDevtools

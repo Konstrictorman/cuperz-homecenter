@@ -19,16 +19,25 @@ npm run build
 
 ## Styling
 
-This project uses [Tailwind CSS](https://tailwindcss.com/) for styling.
+The UI is built on [MUI](https://mui.com/) (Material UI + Emotion). There is no
+utility-CSS framework.
 
-### Removing Tailwind CSS
+- **Design tokens** live in `src/tokens.css` (auto-generated from the Figma
+  variables). `src/styles.css` layers semantic aliases (`--line`, `--body-text`,
+  `--bg-base`, …) on top and holds the base/global rules.
+- **The MUI theme** (`src/theme/index.ts`) mirrors those tokens: palette
+  (light + dark colour schemes), typography scale, radius. It is a real
+  `createTheme` with `cssVariables` — dark mode is scoped to the `data-theme`
+  attribute that `ThemeContext` / the blocking script in `__root.tsx` toggle,
+  so switching needs no re-render and there is no SSR flash.
+- **Component styling** is co-located: each component imports its own
+  `ComponentName.css` (BEM-ish class names, flat selectors, `var(--token)`
+  values, `!important` only where overriding MUI internals). Prefer the MUI
+  theme for anything theme-level; use a component `.css` for structural or
+  MUI-override styling.
 
-If you prefer not to use Tailwind CSS:
-
-1. Remove the demo pages in `src/routes/demo/`
-2. Replace the Tailwind import in `src/styles.css` with your own styles
-3. Remove `tailwindcss()` from the plugins array in `vite.config.ts`
-4. Remove `@tailwindcss/vite` and `tailwindcss` from `package.json`
+When tokens change in Figma, update `src/tokens.css` **and** the colour maps in
+`src/theme/index.ts`.
 
 ## Linting & Formatting
 

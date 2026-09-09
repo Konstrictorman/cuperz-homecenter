@@ -1,37 +1,38 @@
 import { Link } from '@tanstack/react-router'
 import './MenuBar.css'
+import Typography from '@mui/material/Typography'
 
 const MenuBar = () => {
   return (
-    <div>
-      <div className="order-3 flex w-full flex-wrap items-center gap-x-4 gap-y-1 pb-1 text-sm font-semibold sm:order-none sm:w-auto sm:flex-nowrap sm:pb-0">
+    <div className="menu-bar">
+      <div className="menu-bar__nav">
         <Link
           to="/"
           className="nav-link"
           activeProps={{ className: 'nav-link is-active' }}
         >
-          Inicio
+          <Typography>Inicio</Typography>
         </Link>
         <Link
           to="/purchase-orders"
           className="nav-link"
           activeProps={{ className: 'nav-link is-active' }}
         >
-          Órdenes de Compra
+          <Typography>Órdenes de Compra</Typography>
         </Link>
         <Link
           to="/dispatch"
           className="nav-link"
           activeProps={{ className: 'nav-link is-active' }}
         >
-          Despachos
+          <Typography>Despachos</Typography>
         </Link>
         <Link
           to="/receipt-notices"
           className="nav-link"
           activeProps={{ className: 'nav-link is-active' }}
         >
-          Avisos de Recepción
+          <Typography>Avisos de Recepción</Typography>
         </Link>
       </div>
     </div>

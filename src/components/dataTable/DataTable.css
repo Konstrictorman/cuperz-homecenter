@@ -1,3 +1,8 @@
+.data-table {
+  width: 100%;
+  overflow-x: auto;
+}
+
 .data-table .MuiDataGrid-root {
   background-color: var(--table-bg);
   border-color: var(--color-grey-200);

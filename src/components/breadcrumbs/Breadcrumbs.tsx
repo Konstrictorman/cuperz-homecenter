@@ -26,10 +26,7 @@ const Breadcrumbs = () => {
   const ancestors = crumbs.slice(0, -1)
 
   return (
-    <MuiBreadcrumbs
-      aria-label="breadcrumb"
-      className="cuperz-breadcrumbs py-2 px-4 sm:py-3 sm:px-6 text-sm sm:text-base h-12"
-    >
+    <MuiBreadcrumbs aria-label="breadcrumb" className="cuperz-breadcrumbs">
       {ancestors.map((crumb) => (
         <Link
           key={crumb.key}
@@ -41,10 +38,7 @@ const Breadcrumbs = () => {
           {crumb.label}
         </Link>
       ))}
-      <Typography
-        component="span"
-        className="font-bold! text-[var(--palette-text-primary)]!"
-      >
+      <Typography component="span" className="cuperz-breadcrumbs__current">
         {current.label}
       </Typography>
     </MuiBreadcrumbs>

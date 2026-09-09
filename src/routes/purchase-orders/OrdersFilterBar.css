@@ -1,61 +1,41 @@
-[data-theme='dark'] .orders-filter-bar .MuiOutlinedInput-root {
-  background-color: var(--palette-background-paper);
-  color: var(--palette-text-primary);
+/*
+ * Layout only. The dark-mode input / menu overrides that used to live here are
+ * gone — the real MUI theme (src/theme/index.ts) now carries a proper `dark`
+ * colour scheme, so MUI's OutlinedInput, InputLabel, Select menu and the native
+ * date picker (via `color-scheme`) render correctly in dark mode on their own.
+ */
+.orders-filter-bar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
 }
 
-[data-theme='dark']
-  .orders-filter-bar
-  .MuiOutlinedInput-root
-  .MuiOutlinedInput-notchedOutline {
-  border-color: var(--palette-divider);
+.orders-filter-bar__field {
+  width: 100%;
 }
 
-[data-theme='dark']
-  .orders-filter-bar
-  .MuiOutlinedInput-root:hover:not(.Mui-disabled)
-  .MuiOutlinedInput-notchedOutline {
-  border-color: var(--palette-text-secondary);
+.orders-filter-bar__action {
+  width: 100%;
+  margin-top: var(--space-3xs);
 }
 
-[data-theme='dark']
-  .orders-filter-bar
-  .MuiOutlinedInput-root.Mui-focused
-  .MuiOutlinedInput-notchedOutline {
-  border-color: var(--palette-info-main);
-}
+/* Container is `.purchase-orders` (container-type: inline-size). */
+@container (min-width: 32rem) {
+  .orders-filter-bar {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-end;
+  }
 
-[data-theme='dark'] .orders-filter-bar .MuiInputLabel-root {
-  color: var(--palette-text-secondary);
-}
+  .orders-filter-bar__field {
+    width: 14rem;
+  }
 
-[data-theme='dark'] .orders-filter-bar .MuiInputLabel-root.Mui-focused {
-  color: var(--palette-info-main);
-}
+  .orders-filter-bar__field--narrow {
+    width: 12rem;
+  }
 
-[data-theme='dark'] .orders-filter-bar input::placeholder {
-  color: var(--palette-text-secondary);
-  opacity: 1;
-}
-
-[data-theme='dark'] .orders-filter-bar .MuiSvgIcon-root {
-  color: var(--palette-text-secondary);
-}
-
-/* Flips the native date-picker icon/UI to a light-on-dark rendering */
-[data-theme='dark'] .orders-filter-bar input[type='date'] {
-  color-scheme: dark;
-}
-
-/* Select's option list renders in a portal, outside .orders-filter-bar */
-[data-theme='dark'] .MuiMenu-paper {
-  background-color: var(--palette-background-paper);
-  color: var(--palette-text-primary);
-}
-
-[data-theme='dark'] .MuiMenu-paper .MuiMenuItem-root:hover {
-  background-color: var(--palette-action-hover);
-}
-
-[data-theme='dark'] .MuiMenu-paper .MuiMenuItem-root.Mui-selected {
-  background-color: var(--palette-action-selected);
+  .orders-filter-bar__action {
+    width: auto;
+  }
 }

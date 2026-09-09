@@ -8,6 +8,7 @@ import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import { useTheme } from '#/contexts/ThemeContext'
 import MenuBar from './menuBar/MenuBar'
+import './Header.css'
 
 const Header = () => {
   const { theme, toggleTheme } = useTheme()
@@ -25,11 +26,11 @@ const Header = () => {
   }
 
   return (
-    <header className="sticky top-0 z-50 border-b border-[var(--line)] bg-[var(--header-bg)] px-4 backdrop-blur-lg text-[var(--header-text)]">
-      <nav className="page-wrap flex flex-wrap items-center gap-x-3 gap-y-2 py-3 sm:py-4">
-        <img src={logo} alt="Cuperz Logo" className="h-24 w-24 rounded-full" />
+    <header className="app-header">
+      <nav className="app-header__bar">
+        <img src={logo} alt="Cuperz Logo" className="app-header__logo" />
         <MenuBar />
-        <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
+        <div className="app-header__actions">
           <Typography>Light</Typography>
           <ThemeSwitch
             size="small"
@@ -40,7 +41,7 @@ const Header = () => {
           <Typography>Dark</Typography>
         </div>
 
-        <div className="flex items-center gap-1.5 sm:gap-2">
+        <div className="app-header__user">
           <IconButton
             size="large"
             color="inherit"

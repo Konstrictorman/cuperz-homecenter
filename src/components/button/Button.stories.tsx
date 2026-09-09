@@ -19,15 +19,15 @@ const meta = {
     docs: {
       description: {
         component: `
-Wraps MUI's \`Button\`, forcing \`text-transform: none\` and
-\`text-decoration: none\` (MUI's default uppercases button labels) and
-restricting \`color\` to a closed set of four semantic variants: \`info\`,
-\`success\`, \`error\`, \`warning\`.
+Wraps MUI's \`Button\`, restricting \`color\` to a closed set of four
+semantic variants: \`info\`, \`success\`, \`error\`, \`warning\`.
 
-Colors come from \`tokens.css\`'s \`--palette-{color}-*\` scale, which already
-defines separate light/dark values switched via \`[data-theme="dark"]\`, so
-this component needs no extra dark-mode overrides of its own — it just
-reads the tokens. Toggle the theme toolbar above to see it switch.
+Colors come straight from the MUI theme's palette (\`src/theme/index.ts\`),
+which carries both light and dark colour schemes, so this component needs
+no dark-mode overrides of its own. \`text-transform: none\` /
+\`text-decoration: none\` are applied to every button via the theme's
+\`MuiButton\` style overrides. Toggle the theme toolbar above to see it
+switch.
 
 MUI's own \`variant\` (\`text\` / \`outlined\` / \`contained\`), \`size\`,
 \`disabled\`, and other \`Button\` props are all still supported.

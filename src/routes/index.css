@@ -1,0 +1,17 @@
+.dashboard {
+  container-type: inline-size;
+}
+
+.dashboard__grid {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+}
+
+@container (min-width: 28rem) {
+  .dashboard__grid {
+    flex-direction: row;
+  }
+}

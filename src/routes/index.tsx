@@ -3,6 +3,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import PendingActionsIcon from '@mui/icons-material/PendingActions'
 import LocalShippingIcon from '@mui/icons-material/LocalShipping'
 import LocalPostOfficeIcon from '@mui/icons-material/LocalPostOffice'
+import './index.css'
 
 export const Route = createFileRoute('/')({
   component: Home,
@@ -10,8 +11,8 @@ export const Route = createFileRoute('/')({
 
 function Home() {
   return (
-    <div className="@container" id="dashboard-cards">
-      <div className="flex flex-col @md:flex-row flex-wrap justify-center items-center">
+    <div className="dashboard" id="dashboard-cards">
+      <div className="dashboard__grid">
         <DashboardCard
           title={'Órdenes de compra sin procesar'}
           description={'Últimas 24 horas'}
