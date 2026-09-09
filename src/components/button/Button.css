@@ -39,7 +39,11 @@
   border-color: var(--palette-info-main) !important;
 }
 .button.MuiButton-outlined.button--info:hover {
-  background-color: color-mix(in srgb, var(--palette-info-main) 8%, transparent) !important;
+  background-color: color-mix(
+    in srgb,
+    var(--palette-info-main) 8%,
+    transparent
+  ) !important;
   border-color: var(--palette-info-dark) !important;
 }
 .button.MuiButton-outlined.button--success {
@@ -47,7 +51,11 @@
   border-color: var(--palette-success-main) !important;
 }
 .button.MuiButton-outlined.button--success:hover {
-  background-color: color-mix(in srgb, var(--palette-success-main) 8%, transparent) !important;
+  background-color: color-mix(
+    in srgb,
+    var(--palette-success-main) 8%,
+    transparent
+  ) !important;
   border-color: var(--palette-success-dark) !important;
 }
 .button.MuiButton-outlined.button--error {
@@ -55,7 +63,11 @@
   border-color: var(--palette-error-main) !important;
 }
 .button.MuiButton-outlined.button--error:hover {
-  background-color: color-mix(in srgb, var(--palette-error-main) 8%, transparent) !important;
+  background-color: color-mix(
+    in srgb,
+    var(--palette-error-main) 8%,
+    transparent
+  ) !important;
   border-color: var(--palette-error-dark) !important;
 }
 .button.MuiButton-outlined.button--warning {
@@ -63,7 +75,11 @@
   border-color: var(--palette-warning-main) !important;
 }
 .button.MuiButton-outlined.button--warning:hover {
-  background-color: color-mix(in srgb, var(--palette-warning-main) 8%, transparent) !important;
+  background-color: color-mix(
+    in srgb,
+    var(--palette-warning-main) 8%,
+    transparent
+  ) !important;
   border-color: var(--palette-warning-dark) !important;
 }
 
@@ -72,25 +88,41 @@
   color: var(--palette-info-main) !important;
 }
 .button.MuiButton-text.button--info:hover {
-  background-color: color-mix(in srgb, var(--palette-info-main) 8%, transparent) !important;
+  background-color: color-mix(
+    in srgb,
+    var(--palette-info-main) 8%,
+    transparent
+  ) !important;
 }
 .button.MuiButton-text.button--success {
   color: var(--palette-success-main) !important;
 }
 .button.MuiButton-text.button--success:hover {
-  background-color: color-mix(in srgb, var(--palette-success-main) 8%, transparent) !important;
+  background-color: color-mix(
+    in srgb,
+    var(--palette-success-main) 8%,
+    transparent
+  ) !important;
 }
 .button.MuiButton-text.button--error {
   color: var(--palette-error-main) !important;
 }
 .button.MuiButton-text.button--error:hover {
-  background-color: color-mix(in srgb, var(--palette-error-main) 8%, transparent) !important;
+  background-color: color-mix(
+    in srgb,
+    var(--palette-error-main) 8%,
+    transparent
+  ) !important;
 }
 .button.MuiButton-text.button--warning {
   color: var(--palette-warning-main) !important;
 }
 .button.MuiButton-text.button--warning:hover {
-  background-color: color-mix(in srgb, var(--palette-warning-main) 8%, transparent) !important;
+  background-color: color-mix(
+    in srgb,
+    var(--palette-warning-main) 8%,
+    transparent
+  ) !important;
 }
 
 /* disabled overrides any color/variant above */

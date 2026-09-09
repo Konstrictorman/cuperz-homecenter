@@ -3,7 +3,9 @@ import { chromium } from 'playwright'
 const browser = await chromium.launch()
 const page = await browser.newPage()
 await page.setViewportSize({ width: 1400, height: 900 })
-await page.goto('http://localhost:3000/purchase-orders', { waitUntil: 'networkidle' })
+await page.goto('http://localhost:3000/purchase-orders', {
+  waitUntil: 'networkidle',
+})
 await page.waitForSelector('.MuiDataGrid-root')
 
 const themeSwitch = page.locator('input[type="checkbox"]').first()
@@ -29,7 +31,9 @@ const info = await page.evaluate(() => {
     pick('.purchase-orders-table .MuiDataGrid-columnHeaders'),
     pick('.purchase-orders-table .MuiDataGrid-columnHeader'),
     pick('.purchase-orders-table .MuiDataGrid-columnHeaderTitleContainer'),
-    pick('.purchase-orders-table .MuiDataGrid-columnHeaderTitleContainerContent'),
+    pick(
+      '.purchase-orders-table .MuiDataGrid-columnHeaderTitleContainerContent',
+    ),
     pick('.purchase-orders-table .MuiDataGrid-row'),
     pick('.purchase-orders-table .MuiDataGrid-cell'),
     pick('.purchase-orders-table .MuiDataGrid-virtualScroller'),

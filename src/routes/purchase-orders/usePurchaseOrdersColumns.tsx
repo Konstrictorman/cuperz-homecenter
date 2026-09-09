@@ -1,10 +1,11 @@
 import { useMemo } from 'react'
 import StatusBadge from '#/components/statusBadge/StatusBadge'
 import {
-  GridActionsCellItem,
-  type GridColDef,
-  type GridRenderCellParams,
+  GridActionsCellItem
+  
+  
 } from '@mui/x-data-grid'
+import type {GridColDef, GridRenderCellParams} from '@mui/x-data-grid';
 import type { PurchaseOrder } from './PurchaseOrdersTable'
 import VisibilityIcon from '@mui/icons-material/Visibility'
 

@@ -32,8 +32,8 @@ const preview: Preview = {
   parameters: {
     controls: {
       matchers: {
-       color: /(background|color)$/i,
-       date: /Date$/i,
+        color: /(background|color)$/i,
+        date: /Date$/i,
       },
     },
   },
@@ -54,6 +54,6 @@ const preview: Preview = {
     },
   },
   decorators: [withTheme],
-};
+}
 
-export default preview;
+export default preview

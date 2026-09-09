@@ -114,7 +114,9 @@ describe('Breadcrumbs', () => {
     const ordenes = screen.getByRole('link', { name: 'Órdenes de compra' })
     const detalle = screen.getByText('Detalle')
 
-    expect(screen.queryByRole('link', { name: 'Detalle' })).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('link', { name: 'Detalle' }),
+    ).not.toBeInTheDocument()
 
     const position = inicio.compareDocumentPosition(ordenes)
     expect(position & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
