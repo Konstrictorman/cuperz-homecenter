@@ -5,6 +5,7 @@ import IconButton from '@mui/material/IconButton'
 import CloseIcon from '@mui/icons-material/Close'
 import type { DialogProps } from '@mui/material/Dialog'
 import type { ReactNode } from 'react'
+import clsx from 'clsx'
 import './Modal.css'
 
 export interface ModalProps extends Omit<
@@ -34,7 +35,7 @@ const Modal = ({
       onClose={onClose}
       fullWidth={fullWidth}
       maxWidth={maxWidth}
-      className={['modal', className].filter(Boolean).join(' ')}
+      className={clsx('modal', className)}
     >
       <DialogTitle className="modal__title">
         {title}

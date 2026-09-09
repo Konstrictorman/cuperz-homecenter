@@ -1,5 +1,6 @@
 import MuiButton from '@mui/material/Button'
 import type { ButtonProps as MuiButtonProps } from '@mui/material/Button'
+import clsx from 'clsx'
 
 export type ButtonColor = 'info' | 'success' | 'error' | 'warning'
 
@@ -12,9 +13,7 @@ const Button = ({ color = 'info', className, ...props }: ButtonProps) => {
     <MuiButton
       {...props}
       color={color}
-      className={['button', `button--${color}`, className]
-        .filter(Boolean)
-        .join(' ')}
+      className={clsx('button', `button--${color}`, className)}
     />
   )
 }

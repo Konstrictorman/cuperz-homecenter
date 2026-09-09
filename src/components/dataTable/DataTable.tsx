@@ -1,5 +1,6 @@
 import { DataGrid } from '@mui/x-data-grid'
 import type { DataGridProps, GridValidRowModel } from '@mui/x-data-grid'
+import clsx from 'clsx'
 import './DataTable.css'
 
 export type DataTableProps<TRow extends GridValidRowModel = GridValidRowModel> =
@@ -18,7 +19,7 @@ const DataTable = <TRow extends GridValidRowModel>({
   ...props
 }: DataTableProps<TRow>) => {
   return (
-    <div className={['data-table', className].filter(Boolean).join(' ')}>
+    <div className={clsx('data-table', className)}>
       <DataGrid<TRow>
         {...props}
         checkboxSelection={checkboxSelection}

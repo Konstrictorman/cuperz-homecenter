@@ -1,4 +1,5 @@
 import MuiChip from '@mui/material/Chip'
+import clsx from 'clsx'
 import './StatusBadge.css'
 
 export type StatusBadgeTone = 'pending' | 'dispatched' | 'error' | 'processing'
@@ -13,7 +14,7 @@ const StatusBadge = ({ label, tone }: StatusBadgeProps) => {
     <MuiChip
       label={label}
       size="small"
-      className={`status-badge status-badge--${tone}`}
+      className={clsx('status-badge', `status-badge--${tone}`)}
     />
   )
 }

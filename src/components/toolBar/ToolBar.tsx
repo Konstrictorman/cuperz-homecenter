@@ -7,6 +7,7 @@ import CloseIcon from '@mui/icons-material/Close'
 import Tooltip from '@mui/material/Tooltip'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import type { ReactNode } from 'react'
+import clsx from 'clsx'
 import Button from '#/components/button/Button'
 import type { ButtonColor } from '#/components/button/Button'
 import './ToolBar.css'
@@ -67,9 +68,7 @@ const ToolBarIconButton = ({
         onClick={onClick}
         disabled={disabled}
         size="small"
-        className={['tool-bar__icon-button', className]
-          .filter(Boolean)
-          .join(' ')}
+        className={clsx('tool-bar__icon-button', className)}
       >
         {icon}
       </IconButton>
@@ -103,7 +102,7 @@ const ToolBar = ({
       <div
         role="toolbar"
         aria-label="Acciones sobre la selección"
-        className={['tool-bar', className].filter(Boolean).join(' ')}
+        className={clsx('tool-bar', className)}
       >
         <span className="tool-bar__text">
           <Typography>
