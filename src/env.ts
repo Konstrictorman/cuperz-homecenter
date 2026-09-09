@@ -14,6 +14,8 @@ export const env = createEnv({
 
   client: {
     VITE_APP_TITLE: z.string().min(1).optional(),
+    /** `false`/`0` turns the MSW mock API off (defaults to on in dev). */
+    VITE_ENABLE_MOCKS: z.enum(['true', 'false', '0', '1']).optional(),
   },
 
   /**

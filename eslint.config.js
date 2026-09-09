@@ -52,6 +52,8 @@ export default [
       '.nitro/**',
       '.tanstack/**',
       '.vinxi/**',
+      // Vendored MSW service worker script — not part of the source tree.
+      'public/mockServiceWorker.js',
     ],
   },
   ...storybook.configs['flat/recommended'],
