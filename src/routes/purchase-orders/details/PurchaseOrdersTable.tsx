@@ -1,5 +1,6 @@
 import AutorenewOutlinedIcon from '@mui/icons-material/AutorenewOutlined'
 import DownloadIcon from '@mui/icons-material/Download'
+import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined'
 import { useState } from 'react'
 import type { GridRowSelectionModel } from '@mui/x-data-grid'
 import DataTable from '#/components/dataTable/DataTable'
@@ -72,9 +73,15 @@ const PurchaseOrdersTable = ({
           },
           {
             key: 'retry',
-            label: 'Reintentar',
+            label: 'Reinyectar',
             icon: <AutorenewOutlinedIcon fontSize="small" />,
-            onClick: () => console.log('Reintentar', selection),
+            onClick: () => console.log('Reinyectar', selection),
+          },
+          {
+            key: 'dispatch',
+            label: 'Despachar',
+            icon: <LocalShippingOutlinedIcon fontSize="small" />,
+            onClick: () => console.log('Despachar', selection),
           },
         ]}
       />
