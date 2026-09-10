@@ -84,9 +84,9 @@ const lightPalette = {
   },
   // Low-key teal — matches the aqua accent in the reference button design.
   default: {
-    main: '#931a1e', // --color-teal-800
-    dark: '#0f4d46', // --color-teal-900
-    light: '#83e8dc', // --color-teal-300
+    main: '#ffffff',
+    dark: '#0f4d46',
+    light: '#be002b', // --color-teal-300
     contrastText: '#ffffff',
   },
   // Plain grey for the lowest-emphasis action.
@@ -156,7 +156,7 @@ const darkPalette = {
   },
   // Low-key teal — matches the aqua accent in the reference button design.
   default: {
-    main: '#766064', // --color-teal-300
+    main: '#ffffff',
     dark: '#15c1ae', // --color-teal-600
     light: '#b7ebe5', // --color-teal-200
     contrastText: '#ffffff', // --color-teal-1000

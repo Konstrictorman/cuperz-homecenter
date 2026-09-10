@@ -4,7 +4,7 @@
   width: 100%;
   flex-wrap: wrap;
   align-items: center;
-  column-gap: var(--space-md);
+  column-gap: var(--space-3xs);
   row-gap: var(--space-3xs);
   padding-bottom: var(--space-3xs);
   font-size: var(--font-size-14);
@@ -47,6 +47,32 @@
 
 .nav-link:hover:not(.is-active)::after {
   background: var(--menu-hover);
+}
+
+.menu-group-button {
+  position: relative;
+}
+
+.menu-group-button::after {
+  content: '';
+  position: absolute;
+  left: var(--space-2xs);
+  right: var(--space-2xs);
+  bottom: 2px;
+  height: 2px;
+  transform: scaleX(0);
+  transform-origin: left;
+  background: var(--palette-primary-contrastText);
+  transition: transform 170ms ease;
+}
+
+.menu-group-button.is-active::after,
+.menu-group-button:hover::after {
+  transform: scaleX(1);
+}
+
+.menu-group-button:hover::after {
+  background: var(--color-amber-300);
 }
 
 @media (min-width: 640px) {

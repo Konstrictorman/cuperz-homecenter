@@ -92,7 +92,7 @@ const ToolBar = ({
   if (!open) return null
 
   const selectionAsIcons = selectionActionsIconOnly || compact
-  const selectionText = selected > 1 ? 'seleccionados' : 'seleccionado'
+  const selectionText = selected > 1 ? 'Seleccionados' : 'Seleccionado'
   const text = selectionAsIcons ? selectionText : `Registros ${selectionText}`
 
   return (

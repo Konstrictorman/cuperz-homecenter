@@ -2,6 +2,8 @@ import MuiButton from '@mui/material/Button'
 import type { ButtonProps as MuiButtonProps } from '@mui/material/Button'
 import clsx from 'clsx'
 
+import './Button.css'
+
 export type ButtonColor =
   'info' | 'success' | 'error' | 'warning' | 'default' | 'neutral'
 

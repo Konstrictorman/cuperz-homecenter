@@ -1,0 +1,50 @@
+/*
+ * The `default` colour, styled per MUI variant. `!important` beats MUI's
+ * emotion-injected colour rules.
+ *
+ *  - text (the default variant): transparent background, white label; on hover
+ *    the label shifts to amber `--color-amber-300` (#efc47b) in both themes. No
+ *    background in either state.
+ *  - contained: solid fill with a white label — #be002b in light, black in dark;
+ *    on hover the label shifts to amber (#efc47b) in both themes, fill unchanged.
+ *  - outlined: transparent, white label and matching white border; on hover both
+ *    label and border shift to amber (#efc47b) in both themes.
+ */
+
+/* --- text --- */
+.button--default.MuiButton-text {
+  background-color: transparent !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+.button--default.MuiButton-text:hover {
+  color: var(--color-amber-300) !important;
+}
+
+/* --- contained --- */
+.button--default.MuiButton-contained {
+  color: #ffffff !important;
+  background-color: var(--cuperz-primary-500) !important;
+}
+
+[data-theme='dark'] .button--default.MuiButton-contained {
+  background-color: #000000 !important;
+}
+
+.button--default.MuiButton-contained:hover {
+  color: var(--color-amber-300) !important;
+}
+
+/* --- outlined --- */
+.button--default.MuiButton-outlined {
+  background-color: transparent !important;
+  color: #ffffff !important;
+  border-color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+.button--default.MuiButton-outlined:hover {
+  color: var(--color-amber-300) !important;
+  border-color: var(--color-amber-300) !important;
+}
