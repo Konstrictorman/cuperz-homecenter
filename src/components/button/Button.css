@@ -48,3 +48,38 @@
   color: var(--color-amber-300) !important;
   border-color: var(--color-amber-300) !important;
 }
+
+/*
+ * The `neutral` colour. MUI's stock hover for the text/outlined variants is a
+ * ~4%-opacity wash of the grey `main`, which is almost invisible. These rules
+ * give the low-emphasis button a clearly readable hover state:
+ *
+ *  - text: on hover the label darkens to grey-900 (#2e2e2e) — white in dark —
+ *    over a solid grey-100 (#e8e8e8) / 12%-white tint.
+ *  - outlined: same label + border shift, same background tint.
+ *  - contained: unchanged (MUI already darkens the solid fill on hover).
+ */
+
+/* --- text --- */
+.button--neutral.MuiButton-text:hover {
+  color: var(--color-grey-900) !important;
+  background-color: var(--color-grey-100) !important;
+}
+
+[data-theme='dark'] .button--neutral.MuiButton-text:hover {
+  color: #ffffff !important;
+  background-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* --- outlined --- */
+.button--neutral.MuiButton-outlined:hover {
+  color: var(--color-grey-900) !important;
+  border-color: var(--color-grey-900) !important;
+  background-color: var(--color-grey-100) !important;
+}
+
+[data-theme='dark'] .button--neutral.MuiButton-outlined:hover {
+  color: #ffffff !important;
+  border-color: #ffffff !important;
+  background-color: rgba(255, 255, 255, 0.12) !important;
+}
