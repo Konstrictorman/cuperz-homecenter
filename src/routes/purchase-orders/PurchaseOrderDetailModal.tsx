@@ -8,6 +8,7 @@ import { purchaseOrderDetailQueryOptions } from '#/api/purchase-orders'
 import type { PurchaseOrder } from './PurchaseOrdersTable'
 import { ORDER_LINE_STATUS_UI } from './orderPresentation'
 import './PurchaseOrderDetailModal.css'
+import Typography from '@mui/material/Typography'
 
 interface PurchaseOrderDetailModalProps {
   order: PurchaseOrder | null
@@ -101,31 +102,33 @@ const PurchaseOrderDetailModal = ({
       <div className="purchase-order-detail-modal__summary">
         <div>
           <div className="purchase-order-detail-modal__label">
-            EAN punto de entrega
+            <Typography>EAN punto de entrega</Typography>
           </div>
-          <div>{detail?.eanPuntoEntrega ?? '—'}</div>
+          <Typography>{detail?.eanPuntoEntrega ?? '—'}</Typography>
         </div>
         <div>
-          <div className="purchase-order-detail-modal__label">Estado OC</div>
+          <div className="purchase-order-detail-modal__label">
+            <Typography>Estado OC</Typography>
+          </div>
           <StatusBadge label={order.estadoLabel} tone={order.estadoTone} />
         </div>
         <div>
           <div className="purchase-order-detail-modal__label">
-            Cliente / cadena
+            <Typography>Cliente / cadena</Typography>
           </div>
-          <div>{order.cliente}</div>
+          <Typography>{order.cliente}</Typography>
         </div>
         <div>
           <div className="purchase-order-detail-modal__label">
-            Dirección de entrega
+            <Typography>Dirección de entrega</Typography>
           </div>
-          <div>{detail?.direccionEntrega ?? '—'}</div>
+          <Typography>{detail?.direccionEntrega ?? '—'}</Typography>
         </div>
         <div>
           <div className="purchase-order-detail-modal__label">
-            Código sesión recibo
+            <Typography>Código sesión recibo</Typography>
           </div>
-          <div>{detail?.codigoSesionRecibo ?? '—'}</div>
+          <Typography>{detail?.codigoSesionRecibo ?? '—'}</Typography>
         </div>
       </div>
 
