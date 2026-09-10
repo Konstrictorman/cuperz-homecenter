@@ -20,7 +20,7 @@ const config = defineConfig({
     tsconfigPaths: true,
   },
   plugins: [
-    devtools(),
+    devtools({ eventBusConfig: { enabled: false } }),
     nitro({
       rollupConfig: {
         external: [/^@sentry\//],
