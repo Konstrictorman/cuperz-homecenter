@@ -18,5 +18,7 @@
   padding: var(--space-md);
   border-radius: var(--radius-sm, 6px);
   background-color: var(--status-error-50);
-  color: var(--status-error-300);
+  color: var(--status-error-500);
+  border: 1px solid var(--status-error-300);
+  font-weight: var(--font-weight-800) !important;
 }

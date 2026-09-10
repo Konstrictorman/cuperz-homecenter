@@ -11,6 +11,7 @@ import type { OrdersFilterValues } from './OrdersFilterBar'
 import type { PurchaseOrder } from './PurchaseOrdersTable'
 import { purchaseOrdersListQueryOptions } from '#/api/purchase-orders'
 import './index.css'
+import Typography from '@mui/material/Typography'
 
 const PurchaseOrdersPage = () => {
   const [filters, setFilters] = useState<OrdersFilterValues>(
@@ -32,7 +33,9 @@ const PurchaseOrdersPage = () => {
 
       {isError ? (
         <p role="alert" className="purchase-orders__error">
-          No se pudieron cargar las órdenes: {error.message}
+          <Typography>
+            No se pudieron cargar las órdenes: {error.message}
+          </Typography>
         </p>
       ) : (
         <PurchaseOrdersTable

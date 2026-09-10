@@ -1,6 +1,6 @@
 .status-badge {
   font-weight: var(--font-weight-medium);
-  min-width: 80px;
+  width: var(--space-3xl);
 }
 
 .status-badge--pending {
