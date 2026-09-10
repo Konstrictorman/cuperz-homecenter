@@ -1,5 +1,10 @@
+import DeleteIcon from '@mui/icons-material/Delete'
+import DownloadIcon from '@mui/icons-material/Download'
+import { useState } from 'react'
+import type { GridRowSelectionModel } from '@mui/x-data-grid'
 import DataTable from '#/components/dataTable/DataTable'
 import type { StatusBadgeTone } from '#/components/statusBadge/StatusBadge'
+import ToolBar from '#/components/toolBar/ToolBar'
 import { usePurchaseOrdersColumns } from './usePurchaseOrdersColumns'
 
 export interface PurchaseOrder {
@@ -20,14 +25,62 @@ interface PurchaseOrdersTableProps {
   onViewDetail?: (order: PurchaseOrder) => void
 }
 
+const EMPTY_SELECTION: GridRowSelectionModel = {
+  type: 'include',
+  ids: new Set(),
+}
+
+/** How many rows the current selection model covers. */
+const selectionCount = (model: GridRowSelectionModel, total: number): number =>
+  model.type === 'include' ? model.ids.size : total - model.ids.size
+
 const PurchaseOrdersTable = ({
   rows,
   loading,
   onViewDetail,
 }: PurchaseOrdersTableProps) => {
   const columns = usePurchaseOrdersColumns(onViewDetail)
+  const [selection, setSelection] =
+    useState<GridRowSelectionModel>(EMPTY_SELECTION)
 
-  return <DataTable rows={rows} columns={columns} loading={loading} />
+  const selected = selectionCount(selection, rows.length)
+
+  const clearSelection = () => setSelection(EMPTY_SELECTION)
+
+  return (
+    <>
+      <DataTable
+        rows={rows}
+        columns={columns}
+        loading={loading}
+        rowSelectionModel={selection}
+        onRowSelectionModelChange={setSelection}
+      />
+      <ToolBar
+        blockInteraction={false}
+        open={selected > 0}
+        selected={selected}
+        onSelectAll={() => setSelection({ type: 'exclude', ids: new Set() })}
+        onClearSelection={clearSelection}
+        onClose={clearSelection}
+        actions={[
+          {
+            key: 'export',
+            label: 'Exportar',
+            icon: <DownloadIcon fontSize="small" />,
+            onClick: () => console.log('Exportar', selection),
+          },
+          {
+            key: 'delete',
+            label: 'Eliminar',
+            color: 'warning',
+            icon: <DeleteIcon fontSize="small" />,
+            onClick: () => console.log('Eliminar', selection),
+          },
+        ]}
+      />
+    </>
+  )
 }
 
 export default PurchaseOrdersTable
