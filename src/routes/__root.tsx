@@ -12,8 +12,8 @@ import TanstackQueryProvider from '../integrations/tanstack-query/root-provider'
 import appCss from '../styles.css?url'
 
 import type { QueryClient } from '@tanstack/react-query'
-import Header from '#/components/Header'
-import Footer from '#/components/Footer'
+import Header from '#/components/header/Header'
+import Footer from '#/components/footer/Footer'
 import { ThemeProvider } from '#/contexts/ThemeContext'
 import Breadcrumbs from '#/components/breadcrumbs/Breadcrumbs'
 

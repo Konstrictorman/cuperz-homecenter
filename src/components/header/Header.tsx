@@ -1,13 +1,13 @@
-import logo from '../assets/logo-cuperz.png'
+import logo from '../../assets/logo-cuperz.png'
 import Typography from '@mui/material/Typography'
-import ThemeSwitch from './ThemeSwitch'
+import ThemeSwitch from '../themeSwitch/ThemeSwitch'
 import IconButton from '@mui/material/IconButton'
 import Avatar from '@mui/material/Avatar'
 import { useState } from 'react'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import { useTheme } from '#/contexts/ThemeContext'
-import MenuBar from './menuBar/MenuBar'
+import MenuBar from '../menuBar/MenuBar'
 import './Header.css'
 
 const Header = () => {
