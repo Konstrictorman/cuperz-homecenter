@@ -7,6 +7,9 @@ import './index.css'
 
 export const Route = createFileRoute('/')({
   component: Home,
+  staticData: {
+    crumb: 'Inicio',
+  },
 })
 
 function Home() {

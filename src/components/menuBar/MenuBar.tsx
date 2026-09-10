@@ -14,9 +14,7 @@ const MenuBar = () => {
   const matchRoute = useMatchRoute()
   const isHomeActive = Boolean(matchRoute({ to: '/' }))
   const isPurchaseOrdersGroupActive = Boolean(
-    matchRoute({ to: '/purchase-orders', fuzzy: true }) ||
-    matchRoute({ to: '/dispatch', fuzzy: true }) ||
-    matchRoute({ to: '/receipt-notices', fuzzy: true }),
+    matchRoute({ to: '/purchase-orders', fuzzy: true }),
   )
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -64,17 +62,21 @@ const MenuBar = () => {
         >
           <MenuItem
             component={Link}
-            to="/purchase-orders"
+            to="/purchase-orders/details"
             onClick={handleClose}
           >
             Detalles
           </MenuItem>
-          <MenuItem component={Link} to="/dispatch" onClick={handleClose}>
+          <MenuItem
+            component={Link}
+            to="/purchase-orders/dispatch"
+            onClick={handleClose}
+          >
             Despachos
           </MenuItem>
           <MenuItem
             component={Link}
-            to="/receipt-notices"
+            to="/purchase-orders/receipt-notices"
             onClick={handleClose}
           >
             Recepción

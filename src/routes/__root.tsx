@@ -36,9 +36,6 @@ interface MyRouterContext {
 }
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
-  staticData: {
-    crumb: 'Inicio',
-  },
   head: () => ({
     meta: [
       {
