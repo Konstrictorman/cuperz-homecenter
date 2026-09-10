@@ -1,11 +1,13 @@
 import type { GridColDef, GridRenderCellParams } from '@mui/x-data-grid'
+import { useQuery } from '@tanstack/react-query'
 import StatusBadge from '#/components/statusBadge/StatusBadge'
+import type { StatusBadgeTone } from '#/components/statusBadge/StatusBadge'
 import Modal from '#/components/modal/Modal'
-import type { PurchaseOrder } from './PurchaseOrdersTable'
-import { getPurchaseOrderDetail } from './MOCK_PURCHASE_ORDER_DETAILS'
-import type { PurchaseOrderLine } from './MOCK_PURCHASE_ORDER_DETAILS'
-import './PurchaseOrderDetailModal.css'
 import DataTable from '#/components/dataTable/DataTable'
+import { purchaseOrderDetailQueryOptions } from '#/api/purchase-orders'
+import type { PurchaseOrder } from './PurchaseOrdersTable'
+import { ORDER_LINE_STATUS_UI } from './orderPresentation'
+import './PurchaseOrderDetailModal.css'
 
 interface PurchaseOrderDetailModalProps {
   order: PurchaseOrder | null
@@ -13,7 +15,18 @@ interface PurchaseOrderDetailModalProps {
   onClose: () => void
 }
 
-const lineColumns: GridColDef<PurchaseOrderLine>[] = [
+interface OrderLineRow {
+  id: string
+  sku: string
+  producto: string
+  tienda: string
+  cantidadSolicitada: number
+  cantidadCancelada: number
+  estadoLineaTone: StatusBadgeTone
+  estadoLineaLabel: string
+}
+
+const lineColumns: GridColDef<OrderLineRow>[] = [
   { field: 'sku', headerName: 'SKU', flex: 1, minWidth: 100 },
   { field: 'producto', headerName: 'Producto', flex: 2, minWidth: 200 },
   { field: 'tienda', headerName: 'Tienda', flex: 1, minWidth: 140 },
@@ -40,7 +53,7 @@ const lineColumns: GridColDef<PurchaseOrderLine>[] = [
     sortable: false,
     headerAlign: 'center',
     align: 'center',
-    renderCell: (params: GridRenderCellParams<PurchaseOrderLine>) => (
+    renderCell: (params: GridRenderCellParams<OrderLineRow>) => (
       <StatusBadge
         label={params.row.estadoLineaLabel}
         tone={params.row.estadoLineaTone}
@@ -54,9 +67,30 @@ const PurchaseOrderDetailModal = ({
   open,
   onClose,
 }: PurchaseOrderDetailModalProps) => {
+  // Hook runs every render; `enabled` gates the actual request.
+  const { data: detail, isPending } = useQuery({
+    ...purchaseOrderDetailQueryOptions(order?.ordenCompra ?? ''),
+    enabled: open && order != null,
+  })
+
   if (!order) return null
 
-  const detail = getPurchaseOrderDetail(order.id)
+  // The API nests lines under stores → flatten into one grid.
+  const lineas: OrderLineRow[] = (detail?.tiendas ?? []).flatMap((tienda) =>
+    tienda.productos.map((producto) => {
+      const ui = ORDER_LINE_STATUS_UI[producto.estadoLinea]
+      return {
+        id: `${tienda.eanTienda}-${producto.eanSku}`,
+        sku: producto.eanSku,
+        producto: producto.descripcion,
+        tienda: tienda.eanTienda,
+        cantidadSolicitada: producto.cantidadSolicitada,
+        cantidadCancelada: producto.cantidadCancelada,
+        estadoLineaTone: ui.tone,
+        estadoLineaLabel: ui.label,
+      }
+    }),
+  )
 
   return (
     <Modal
@@ -83,12 +117,6 @@ const PurchaseOrderDetailModal = ({
         </div>
         <div>
           <div className="purchase-order-detail-modal__label">
-            Transportadora
-          </div>
-          <div>{detail?.transportadora ?? '—'}</div>
-        </div>
-        <div>
-          <div className="purchase-order-detail-modal__label">
             Dirección de entrega
           </div>
           <div>{detail?.direccionEntrega ?? '—'}</div>
@@ -103,9 +131,10 @@ const PurchaseOrderDetailModal = ({
 
       <div className="purchase-order-detail-modal__lines">
         <DataTable
-          rows={detail?.lineas ?? []}
+          rows={lineas}
           columns={lineColumns}
-          getRowId={(row) => row.sku}
+          loading={isPending}
+          getRowId={(row) => row.id}
           hideFooter
           disableRowSelectionOnClick
           autoHeight

@@ -1,9 +1,9 @@
-import { avisosHandlers } from './avisos'
-import { bitacoraHandlers } from './bitacora'
-import { ordenesHandlers } from './ordenes'
+import { dispatchNoticesHandlers } from './dispatch-notices'
+import { integrationLogHandlers } from './integration-log'
+import { purchaseOrdersHandlers } from './purchase-orders'
 
 export const handlers = [
-  ...ordenesHandlers,
-  ...avisosHandlers,
-  ...bitacoraHandlers,
+  ...purchaseOrdersHandlers,
+  ...dispatchNoticesHandlers,
+  ...integrationLogHandlers,
 ]

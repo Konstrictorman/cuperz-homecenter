@@ -5,9 +5,9 @@ import { setupServer } from 'msw/node'
 import { handlers } from './registry'
 import { resetDb } from '../data/db'
 import type {
-  AvisoDespachoResultado,
+  DispatchNoticeResult,
   Paginated,
-  OrdenCompraResumen,
+  PurchaseOrderSummary,
 } from '#/api/types'
 
 const server = setupServer(...handlers)
@@ -36,9 +36,9 @@ function post(body: unknown): RequestInit {
   }
 }
 
-describe('órdenes de compra', () => {
+describe('purchase orders', () => {
   it('lists with the pagination envelope', async () => {
-    const { status, body } = await json<Paginated<OrdenCompraResumen>>(
+    const { status, body } = await json<Paginated<PurchaseOrderSummary>>(
       '/ordenes-compra?pageSize=5',
     )
     expect(status).toBe(200)
@@ -80,7 +80,7 @@ describe('órdenes de compra', () => {
   })
 })
 
-describe('avisos de despacho', () => {
+describe('dispatch notices', () => {
   it('rejects quantities over what was requested (400)', async () => {
     const { status, body } = await json<{
       error: { code: string; details: unknown[] }
@@ -115,8 +115,8 @@ describe('avisos de despacho', () => {
     expect(body.error.details.length).toBeGreaterThan(0)
   })
 
-  it('creates and sends an aviso (201 ENVIADO)', async () => {
-    const { status, body } = await json<AvisoDespachoResultado>(
+  it('creates and sends a notice (201 ENVIADO)', async () => {
+    const { status, body } = await json<DispatchNoticeResult>(
       '/avisos-despacho',
       post({
         ordenCompra: '8467343',
@@ -148,7 +148,7 @@ describe('avisos de despacho', () => {
   })
 
   it('saves a draft without contacting Homecenter', async () => {
-    const { body } = await json<AvisoDespachoResultado>(
+    const { body } = await json<DispatchNoticeResult>(
       '/avisos-despacho',
       post({
         ordenCompra: '8467343',
@@ -178,7 +178,7 @@ describe('avisos de despacho', () => {
   })
 })
 
-describe('bitácora', () => {
+describe('integration log', () => {
   it('lists newest-first and resolves a detail', async () => {
     const { body } = await json<Paginated<{ integracionLogId: string }>>(
       '/integracion-log?pageSize=1',

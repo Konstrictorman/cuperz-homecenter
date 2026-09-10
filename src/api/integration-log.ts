@@ -1,31 +1,33 @@
-// Bitácora de Integración — TanStack Query layer (§ 3 de la especificación).
+// Integration Log — TanStack Query layer (spec § 3).
 
 import { queryOptions } from '@tanstack/react-query'
 import { apiFetch, buildQuery } from './http'
 import { queryKeys } from './query-keys'
 import type {
-  IntegracionLogDetalle,
-  IntegracionLogQuery,
-  IntegracionLogResumen,
+  IntegrationLogDetail,
+  IntegrationLogQuery,
+  IntegrationLogSummary,
   Paginated,
 } from './types'
 
-export function bitacoraListQueryOptions(query: IntegracionLogQuery = {}) {
+export function integrationLogListQueryOptions(
+  query: IntegrationLogQuery = {},
+) {
   return queryOptions({
-    queryKey: queryKeys.bitacora.list(query),
+    queryKey: queryKeys.integrationLog.list(query),
     queryFn: ({ signal }) =>
-      apiFetch<Paginated<IntegracionLogResumen>>(
+      apiFetch<Paginated<IntegrationLogSummary>>(
         `/integracion-log${buildQuery({ ...query })}`,
         { signal },
       ),
   })
 }
 
-export function bitacoraDetalleQueryOptions(integracionLogId: string) {
+export function integrationLogDetailQueryOptions(integracionLogId: string) {
   return queryOptions({
-    queryKey: queryKeys.bitacora.detail(integracionLogId),
+    queryKey: queryKeys.integrationLog.detail(integracionLogId),
     queryFn: ({ signal }) =>
-      apiFetch<IntegracionLogDetalle>(
+      apiFetch<IntegrationLogDetail>(
         `/integracion-log/${encodeURIComponent(integracionLogId)}`,
         { signal },
       ),

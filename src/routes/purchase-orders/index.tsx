@@ -1,35 +1,16 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import OrdersFilterBar, {
   DEFAULT_ORDERS_FILTER_VALUES,
 } from './OrdersFilterBar'
 import PurchaseOrdersTable from './PurchaseOrdersTable'
 import PurchaseOrderDetailModal from './PurchaseOrderDetailModal'
+import { toPurchaseOrderRow, toPurchaseOrdersQuery } from './orderPresentation'
 import type { OrdersFilterValues } from './OrdersFilterBar'
 import type { PurchaseOrder } from './PurchaseOrdersTable'
-import { MOCK_PURCHASE_ORDERS } from './MOCK_PURCHASE_ORDERS'
+import { purchaseOrdersListQueryOptions } from '#/api/purchase-orders'
 import './index.css'
-
-function filterPurchaseOrders(
-  orders: PurchaseOrder[],
-  filters: OrdersFilterValues,
-) {
-  return orders.filter((order) => {
-    const matchesOrden = filters.ordenCompra
-      ? order.ordenCompra.includes(filters.ordenCompra.trim())
-      : true
-    const matchesEstado =
-      filters.estado === 'all' || order.estadoTone === filters.estado
-    const matchesDesde = filters.fechaDesde
-      ? order.fecha >= filters.fechaDesde
-      : true
-    const matchesHasta = filters.fechaHasta
-      ? order.fecha <= filters.fechaHasta
-      : true
-
-    return matchesOrden && matchesEstado && matchesDesde && matchesHasta
-  })
-}
 
 const PurchaseOrdersPage = () => {
   const [filters, setFilters] = useState<OrdersFilterValues>(
@@ -37,19 +18,30 @@ const PurchaseOrdersPage = () => {
   )
   const [selectedOrder, setSelectedOrder] = useState<PurchaseOrder | null>(null)
 
-  const rows = useMemo(
-    () => filterPurchaseOrders(MOCK_PURCHASE_ORDERS, filters),
-    [filters],
-  )
+  const { data, isError, error, isFetching } = useQuery({
+    ...purchaseOrdersListQueryOptions(toPurchaseOrdersQuery(filters)),
+    // keep the previous rows on screen (dimmed) while a new filter loads
+    placeholderData: keepPreviousData,
+  })
 
-  const onViewDetail = (order: PurchaseOrder) => {
-    setSelectedOrder(order)
-  }
+  const rows = (data?.data ?? []).map(toPurchaseOrderRow)
 
   return (
     <div className="purchase-orders">
       <OrdersFilterBar onFilter={setFilters} />
-      <PurchaseOrdersTable rows={rows} onViewDetail={onViewDetail} />
+
+      {isError ? (
+        <p role="alert" className="purchase-orders__error">
+          No se pudieron cargar las órdenes: {error.message}
+        </p>
+      ) : (
+        <PurchaseOrdersTable
+          rows={rows}
+          loading={isFetching}
+          onViewDetail={setSelectedOrder}
+        />
+      )}
+
       <PurchaseOrderDetailModal
         order={selectedOrder}
         open={selectedOrder !== null}

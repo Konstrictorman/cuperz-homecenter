@@ -1,124 +1,127 @@
-// Handlers for § 2 — Avisos de Despacho.
+// Handlers for § 2 — Dispatch Notices (Platform → Homecenter).
 
 import { HttpResponse, http } from 'msw'
 import { API, apiError, latency, readPageParams, withinRange } from './shared'
 import {
-  avisoToHomecenterRequest,
   db,
-  generarEan128,
-  nextAvisoId,
+  dispatchNoticeToHomecenterRequest,
+  generateEan128,
+  nextDispatchNoticeId,
   nextLogId,
   nowIso,
   paginate,
 } from '../data/db'
-import type { AvisoRecord, OrdenRecord } from '../data/db'
+import type { DispatchNoticeRecord, PurchaseOrderRecord } from '../data/db'
 import type {
-  AvisoDespachoDetalle,
-  AvisoDespachoResultado,
-  AvisoDespachoResumen,
-  AvisoEan128Response,
-  AvisoIntentosResponse,
-  CrearAvisoDespachoRequest,
-  Ean128Contenedor,
-  EstadoAviso,
-  HomecenterResultado,
-  ReenviarAvisoRequest,
+  CreateDispatchNoticeRequest,
+  DispatchNoticeAttemptsResponse,
+  DispatchNoticeDetail,
+  DispatchNoticeEan128Response,
+  DispatchNoticeResult,
+  DispatchNoticeStatus,
+  DispatchNoticeSummary,
+  Ean128Container,
+  HomecenterResult,
+  ResendDispatchNoticeRequest,
 } from '#/api/types'
 
-function cantidadContenedores(aviso: AvisoRecord): number {
-  return aviso.tiendas.reduce((sum, t) => sum + t.contenedores.length, 0)
+function containerCount(notice: DispatchNoticeRecord): number {
+  return notice.tiendas.reduce((sum, t) => sum + t.contenedores.length, 0)
 }
 
-function toResumen(aviso: AvisoRecord): AvisoDespachoResumen {
+function toSummary(notice: DispatchNoticeRecord): DispatchNoticeSummary {
   return {
-    avisoId: aviso.avisoId,
-    ordenCompra: aviso.ordenCompra,
-    fechaRealDespacho: aviso.fechaRealDespacho,
-    cantidadContenedores: cantidadContenedores(aviso),
-    estado: aviso.estado,
-    fechaEnvio: aviso.fechaEnvio,
+    avisoId: notice.avisoId,
+    ordenCompra: notice.ordenCompra,
+    fechaRealDespacho: notice.fechaRealDespacho,
+    cantidadContenedores: containerCount(notice),
+    estado: notice.estado,
+    fechaEnvio: notice.fechaEnvio,
   }
 }
 
-function toDetalle(aviso: AvisoRecord): AvisoDespachoDetalle {
+function toDetail(notice: DispatchNoticeRecord): DispatchNoticeDetail {
   return {
-    avisoId: aviso.avisoId,
-    ordenCompra: aviso.ordenCompra,
-    fechaRealDespacho: aviso.fechaRealDespacho,
-    enviarInmediatamente: aviso.enviarInmediatamente,
-    tiendas: aviso.tiendas,
-    estado: aviso.estado,
-    intentos: aviso.intentos,
-    integracionLogId: aviso.integracionLogId,
+    avisoId: notice.avisoId,
+    ordenCompra: notice.ordenCompra,
+    fechaRealDespacho: notice.fechaRealDespacho,
+    enviarInmediatamente: notice.enviarInmediatamente,
+    tiendas: notice.tiendas,
+    estado: notice.estado,
+    intentos: notice.intentos,
+    integracionLogId: notice.integracionLogId,
   }
 }
 
-function toResultado(aviso: AvisoRecord): AvisoDespachoResultado {
+function toResult(notice: DispatchNoticeRecord): DispatchNoticeResult {
   return {
-    avisoId: aviso.avisoId,
-    ordenCompra: aviso.ordenCompra,
-    estado: aviso.estado,
-    homecenter: aviso.homecenter,
-    intentos: aviso.intentos,
+    avisoId: notice.avisoId,
+    ordenCompra: notice.ordenCompra,
+    estado: notice.estado,
+    homecenter: notice.homecenter,
+    intentos: notice.intentos,
   }
 }
 
-/** solicitada por (eanTienda|eanSku) tomada de la orden. */
-function solicitadaMap(orden: OrdenRecord): Map<string, number> {
+/** Requested qty per `eanTienda|eanSku`, taken from the order. */
+function requestedQtyMap(order: PurchaseOrderRecord): Map<string, number> {
   const map = new Map<string, number>()
-  for (const tienda of orden.tiendas) {
-    for (const prod of tienda.productos) {
-      map.set(`${tienda.eanTienda}|${prod.eanSku}`, prod.cantidadSolicitada)
+  for (const store of order.tiendas) {
+    for (const product of store.productos) {
+      map.set(
+        `${store.eanTienda}|${product.eanSku}`,
+        product.cantidadSolicitada,
+      )
     }
   }
   return map
 }
 
-/** Replica la validación que Homecenter aplica en su lado (§ 2.1). */
-function validarCantidades(
-  body: CrearAvisoDespachoRequest,
-  orden: OrdenRecord,
+/** Replays the check Homecenter applies on its side (§ 2.1). */
+function validateQuantities(
+  body: CreateDispatchNoticeRequest,
+  order: PurchaseOrderRecord,
 ): Array<unknown> {
-  const solicitada = solicitadaMap(orden)
-  const acumulado = new Map<string, number>()
-  const errores: Array<unknown> = []
+  const requested = requestedQtyMap(order)
+  const running = new Map<string, number>()
+  const errors: Array<unknown> = []
 
-  for (const tienda of body.tiendas) {
-    for (const contenedor of tienda.contenedores) {
-      for (const prod of contenedor.productos) {
-        const key = `${tienda.eanTienda}|${prod.eanSku}`
-        const total = (acumulado.get(key) ?? 0) + prod.cantidad
-        acumulado.set(key, total)
-        const max = solicitada.get(key)
+  for (const store of body.tiendas) {
+    for (const container of store.contenedores) {
+      for (const product of container.productos) {
+        const key = `${store.eanTienda}|${product.eanSku}`
+        const total = (running.get(key) ?? 0) + product.cantidad
+        running.set(key, total)
+        const max = requested.get(key)
         if (max === undefined) {
-          errores.push({
-            eanSku: prod.eanSku,
-            eanTienda: tienda.eanTienda,
-            mensaje: `El SKU ${prod.eanSku} no pertenece a la tienda ${tienda.eanTienda} en la orden ${orden.ordenCompra}.`,
+          errors.push({
+            eanSku: product.eanSku,
+            eanTienda: store.eanTienda,
+            mensaje: `El SKU ${product.eanSku} no pertenece a la tienda ${store.eanTienda} en la orden ${order.ordenCompra}.`,
           })
         } else if (total > max) {
-          errores.push({
-            eanSku: prod.eanSku,
-            eanTienda: tienda.eanTienda,
-            mensaje: `El producto:'${prod.eanSku}' dirigido a la tienda:'${tienda.eanTienda}' supera la cantidad solicitada:'${max}'`,
+          errors.push({
+            eanSku: product.eanSku,
+            eanTienda: store.eanTienda,
+            mensaje: `El producto:'${product.eanSku}' dirigido a la tienda:'${store.eanTienda}' supera la cantidad solicitada:'${max}'`,
           })
         }
       }
     }
   }
-  return errores
+  return errors
 }
 
-/** Homecenter "responde": ENVIADO salvo que una línea llegue al 100% de lo pedido. */
-function simularHomecenter(
-  aviso: AvisoRecord,
-  orden: OrdenRecord,
-): { estado: EstadoAviso; homecenter: HomecenterResultado } {
-  // Trigger de prueba: un contenedor llamado "*ERR*" fuerza caída de Homecenter.
-  const fuerzaError = aviso.tiendas.some((t) =>
+/** Homecenter "replies": ENVIADO unless a line reaches 100% of what was ordered. */
+function simulateHomecenter(
+  notice: DispatchNoticeRecord,
+  order: PurchaseOrderRecord,
+): { estado: DispatchNoticeStatus; homecenter: HomecenterResult } {
+  // Test trigger: a container named "*ERR*" forces a Homecenter outage.
+  const forceError = notice.tiendas.some((t) =>
     t.contenedores.some((c) => c.contenedor.toUpperCase().includes('ERR')),
   )
-  if (fuerzaError) {
+  if (forceError) {
     return {
       estado: 'ERROR_ENVIO',
       homecenter: {
@@ -128,30 +131,30 @@ function simularHomecenter(
     }
   }
 
-  const solicitada = solicitadaMap(orden)
-  const novedades: HomecenterResultado['detalle'] = []
-  for (const tienda of aviso.tiendas) {
-    for (const contenedor of tienda.contenedores) {
-      for (const prod of contenedor.productos) {
-        const max = solicitada.get(`${tienda.eanTienda}|${prod.eanSku}`)
-        if (max !== undefined && prod.cantidad >= max) {
-          novedades.push({
-            eanSku: prod.eanSku,
-            eanTienda: tienda.eanTienda,
-            mensaje: `El producto:'${prod.eanSku}' dirigido a la tienda:'${tienda.eanTienda}' supera la cantidad solicitada:'${max}'`,
+  const requested = requestedQtyMap(order)
+  const issues: HomecenterResult['detalle'] = []
+  for (const store of notice.tiendas) {
+    for (const container of store.contenedores) {
+      for (const product of container.productos) {
+        const max = requested.get(`${store.eanTienda}|${product.eanSku}`)
+        if (max !== undefined && product.cantidad >= max) {
+          issues.push({
+            eanSku: product.eanSku,
+            eanTienda: store.eanTienda,
+            mensaje: `El producto:'${product.eanSku}' dirigido a la tienda:'${store.eanTienda}' supera la cantidad solicitada:'${max}'`,
           })
         }
       }
     }
   }
 
-  if (novedades.length > 0) {
+  if (issues.length > 0) {
     return {
       estado: 'CON_NOVEDAD',
       homecenter: {
         isError: false,
         errorMessage: 'Se presentaron errores en algunos items ver resultado',
-        detalle: novedades,
+        detalle: issues,
       },
     }
   }
@@ -161,16 +164,19 @@ function simularHomecenter(
   }
 }
 
-function registrarIntento(aviso: AvisoRecord, estado: EstadoAviso): string {
+function recordAttempt(
+  notice: DispatchNoticeRecord,
+  status: DispatchNoticeStatus,
+): string {
   const when = new Date()
   const logId = nextLogId(db, when)
-  aviso.intentos += 1
-  aviso.integracionLogId = logId
-  aviso.fechaEnvio = nowIso()
-  aviso.historialIntentos.push({
-    numero: aviso.intentos,
+  notice.intentos += 1
+  notice.integracionLogId = logId
+  notice.fechaEnvio = nowIso()
+  notice.historialIntentos.push({
+    numero: notice.intentos,
     fecha: nowIso(),
-    estado,
+    estado: status,
     integracionLogId: logId,
   })
   db.logs.unshift({
@@ -178,19 +184,19 @@ function registrarIntento(aviso: AvisoRecord, estado: EstadoAviso): string {
     tipo: 'AVISO_DESPACHO',
     fecha: nowIso(),
     estado:
-      estado === 'ENVIADO'
+      status === 'ENVIADO'
         ? 'EXITOSO'
-        : estado === 'CON_NOVEDAD'
+        : status === 'CON_NOVEDAD'
           ? 'CON_NOVEDAD'
           : 'FALLIDO',
-    referencia: aviso.avisoId,
-    requestEnviado: avisoToHomecenterRequest(aviso),
-    respuestaRecibida: aviso.homecenter,
+    referencia: notice.avisoId,
+    requestEnviado: dispatchNoticeToHomecenterRequest(notice),
+    respuestaRecibida: notice.homecenter,
   })
   return logId
 }
 
-export const avisosHandlers = [
+export const dispatchNoticesHandlers = [
   // § 2.2
   http.get(`${API}/avisos-despacho`, async ({ request }) => {
     await latency()
@@ -201,7 +207,7 @@ export const avisosHandlers = [
     const fechaDesde = url.searchParams.get('fechaDesde')
     const fechaHasta = url.searchParams.get('fechaHasta')
 
-    const rows = db.avisos
+    const rows = db.dispatchNotices
       .filter((a) => (ordenCompra ? a.ordenCompra.includes(ordenCompra) : true))
       .filter((a) => (estado ? a.estado === estado : true))
       .filter((a) => withinRange(a.fechaRealDespacho, fechaDesde, fechaHasta))
@@ -210,7 +216,7 @@ export const avisosHandlers = [
           a.fechaEnvio ?? a.fechaRealDespacho,
         ),
       )
-      .map(toResumen)
+      .map(toSummary)
 
     return HttpResponse.json(paginate(rows, page, pageSize))
   }),
@@ -218,9 +224,11 @@ export const avisosHandlers = [
   // § 2.1
   http.post(`${API}/avisos-despacho`, async ({ request }) => {
     await latency()
-    const body = (await request.json()) as CrearAvisoDespachoRequest
-    const orden = db.ordenes.find((o) => o.ordenCompra === body.ordenCompra)
-    if (!orden) {
+    const body = (await request.json()) as CreateDispatchNoticeRequest
+    const order = db.purchaseOrders.find(
+      (o) => o.ordenCompra === body.ordenCompra,
+    )
+    if (!order) {
       return apiError(
         404,
         'ORDEN_NO_ENCONTRADA',
@@ -228,18 +236,18 @@ export const avisosHandlers = [
       )
     }
 
-    const errores = validarCantidades(body, orden)
-    if (errores.length > 0) {
+    const errors = validateQuantities(body, order)
+    if (errors.length > 0) {
       return apiError(
         400,
         'CANTIDAD_EXCEDE_SOLICITADO',
         'Una o más líneas superan la cantidad solicitada en la orden.',
-        errores,
+        errors,
       )
     }
 
-    const aviso: AvisoRecord = {
-      avisoId: nextAvisoId(db, body.ordenCompra),
+    const notice: DispatchNoticeRecord = {
+      avisoId: nextDispatchNoticeId(db, body.ordenCompra),
       ordenCompra: body.ordenCompra,
       fechaRealDespacho: body.fechaRealDespacho,
       enviarInmediatamente: body.enviarInmediatamente,
@@ -253,31 +261,31 @@ export const avisosHandlers = [
     }
 
     if (!body.enviarInmediatamente) {
-      db.avisos.push(aviso)
-      return HttpResponse.json<AvisoDespachoResultado>(toResultado(aviso), {
+      db.dispatchNotices.push(notice)
+      return HttpResponse.json<DispatchNoticeResult>(toResult(notice), {
         status: 201,
       })
     }
 
-    const { estado, homecenter } = simularHomecenter(aviso, orden)
-    aviso.homecenter = homecenter
+    const { estado, homecenter } = simulateHomecenter(notice, order)
+    notice.homecenter = homecenter
 
     if (estado === 'ERROR_ENVIO') {
-      aviso.estado = 'ERROR_ENVIO'
-      registrarIntento(aviso, 'ERROR_ENVIO')
-      db.avisos.push(aviso)
+      notice.estado = 'ERROR_ENVIO'
+      recordAttempt(notice, 'ERROR_ENVIO')
+      db.dispatchNotices.push(notice)
       return apiError(
         502,
         'HOMECENTER_NO_DISPONIBLE',
         'No se pudo contactar a Homecenter. El aviso quedó en ERROR_ENVIO para reintento.',
-        [{ avisoId: aviso.avisoId }],
+        [{ avisoId: notice.avisoId }],
       )
     }
 
-    aviso.estado = estado
-    registrarIntento(aviso, estado)
-    db.avisos.push(aviso)
-    return HttpResponse.json<AvisoDespachoResultado>(toResultado(aviso), {
+    notice.estado = estado
+    recordAttempt(notice, estado)
+    db.dispatchNotices.push(notice)
+    return HttpResponse.json<DispatchNoticeResult>(toResult(notice), {
       status: 201,
     })
   }),
@@ -285,37 +293,41 @@ export const avisosHandlers = [
   // § 2.4
   http.get(`${API}/avisos-despacho/:avisoId/ean128`, async ({ params }) => {
     await latency()
-    const aviso = db.avisos.find((a) => a.avisoId === String(params.avisoId))
-    if (!aviso) {
+    const notice = db.dispatchNotices.find(
+      (a) => a.avisoId === String(params.avisoId),
+    )
+    if (!notice) {
       return apiError(
         404,
         'AVISO_NO_ENCONTRADO',
         'Aviso de despacho no encontrado.',
       )
     }
-    const orden = db.ordenes.find((o) => o.ordenCompra === aviso.ordenCompra)
-    const solicitada = orden ? solicitadaMap(orden) : new Map<string, number>()
+    const order = db.purchaseOrders.find(
+      (o) => o.ordenCompra === notice.ordenCompra,
+    )
+    const requested = order ? requestedQtyMap(order) : new Map<string, number>()
 
-    const contenedores: Array<Ean128Contenedor> = []
-    for (const tienda of aviso.tiendas) {
-      for (const contenedor of tienda.contenedores) {
-        for (const prod of contenedor.productos) {
+    const contenedores: Array<Ean128Container> = []
+    for (const store of notice.tiendas) {
+      for (const container of store.contenedores) {
+        for (const product of container.productos) {
           contenedores.push({
-            contenedor: contenedor.contenedor,
-            eanSku: prod.eanSku,
+            contenedor: container.contenedor,
+            eanSku: product.eanSku,
             cantidadSolicitada:
-              solicitada.get(`${tienda.eanTienda}|${prod.eanSku}`) ??
-              prod.cantidad,
-            cantidadDespachada: prod.cantidad,
-            peso: prod.peso,
-            volumen: prod.volumen,
-            ean128: generarEan128(contenedor.contenedor, prod.eanSku),
+              requested.get(`${store.eanTienda}|${product.eanSku}`) ??
+              product.cantidad,
+            cantidadDespachada: product.cantidad,
+            peso: product.peso,
+            volumen: product.volumen,
+            ean128: generateEan128(container.contenedor, product.eanSku),
           })
         }
       }
     }
-    return HttpResponse.json<AvisoEan128Response>({
-      avisoId: aviso.avisoId,
+    return HttpResponse.json<DispatchNoticeEan128Response>({
+      avisoId: notice.avisoId,
       contenedores,
     })
   }),
@@ -323,17 +335,19 @@ export const avisosHandlers = [
   // § 2.6
   http.get(`${API}/avisos-despacho/:avisoId/intentos`, async ({ params }) => {
     await latency()
-    const aviso = db.avisos.find((a) => a.avisoId === String(params.avisoId))
-    if (!aviso) {
+    const notice = db.dispatchNotices.find(
+      (a) => a.avisoId === String(params.avisoId),
+    )
+    if (!notice) {
       return apiError(
         404,
         'AVISO_NO_ENCONTRADO',
         'Aviso de despacho no encontrado.',
       )
     }
-    return HttpResponse.json<AvisoIntentosResponse>({
-      avisoId: aviso.avisoId,
-      intentos: aviso.historialIntentos,
+    return HttpResponse.json<DispatchNoticeAttemptsResponse>({
+      avisoId: notice.avisoId,
+      intentos: notice.historialIntentos,
     })
   }),
 
@@ -342,46 +356,53 @@ export const avisosHandlers = [
     `${API}/avisos-despacho/:avisoId/reenviar`,
     async ({ params, request }) => {
       await latency()
-      const aviso = db.avisos.find((a) => a.avisoId === String(params.avisoId))
-      if (!aviso) {
+      const notice = db.dispatchNotices.find(
+        (a) => a.avisoId === String(params.avisoId),
+      )
+      if (!notice) {
         return apiError(
           404,
           'AVISO_NO_ENCONTRADO',
           'Aviso de despacho no encontrado.',
         )
       }
-      if (aviso.estado === 'ENVIADO' || aviso.estado === 'BORRADOR') {
+      if (notice.estado === 'ENVIADO' || notice.estado === 'BORRADOR') {
         return apiError(
           409,
           'AVISO_NO_REENVIABLE',
-          `El aviso ${aviso.avisoId} está en estado ${aviso.estado}; el reenvío solo aplica a avisos con problema.`,
+          `El aviso ${notice.avisoId} está en estado ${notice.estado}; el reenvío solo aplica a avisos con problema.`,
         )
       }
 
-      const body = (await request.json()) as ReenviarAvisoRequest
-      for (const correccion of body.correcciones) {
-        for (const tienda of aviso.tiendas) {
-          if (tienda.eanTienda !== correccion.eanTienda) continue
-          for (const contenedor of tienda.contenedores) {
-            if (contenedor.contenedor !== correccion.contenedor) continue
-            for (const prod of contenedor.productos) {
-              if (prod.eanSku === correccion.eanSku) {
-                prod.cantidad = correccion.cantidadCorregida
+      const body = (await request.json()) as ResendDispatchNoticeRequest
+      for (const correction of body.correcciones) {
+        for (const store of notice.tiendas) {
+          if (store.eanTienda !== correction.eanTienda) continue
+          for (const container of store.contenedores) {
+            if (container.contenedor !== correction.contenedor) continue
+            for (const product of container.productos) {
+              if (product.eanSku === correction.eanSku) {
+                product.cantidad = correction.cantidadCorregida
               }
             }
           }
         }
       }
 
-      const orden = db.ordenes.find((o) => o.ordenCompra === aviso.ordenCompra)
-      const { estado, homecenter } = orden
-        ? simularHomecenter(aviso, orden)
-        : { estado: 'ENVIADO' as EstadoAviso, homecenter: aviso.homecenter }
-      aviso.homecenter = homecenter
-      aviso.estado = estado
-      registrarIntento(aviso, estado)
+      const order = db.purchaseOrders.find(
+        (o) => o.ordenCompra === notice.ordenCompra,
+      )
+      const { estado, homecenter } = order
+        ? simulateHomecenter(notice, order)
+        : {
+            estado: 'ENVIADO' as DispatchNoticeStatus,
+            homecenter: notice.homecenter,
+          }
+      notice.homecenter = homecenter
+      notice.estado = estado
+      recordAttempt(notice, estado)
 
-      return HttpResponse.json<AvisoDespachoResultado>(toResultado(aviso), {
+      return HttpResponse.json<DispatchNoticeResult>(toResult(notice), {
         status: 200,
       })
     },
@@ -390,14 +411,16 @@ export const avisosHandlers = [
   // § 2.3
   http.get(`${API}/avisos-despacho/:avisoId`, async ({ params }) => {
     await latency()
-    const aviso = db.avisos.find((a) => a.avisoId === String(params.avisoId))
-    if (!aviso) {
+    const notice = db.dispatchNotices.find(
+      (a) => a.avisoId === String(params.avisoId),
+    )
+    if (!notice) {
       return apiError(
         404,
         'AVISO_NO_ENCONTRADO',
         'Aviso de despacho no encontrado.',
       )
     }
-    return HttpResponse.json(toDetalle(aviso))
+    return HttpResponse.json(toDetail(notice))
   }),
 ]

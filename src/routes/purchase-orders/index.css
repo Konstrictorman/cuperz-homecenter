@@ -12,3 +12,11 @@
     padding: var(--space-lg);
   }
 }
+
+.purchase-orders__error {
+  margin: 0;
+  padding: var(--space-md);
+  border-radius: var(--radius-sm, 6px);
+  background-color: var(--status-error-50);
+  color: var(--status-error-300);
+}

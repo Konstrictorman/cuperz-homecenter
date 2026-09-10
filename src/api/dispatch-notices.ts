@@ -1,4 +1,4 @@
-// Avisos de Despacho — TanStack Query layer (§ 2 de la especificación).
+// Dispatch Notices — TanStack Query layer (spec § 2).
 
 import {
   queryOptions,
@@ -8,33 +8,35 @@ import {
 import { apiFetch, buildQuery } from './http'
 import { queryKeys } from './query-keys'
 import type {
-  AvisoDespachoDetalle,
-  AvisoDespachoResultado,
-  AvisoDespachoResumen,
-  AvisoEan128Response,
-  AvisoIntentosResponse,
-  AvisosDespachoQuery,
-  CrearAvisoDespachoRequest,
+  DispatchNoticeDetail,
+  DispatchNoticeResult,
+  DispatchNoticeSummary,
+  DispatchNoticeEan128Response,
+  DispatchNoticeAttemptsResponse,
+  DispatchNoticesQuery,
+  CreateDispatchNoticeRequest,
   Paginated,
-  ReenviarAvisoRequest,
+  ResendDispatchNoticeRequest,
 } from './types'
 
-export function avisosListQueryOptions(query: AvisosDespachoQuery = {}) {
+export function dispatchNoticesListQueryOptions(
+  query: DispatchNoticesQuery = {},
+) {
   return queryOptions({
-    queryKey: queryKeys.avisos.list(query),
+    queryKey: queryKeys.dispatchNotices.list(query),
     queryFn: ({ signal }) =>
-      apiFetch<Paginated<AvisoDespachoResumen>>(
+      apiFetch<Paginated<DispatchNoticeSummary>>(
         `/avisos-despacho${buildQuery({ ...query })}`,
         { signal },
       ),
   })
 }
 
-export function avisoDetalleQueryOptions(avisoId: string) {
+export function dispatchNoticeDetailQueryOptions(avisoId: string) {
   return queryOptions({
-    queryKey: queryKeys.avisos.detail(avisoId),
+    queryKey: queryKeys.dispatchNotices.detail(avisoId),
     queryFn: ({ signal }) =>
-      apiFetch<AvisoDespachoDetalle>(
+      apiFetch<DispatchNoticeDetail>(
         `/avisos-despacho/${encodeURIComponent(avisoId)}`,
         { signal },
       ),
@@ -43,11 +45,11 @@ export function avisoDetalleQueryOptions(avisoId: string) {
 }
 
 /** `GET /api/v1/avisos-despacho/{avisoId}/ean128` (§ 2.4). */
-export function avisoEan128QueryOptions(avisoId: string) {
+export function dispatchNoticeEan128QueryOptions(avisoId: string) {
   return queryOptions({
-    queryKey: queryKeys.avisos.ean128(avisoId),
+    queryKey: queryKeys.dispatchNotices.ean128(avisoId),
     queryFn: ({ signal }) =>
-      apiFetch<AvisoEan128Response>(
+      apiFetch<DispatchNoticeEan128Response>(
         `/avisos-despacho/${encodeURIComponent(avisoId)}/ean128`,
         { signal },
       ),
@@ -56,11 +58,11 @@ export function avisoEan128QueryOptions(avisoId: string) {
 }
 
 /** `GET /api/v1/avisos-despacho/{avisoId}/intentos` (§ 2.6). */
-export function avisoIntentosQueryOptions(avisoId: string) {
+export function dispatchNoticeAttemptsQueryOptions(avisoId: string) {
   return queryOptions({
-    queryKey: queryKeys.avisos.intentos(avisoId),
+    queryKey: queryKeys.dispatchNotices.attempts(avisoId),
     queryFn: ({ signal }) =>
-      apiFetch<AvisoIntentosResponse>(
+      apiFetch<DispatchNoticeAttemptsResponse>(
         `/avisos-despacho/${encodeURIComponent(avisoId)}/intentos`,
         { signal },
       ),
@@ -68,45 +70,49 @@ export function avisoIntentosQueryOptions(avisoId: string) {
   })
 }
 
-function invalidateAviso(
+function invalidateDispatchNotice(
   queryClient: ReturnType<typeof useQueryClient>,
   avisoId?: string,
 ) {
-  void queryClient.invalidateQueries({ queryKey: queryKeys.avisos.all() })
-  void queryClient.invalidateQueries({ queryKey: queryKeys.bitacora.all() })
+  void queryClient.invalidateQueries({
+    queryKey: queryKeys.dispatchNotices.all(),
+  })
+  void queryClient.invalidateQueries({
+    queryKey: queryKeys.integrationLog.all(),
+  })
   if (avisoId) {
     void queryClient.invalidateQueries({
-      queryKey: queryKeys.avisos.detail(avisoId),
+      queryKey: queryKeys.dispatchNotices.detail(avisoId),
     })
   }
 }
 
-/** `POST /api/v1/avisos-despacho` (§ 2.1) — crea borrador o envía. */
-export function useCrearAvisoDespacho() {
+/** `POST /api/v1/avisos-despacho` (§ 2.1) — save draft or send. */
+export function useCreateDispatchNotice() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (body: CrearAvisoDespachoRequest) =>
-      apiFetch<AvisoDespachoResultado>('/avisos-despacho', {
+    mutationFn: (body: CreateDispatchNoticeRequest) =>
+      apiFetch<DispatchNoticeResult>('/avisos-despacho', {
         method: 'POST',
         body,
       }),
-    onSuccess: (data) => invalidateAviso(queryClient, data.avisoId),
+    onSuccess: (data) => invalidateDispatchNotice(queryClient, data.avisoId),
   })
 }
 
 /** `POST /api/v1/avisos-despacho/{avisoId}/reenviar` (§ 2.5). */
-export function useReenviarAvisoDespacho(avisoId: string) {
+export function useResendDispatchNotice(avisoId: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (body: ReenviarAvisoRequest) =>
-      apiFetch<AvisoDespachoResultado>(
+    mutationFn: (body: ResendDispatchNoticeRequest) =>
+      apiFetch<DispatchNoticeResult>(
         `/avisos-despacho/${encodeURIComponent(avisoId)}/reenviar`,
         { method: 'POST', body },
       ),
     onSuccess: () => {
-      invalidateAviso(queryClient, avisoId)
+      invalidateDispatchNotice(queryClient, avisoId)
       void queryClient.invalidateQueries({
-        queryKey: queryKeys.avisos.intentos(avisoId),
+        queryKey: queryKeys.dispatchNotices.attempts(avisoId),
       })
     },
   })

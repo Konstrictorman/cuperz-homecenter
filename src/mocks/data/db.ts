@@ -1,61 +1,65 @@
 // In-memory store that backs the MSW handlers. Seeded once per process with a
 // fixed faker seed so the "fake but real-looking" data is stable across reloads.
-// Everything here is mutable: POST/reenviar/reinyectar handlers write back to it.
+// Everything here is mutable: the create/resend/reprocess handlers write back.
+//
+// Note: object *keys* and enum string *values* stay in Spanish because they
+// mirror Homecenter's real contract (see docs/mock-api.md). Only identifiers
+// (types, functions, variables) are in English.
 
 import { faker } from '@faker-js/faker'
-import { CLIENTES, PRODUCTOS, PUNTOS_ENTREGA, TIENDAS } from './catalogo'
+import { CLIENTS, DELIVERY_POINTS, PRODUCTS, STORES } from './catalog'
 import type {
-  AvisoIntento,
-  AvisoTiendaInput,
-  EstadoAviso,
-  EstadoLineaOrden,
-  EstadoOrden,
-  HomecenterResultado,
-  IntegracionLogDetalle,
-  OrdenCompraTienda,
+  DispatchNoticeAttempt,
+  DispatchNoticeStatus,
+  DispatchNoticeStoreInput,
+  HomecenterResult,
+  IntegrationLogDetail,
+  OrderLineStatus,
+  OrderStatus,
+  PurchaseOrderStore,
 } from '#/api/types'
 
 // --- Record shapes (superset of the API DTOs) ---
 
-export interface OrdenRecord {
+export interface PurchaseOrderRecord {
   ordenCompra: string
   eanPuntoEntrega: string
   cliente: string
   ciudadEntrega: string
   direccionEntrega: string
-  estado: EstadoOrden
+  estado: OrderStatus
   codigoSesionRecibo: string | null
   fechaOrden: string
   ultimaActualizacion: string
-  tiendas: Array<OrdenCompraTienda>
+  tiendas: Array<PurchaseOrderStore>
   /** Reprocessing attempts (§ 1.4). */
   intentos: number
   maxIntentos: number
 }
 
-export interface AvisoRecord {
+export interface DispatchNoticeRecord {
   avisoId: string
   ordenCompra: string
   fechaRealDespacho: string
   enviarInmediatamente: boolean
-  tiendas: Array<AvisoTiendaInput>
-  estado: EstadoAviso
+  tiendas: Array<DispatchNoticeStoreInput>
+  estado: DispatchNoticeStatus
   intentos: number
   integracionLogId: string | null
   fechaEnvio: string | null
-  homecenter: HomecenterResultado
-  historialIntentos: Array<AvisoIntento>
+  homecenter: HomecenterResult
+  historialIntentos: Array<DispatchNoticeAttempt>
 }
 
-export type LogRecord = IntegracionLogDetalle
+export type IntegrationLogRecord = IntegrationLogDetail
 
 interface MockDb {
-  ordenes: Array<OrdenRecord>
-  avisos: Array<AvisoRecord>
-  logs: Array<LogRecord>
+  purchaseOrders: Array<PurchaseOrderRecord>
+  dispatchNotices: Array<DispatchNoticeRecord>
+  logs: Array<IntegrationLogRecord>
   seq: {
     logByDay: Record<string, number>
-    avisoByOrden: Record<string, number>
+    noticeByOrder: Record<string, number>
     sync: number
   }
 }
@@ -94,9 +98,9 @@ export function nextLogId(db: MockDb, when: Date): string {
   return `log-${day}-${time}${String(n).padStart(2, '0')}`
 }
 
-export function nextAvisoId(db: MockDb, ordenCompra: string): string {
-  const n = (db.seq.avisoByOrden[ordenCompra] ?? 0) + 1
-  db.seq.avisoByOrden[ordenCompra] = n
+export function nextDispatchNoticeId(db: MockDb, ordenCompra: string): string {
+  const n = (db.seq.noticeByOrder[ordenCompra] ?? 0) + 1
+  db.seq.noticeByOrder[ordenCompra] = n
   return `av-${ordenCompra}-${String(n).padStart(3, '0')}`
 }
 
@@ -107,8 +111,8 @@ export function nextSyncId(db: MockDb): string {
 }
 
 /** Deterministic-ish EAN128 (SSCC-shaped, 18 digits). */
-export function generarEan128(contenedor: string, eanSku: string): string {
-  const base = `${contenedor}${eanSku}`
+export function generateEan128(container: string, eanSku: string): string {
+  const base = `${container}${eanSku}`
   let hash = 0
   for (const ch of base) hash = (hash * 31 + ch.charCodeAt(0)) >>> 0
   return `37${String(hash).padStart(16, '0').slice(0, 16)}`
@@ -116,7 +120,7 @@ export function generarEan128(contenedor: string, eanSku: string): string {
 
 // --- Seed ---
 
-const ESTADOS_ORDEN: Array<EstadoOrden> = [
+const ORDER_STATUSES: Array<OrderStatus> = [
   'PENDIENTE',
   'PENDIENTE',
   'PROCESANDO',
@@ -125,81 +129,87 @@ const ESTADOS_ORDEN: Array<EstadoOrden> = [
   'CON_ERROR',
 ]
 
-function pickTiendas(count: number) {
-  return faker.helpers.arrayElements(TIENDAS, count)
+function pickStores(count: number) {
+  return faker.helpers.arrayElements(STORES, count)
 }
 
-function buildOrdenTiendas(estado: EstadoOrden): Array<OrdenCompraTienda> {
-  const tiendas = pickTiendas(faker.number.int({ min: 1, max: 3 }))
-  return tiendas.map((tienda) => {
-    const productos = faker.helpers
-      .arrayElements(PRODUCTOS, faker.number.int({ min: 1, max: 4 }))
-      .map((prod) => {
+function buildPurchaseOrderStores(
+  status: OrderStatus,
+): Array<PurchaseOrderStore> {
+  const stores = pickStores(faker.number.int({ min: 1, max: 3 }))
+  return stores.map((store) => {
+    const products = faker.helpers
+      .arrayElements(PRODUCTS, faker.number.int({ min: 1, max: 4 }))
+      .map((product) => {
         const cantidadSolicitada = faker.number.int({ min: 10, max: 400 })
-        const cancelada =
-          estado === 'CON_ERROR' && faker.datatype.boolean(0.4)
+        const cancelledQty =
+          status === 'CON_ERROR' && faker.datatype.boolean(0.4)
             ? faker.number.int({
                 min: 1,
                 max: Math.floor(cantidadSolicitada / 4),
               })
             : 0
-        let estadoLinea: EstadoLineaOrden = 'PENDIENTE'
-        if (estado === 'DESPACHADA') estadoLinea = 'DESPACHADA'
-        else if (estado === 'PROCESANDO') estadoLinea = 'PARCIAL'
-        else if (estado === 'CON_ERROR') estadoLinea = 'SUPERA_SOLICITADO'
+        let estadoLinea: OrderLineStatus = 'PENDIENTE'
+        if (status === 'DESPACHADA') estadoLinea = 'DESPACHADA'
+        else if (status === 'PROCESANDO') estadoLinea = 'PARCIAL'
+        else if (status === 'CON_ERROR') estadoLinea = 'SUPERA_SOLICITADO'
         return {
-          eanSku: prod.eanSku,
-          descripcion: prod.descripcion,
+          eanSku: product.eanSku,
+          descripcion: product.descripcion,
           cantidadSolicitada,
-          cantidadCancelada: cancelada,
+          cantidadCancelada: cancelledQty,
           cantidadDevuelta: 0,
           estadoLinea,
         }
       })
-    return { eanTienda: tienda.eanTienda, productos }
+    return { eanTienda: store.eanTienda, productos: products }
   })
 }
 
-function makeOrden(ordenCompra: string, estado: EstadoOrden): OrdenRecord {
-  const punto = faker.helpers.arrayElement(PUNTOS_ENTREGA)
-  const fecha = faker.date.recent({ days: 45 })
-  const actualizada = faker.date.between({ from: fecha, to: new Date() })
+function makePurchaseOrder(
+  ordenCompra: string,
+  status: OrderStatus,
+): PurchaseOrderRecord {
+  const deliveryPoint = faker.helpers.arrayElement(DELIVERY_POINTS)
+  const orderDate = faker.date.recent({ days: 45 })
+  const updatedAt = faker.date.between({ from: orderDate, to: new Date() })
   return {
     ordenCompra,
-    eanPuntoEntrega: punto.ean,
-    cliente: faker.helpers.arrayElement(CLIENTES),
-    ciudadEntrega: punto.ciudad,
-    direccionEntrega: punto.direccion,
-    estado,
+    eanPuntoEntrega: deliveryPoint.ean,
+    cliente: faker.helpers.arrayElement(CLIENTS),
+    ciudadEntrega: deliveryPoint.ciudad,
+    direccionEntrega: deliveryPoint.direccion,
+    estado: status,
     codigoSesionRecibo:
-      estado === 'DESPACHADA' && faker.datatype.boolean(0.5)
-        ? `REC-${isoDate(actualizada).replace(/-/g, '')}-${faker.number.int({ min: 1, max: 9 })}`
+      status === 'DESPACHADA' && faker.datatype.boolean(0.5)
+        ? `REC-${isoDate(updatedAt).replace(/-/g, '')}-${faker.number.int({ min: 1, max: 9 })}`
         : null,
-    fechaOrden: isoDate(fecha),
-    ultimaActualizacion: isoDateTime(actualizada),
-    tiendas: buildOrdenTiendas(estado),
-    intentos: estado === 'CON_ERROR' ? faker.number.int({ min: 1, max: 2 }) : 0,
+    fechaOrden: isoDate(orderDate),
+    ultimaActualizacion: isoDateTime(updatedAt),
+    tiendas: buildPurchaseOrderStores(status),
+    intentos: status === 'CON_ERROR' ? faker.number.int({ min: 1, max: 2 }) : 0,
     maxIntentos: 3,
   }
 }
 
-function ordenToHomecenterRequest(orden: OrdenRecord) {
+/** Mimics the Spanish payload Homecenter would echo back for a PO sync. */
+function purchaseOrderToHomecenterRequest(order: PurchaseOrderRecord) {
   return {
     metodo: 'GetOrdenesDeCompra',
-    filtros: { ordenCompra: orden.ordenCompra, modo: 'INCREMENTAL' },
+    filtros: { ordenCompra: order.ordenCompra, modo: 'INCREMENTAL' },
   }
 }
 
-function ordenToHomecenterResponse(orden: OrdenRecord) {
+function purchaseOrderToHomecenterResponse(order: PurchaseOrderRecord) {
   return {
     isError: false,
     errorMessage: null,
     ordenes: [
       {
-        NUMERO_ORDEN: orden.ordenCompra,
-        EAN_PUNTO_ENTREGA: orden.eanPuntoEntrega,
-        FECHA_ORDEN: orden.fechaOrden.split('-').reverse().join('/'),
-        TIENDAS: orden.tiendas.map((t) => ({
+        NUMERO_ORDEN: order.ordenCompra,
+        EAN_PUNTO_ENTREGA: order.eanPuntoEntrega,
+        FECHA_ORDEN: order.fechaOrden.split('-').reverse().join('/'),
+        TIENDAS: order.tiendas.map((t) => ({
           EAN_TIENDA: t.eanTienda,
           PRODUCTOS: t.productos.map((p) => ({
             EAN_SKU: p.eanSku,
@@ -213,11 +223,11 @@ function ordenToHomecenterResponse(orden: OrdenRecord) {
   }
 }
 
-function avisoToHomecenterRequest(aviso: AvisoRecord) {
+function dispatchNoticeToHomecenterRequest(notice: DispatchNoticeRecord) {
   return {
-    OrdenCompra: aviso.ordenCompra,
-    FechaRealDespacho: aviso.fechaRealDespacho.split('-').reverse().join('/'),
-    Tiendas: aviso.tiendas.map((t) => ({
+    OrdenCompra: notice.ordenCompra,
+    FechaRealDespacho: notice.fechaRealDespacho.split('-').reverse().join('/'),
+    Tiendas: notice.tiendas.map((t) => ({
       EanTienda: t.eanTienda,
       Contenedores: t.contenedores.map((c) => ({
         Contenedor: c.contenedor,
@@ -235,14 +245,14 @@ function avisoToHomecenterRequest(aviso: AvisoRecord) {
 function seed(): MockDb {
   faker.seed(8467343)
   const db: MockDb = {
-    ordenes: [],
-    avisos: [],
+    purchaseOrders: [],
+    dispatchNotices: [],
     logs: [],
-    seq: { logByDay: {}, avisoByOrden: {}, sync: 90 },
+    seq: { logByDay: {}, noticeByOrder: {}, sync: 90 },
   }
 
   // Canonical order from the spec so its documented examples resolve.
-  const canonical = makeOrden('8467343', 'PENDIENTE')
+  const canonical = makePurchaseOrder('8467343', 'PENDIENTE')
   canonical.cliente = 'Cali Sur'
   canonical.ciudadEntrega = 'Cali'
   canonical.eanPuntoEntrega = '7703670529804'
@@ -270,80 +280,83 @@ function seed(): MockDb {
       ],
     },
   ]
-  db.ordenes.push(canonical)
+  db.purchaseOrders.push(canonical)
 
   // 44 more generated orders.
   for (let i = 0; i < 44; i += 1) {
     const ordenCompra = String(
       faker.number.int({ min: 12_000_000, max: 22_999_999 }),
     )
-    const estado = faker.helpers.arrayElement(ESTADOS_ORDEN)
-    db.ordenes.push(makeOrden(ordenCompra, estado))
+    const status = faker.helpers.arrayElement(ORDER_STATUSES)
+    db.purchaseOrders.push(makePurchaseOrder(ordenCompra, status))
   }
 
   // One ORDEN_COMPRA_SYNC log per order (the last sync that brought it in).
-  for (const orden of db.ordenes) {
-    const when = new Date(orden.ultimaActualizacion)
+  for (const order of db.purchaseOrders) {
+    const when = new Date(order.ultimaActualizacion)
     const id = nextLogId(db, when)
     db.logs.push({
       integracionLogId: id,
       tipo: 'ORDEN_COMPRA_SYNC',
       fecha: isoDateTime(when),
-      estado: orden.estado === 'CON_ERROR' ? 'FALLIDO' : 'EXITOSO',
-      referencia: orden.ordenCompra,
-      requestEnviado: ordenToHomecenterRequest(orden),
-      respuestaRecibida: ordenToHomecenterResponse(orden),
+      estado: order.estado === 'CON_ERROR' ? 'FALLIDO' : 'EXITOSO',
+      referencia: order.ordenCompra,
+      requestEnviado: purchaseOrderToHomecenterRequest(order),
+      respuestaRecibida: purchaseOrderToHomecenterResponse(order),
     })
   }
 
   // Dispatch notices for a slice of the dispatched / processing orders.
-  const candidatas = db.ordenes.filter(
+  const candidates = db.purchaseOrders.filter(
     (o) => o.estado === 'DESPACHADA' || o.estado === 'PROCESANDO',
   )
-  for (const orden of faker.helpers.arrayElements(
-    candidatas,
-    Math.min(candidatas.length, 12),
+  for (const order of faker.helpers.arrayElements(
+    candidates,
+    Math.min(candidates.length, 12),
   )) {
-    const estado = faker.helpers.arrayElement<EstadoAviso>([
+    const status = faker.helpers.arrayElement<DispatchNoticeStatus>([
       'BORRADOR',
       'ENVIADO',
       'ENVIADO',
       'CON_NOVEDAD',
       'ERROR_ENVIO',
     ])
-    const despachadaEl = faker.date.recent({ days: 20 })
-    const tiendas: Array<AvisoTiendaInput> = orden.tiendas.map((t, ti) => ({
-      eanTienda: t.eanTienda,
-      contenedores: [
-        {
-          contenedor: `CONT${String(ti + 1).padStart(3, '0')}`,
-          productos: t.productos.map((p) => ({
-            eanSku: p.eanSku,
-            cantidad: Math.max(
-              1,
-              Math.floor(
-                p.cantidadSolicitada * faker.number.float({ min: 0.3, max: 1 }),
+    const dispatchedOn = faker.date.recent({ days: 20 })
+    const stores: Array<DispatchNoticeStoreInput> = order.tiendas.map(
+      (t, ti) => ({
+        eanTienda: t.eanTienda,
+        contenedores: [
+          {
+            contenedor: `CONT${String(ti + 1).padStart(3, '0')}`,
+            productos: t.productos.map((p) => ({
+              eanSku: p.eanSku,
+              cantidad: Math.max(
+                1,
+                Math.floor(
+                  p.cantidadSolicitada *
+                    faker.number.float({ min: 0.3, max: 1 }),
+                ),
               ),
-            ),
-            peso: faker.number.float({ min: 5, max: 320, fractionDigits: 1 }),
-            volumen: faker.number.float({
-              min: 0.2,
-              max: 4,
-              fractionDigits: 2,
-            }),
-          })),
-        },
-      ],
-    }))
+              peso: faker.number.float({ min: 5, max: 320, fractionDigits: 1 }),
+              volumen: faker.number.float({
+                min: 0.2,
+                max: 4,
+                fractionDigits: 2,
+              }),
+            })),
+          },
+        ],
+      }),
+    )
 
-    const avisoId = nextAvisoId(db, orden.ordenCompra)
-    const aviso: AvisoRecord = {
+    const avisoId = nextDispatchNoticeId(db, order.ordenCompra)
+    const notice: DispatchNoticeRecord = {
       avisoId,
-      ordenCompra: orden.ordenCompra,
-      fechaRealDespacho: isoDate(despachadaEl),
-      enviarInmediatamente: estado !== 'BORRADOR',
-      tiendas,
-      estado,
+      ordenCompra: order.ordenCompra,
+      fechaRealDespacho: isoDate(dispatchedOn),
+      enviarInmediatamente: status !== 'BORRADOR',
+      tiendas: stores,
+      estado: status,
       intentos: 0,
       integracionLogId: null,
       fechaEnvio: null,
@@ -351,37 +364,37 @@ function seed(): MockDb {
       historialIntentos: [],
     }
 
-    if (estado !== 'BORRADOR') {
-      const when = despachadaEl
+    if (status !== 'BORRADOR') {
+      const when = dispatchedOn
       const logId = nextLogId(db, when)
-      aviso.intentos = 1
-      aviso.integracionLogId = logId
-      aviso.fechaEnvio = isoDateTime(when)
+      notice.intentos = 1
+      notice.integracionLogId = logId
+      notice.fechaEnvio = isoDateTime(when)
 
-      if (estado === 'CON_NOVEDAD') {
-        const linea = tiendas[0].contenedores[0].productos[0]
-        aviso.homecenter = {
+      if (status === 'CON_NOVEDAD') {
+        const line = stores[0].contenedores[0].productos[0]
+        notice.homecenter = {
           isError: false,
           errorMessage: 'Se presentaron errores en algunos items ver resultado',
           detalle: [
             {
-              eanSku: linea.eanSku,
-              eanTienda: tiendas[0].eanTienda,
-              mensaje: `El producto:'${linea.eanSku}' dirigido a la tienda:'${tiendas[0].eanTienda}' supera la cantidad solicitada`,
+              eanSku: line.eanSku,
+              eanTienda: stores[0].eanTienda,
+              mensaje: `El producto:'${line.eanSku}' dirigido a la tienda:'${stores[0].eanTienda}' supera la cantidad solicitada`,
             },
           ],
         }
-      } else if (estado === 'ERROR_ENVIO') {
-        aviso.homecenter = {
+      } else if (status === 'ERROR_ENVIO') {
+        notice.homecenter = {
           isError: true,
           errorMessage: 'Homecenter no disponible (timeout tras 30s)',
         }
       }
 
-      aviso.historialIntentos.push({
+      notice.historialIntentos.push({
         numero: 1,
         fecha: isoDateTime(when),
-        estado,
+        estado: status,
         integracionLogId: logId,
       })
 
@@ -390,21 +403,21 @@ function seed(): MockDb {
         tipo: 'AVISO_DESPACHO',
         fecha: isoDateTime(when),
         estado:
-          estado === 'ENVIADO'
+          status === 'ENVIADO'
             ? 'EXITOSO'
-            : estado === 'CON_NOVEDAD'
+            : status === 'CON_NOVEDAD'
               ? 'CON_NOVEDAD'
               : 'FALLIDO',
         referencia: avisoId,
-        requestEnviado: avisoToHomecenterRequest(aviso),
-        respuestaRecibida: aviso.homecenter,
+        requestEnviado: dispatchNoticeToHomecenterRequest(notice),
+        respuestaRecibida: notice.homecenter,
       })
     }
 
-    db.avisos.push(aviso)
+    db.dispatchNotices.push(notice)
   }
 
-  // Sort logs newest-first for the bitácora screen.
+  // Sort logs newest-first for the integration-log screen.
   db.logs.sort((a, b) => b.fecha.localeCompare(a.fecha))
   return db
 }
@@ -415,10 +428,10 @@ export const db: MockDb = seed()
 
 export function resetDb(): void {
   const fresh = seed()
-  db.ordenes = fresh.ordenes
-  db.avisos = fresh.avisos
+  db.purchaseOrders = fresh.purchaseOrders
+  db.dispatchNotices = fresh.dispatchNotices
   db.logs = fresh.logs
   db.seq = fresh.seq
 }
 
-export { avisoToHomecenterRequest }
+export { dispatchNoticeToHomecenterRequest }

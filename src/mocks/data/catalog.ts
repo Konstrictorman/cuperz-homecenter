@@ -2,25 +2,25 @@
 // Sodimac / Homecenter values seen in docs/ORD_15669499 (1).csv; product SKUs
 // mirror the shape used in the wireframe mocks.
 
-export interface TiendaCatalogo {
+export interface StoreCatalogEntry {
   eanTienda: string
   nombre: string
   ciudad: string
 }
 
-export interface PuntoEntregaCatalogo {
+export interface DeliveryPointCatalogEntry {
   ean: string
   nombre: string
   ciudad: string
   direccion: string
 }
 
-export interface ProductoCatalogo {
+export interface ProductCatalogEntry {
   eanSku: string
   descripcion: string
 }
 
-export const PUNTOS_ENTREGA: Array<PuntoEntregaCatalogo> = [
+export const DELIVERY_POINTS: Array<DeliveryPointCatalogEntry> = [
   {
     ean: '7703670529804',
     nombre: 'SODIMAC - CEDI FUNZA',
@@ -41,7 +41,7 @@ export const PUNTOS_ENTREGA: Array<PuntoEntregaCatalogo> = [
   },
 ]
 
-export const TIENDAS: Array<TiendaCatalogo> = [
+export const STORES: Array<StoreCatalogEntry> = [
   { eanTienda: '7703670900306', nombre: 'SODIMAC - CALI SUR', ciudad: 'Cali' },
   {
     eanTienda: '7703670900405',
@@ -96,7 +96,7 @@ export const TIENDAS: Array<TiendaCatalogo> = [
   { eanTienda: '7703670901402', nombre: 'SODIMAC - IBAGUE', ciudad: 'Ibagué' },
 ]
 
-export const CLIENTES: Array<string> = [
+export const CLIENTS: Array<string> = [
   'Cali Sur',
   'Bogotá Norte',
   'Bloque Cero S.A.S.',
@@ -109,7 +109,7 @@ export const CLIENTES: Array<string> = [
   'Manizales Centro',
 ]
 
-export const PRODUCTOS: Array<ProductoCatalogo> = [
+export const PRODUCTS: Array<ProductCatalogEntry> = [
   {
     eanSku: '7703670004288',
     descripcion: 'MALLA ESLABONADA 1.8x10m METAL 2.1/4x2.1/4 2.5 mm',

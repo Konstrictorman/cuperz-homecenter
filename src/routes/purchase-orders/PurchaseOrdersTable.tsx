@@ -16,16 +16,18 @@ export interface PurchaseOrder {
 
 interface PurchaseOrdersTableProps {
   rows: PurchaseOrder[]
+  loading?: boolean
   onViewDetail?: (order: PurchaseOrder) => void
 }
 
 const PurchaseOrdersTable = ({
   rows,
+  loading,
   onViewDetail,
 }: PurchaseOrdersTableProps) => {
   const columns = usePurchaseOrdersColumns(onViewDetail)
 
-  return <DataTable rows={rows} columns={columns} />
+  return <DataTable rows={rows} columns={columns} loading={loading} />
 }
 
 export default PurchaseOrdersTable

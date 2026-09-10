@@ -1,11 +1,11 @@
-// Handlers for § 3 — Bitácora de Integración (transversal).
+// Handlers for § 3 — Integration Log (shared across all three processes).
 
 import { HttpResponse, http } from 'msw'
 import { API, apiError, latency, readPageParams, withinRange } from './shared'
 import { db, paginate } from '../data/db'
-import type { IntegracionLogResumen } from '#/api/types'
+import type { IntegrationLogSummary } from '#/api/types'
 
-export const bitacoraHandlers = [
+export const integrationLogHandlers = [
   // § 3.2
   http.get(`${API}/integracion-log`, async ({ request }) => {
     await latency()
@@ -16,7 +16,7 @@ export const bitacoraHandlers = [
     const fechaDesde = url.searchParams.get('fechaDesde')
     const fechaHasta = url.searchParams.get('fechaHasta')
 
-    const rows: Array<IntegracionLogResumen> = db.logs
+    const rows: Array<IntegrationLogSummary> = db.logs
       .filter((l) => (tipo ? l.tipo === tipo : true))
       .filter((l) => (estado ? l.estado === estado : true))
       .filter((l) => withinRange(l.fecha.slice(0, 10), fechaDesde, fechaHasta))
