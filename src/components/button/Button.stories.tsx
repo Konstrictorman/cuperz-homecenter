@@ -8,7 +8,7 @@ const meta = {
   argTypes: {
     color: {
       control: 'select',
-      options: ['info', 'success', 'error', 'warning'],
+      options: ['info', 'success', 'error', 'warning', 'default', 'neutral'],
     },
     variant: {
       control: 'select',
@@ -19,8 +19,10 @@ const meta = {
     docs: {
       description: {
         component: `
-Wraps MUI's \`Button\`, restricting \`color\` to a closed set of four
-semantic variants: \`info\`, \`success\`, \`error\`, \`warning\`.
+Wraps MUI's \`Button\`, restricting \`color\` to a closed set of six
+variants: the semantic \`info\`, \`success\`, \`error\`, \`warning\`, plus
+\`default\` (a low-key teal) and \`neutral\` (a plain grey) for
+lower-emphasis actions.
 
 Colors come straight from the MUI theme's palette (\`src/theme/index.ts\`),
 which carries both light and dark colour schemes, so this component needs
@@ -72,6 +74,22 @@ export const Warning: Story = {
   },
 }
 
+export const Default: Story = {
+  args: {
+    color: 'default',
+    variant: 'outlined',
+    children: 'About This Starter',
+  },
+}
+
+export const Neutral: Story = {
+  args: {
+    color: 'neutral',
+    variant: 'contained',
+    children: 'Router Guide',
+  },
+}
+
 export const AllVariants: Story = {
   args: {
     color: 'info',
@@ -100,6 +118,12 @@ export const AllVariants: Story = {
           </Button>
           <Button color="warning" variant={variant}>
             Warning
+          </Button>
+          <Button color="default" variant={variant}>
+            Default
+          </Button>
+          <Button color="neutral" variant={variant}>
+            Neutral
           </Button>
         </div>
       ))}

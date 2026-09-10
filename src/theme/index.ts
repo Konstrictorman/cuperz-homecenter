@@ -6,6 +6,24 @@ declare module '@mui/material/styles' {
   interface CssThemeVariables {
     enabled: true
   }
+  // Two extra palette colours beyond MUI's semantic set, used by `<Button>`:
+  // `default` (a low-key teal) and `neutral` (a plain grey). Both carry a full
+  // light/dark colour scheme like the built-ins.
+  interface Palette {
+    default: Palette['primary']
+    neutral: Palette['primary']
+  }
+  interface PaletteOptions {
+    default?: PaletteOptions['primary']
+    neutral?: PaletteOptions['primary']
+  }
+}
+
+declare module '@mui/material/Button' {
+  interface ButtonPropsColorOverrides {
+    default: true
+    neutral: true
+  }
 }
 
 /**
@@ -64,6 +82,20 @@ const lightPalette = {
     light: '#85e5a8',
     contrastText: '#ffffff',
   },
+  // Low-key teal — matches the aqua accent in the reference button design.
+  default: {
+    main: '#931a1e', // --color-teal-800
+    dark: '#0f4d46', // --color-teal-900
+    light: '#83e8dc', // --color-teal-300
+    contrastText: '#ffffff',
+  },
+  // Plain grey for the lowest-emphasis action.
+  neutral: {
+    main: '#6b6b6b', // --color-grey-500
+    dark: '#575757', // --color-grey-700
+    light: '#b5b5b5', // --color-grey-300
+    contrastText: '#ffffff', // --color-grey-1000
+  },
   text: {
     primary: '#2e2e2e',
     secondary: '#6b6b6b',
@@ -121,6 +153,20 @@ const darkPalette = {
     dark: '#19bd56',
     light: '#85e5a8',
     contrastText: '#ffffff',
+  },
+  // Low-key teal — matches the aqua accent in the reference button design.
+  default: {
+    main: '#766064', // --color-teal-300
+    dark: '#15c1ae', // --color-teal-600
+    light: '#b7ebe5', // --color-teal-200
+    contrastText: '#ffffff', // --color-teal-1000
+  },
+  // Plain grey for the lowest-emphasis action.
+  neutral: {
+    main: '#d1d1d1', // --color-grey-400
+    dark: '#808080', // --color-grey-500
+    light: '#d1d1d1', // --color-grey-200
+    contrastText: '#1a1a1a', // --color-grey-1000
   },
   text: {
     primary: '#ffffff',

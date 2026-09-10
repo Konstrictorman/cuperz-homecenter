@@ -157,7 +157,15 @@ const ToolBar = ({
 
         <div className="tool-bar__actions">
           {actions.map(
-            ({ key, label, icon, onClick, disabled, color, iconOnly }) => {
+            ({
+              key,
+              label,
+              icon,
+              onClick,
+              disabled,
+              color = 'neutral',
+              iconOnly,
+            }) => {
               // `iconOnly` is honored as-is; the mobile auto-collapse only
               // applies to actions that actually have an icon to show, so an
               // icon-less action keeps its label instead of rendering empty.

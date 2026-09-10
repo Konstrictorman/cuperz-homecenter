@@ -1,4 +1,4 @@
-import DeleteIcon from '@mui/icons-material/Delete'
+import AutorenewOutlinedIcon from '@mui/icons-material/AutorenewOutlined'
 import DownloadIcon from '@mui/icons-material/Download'
 import { useState } from 'react'
 import type { GridRowSelectionModel } from '@mui/x-data-grid'
@@ -71,11 +71,10 @@ const PurchaseOrdersTable = ({
             onClick: () => console.log('Exportar', selection),
           },
           {
-            key: 'delete',
-            label: 'Eliminar',
-            color: 'warning',
-            icon: <DeleteIcon fontSize="small" />,
-            onClick: () => console.log('Eliminar', selection),
+            key: 'retry',
+            label: 'Reintentar',
+            icon: <AutorenewOutlinedIcon fontSize="small" />,
+            onClick: () => console.log('Reintentar', selection),
           },
         ]}
       />

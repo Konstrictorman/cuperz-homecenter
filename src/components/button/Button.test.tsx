@@ -16,17 +16,18 @@ describe('Button', () => {
     expect(screen.getByRole('button')).toHaveClass('button', 'button--info')
   })
 
-  it.each<ButtonColor>(['info', 'success', 'error', 'warning'])(
-    'applies the %s color class',
-    (color) => {
-      render(<Button color={color}>Guardar</Button>)
+  it.each<ButtonColor>([
+    'info',
+    'success',
+    'error',
+    'warning',
+    'default',
+    'neutral',
+  ])('applies the %s color class', (color) => {
+    render(<Button color={color}>Guardar</Button>)
 
-      expect(screen.getByRole('button')).toHaveClass(
-        'button',
-        `button--${color}`,
-      )
-    },
-  )
+    expect(screen.getByRole('button')).toHaveClass('button', `button--${color}`)
+  })
 
   it('merges a custom className with the base classes', () => {
     render(<Button className="extra-class">Guardar</Button>)
