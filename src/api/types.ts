@@ -61,6 +61,7 @@ export interface PurchaseOrderSummary {
   ciudadEntrega: string
   cantidadTiendas: number
   cantidadTotalSolicitada: number
+  costoTotalOc: number
   estado: OrderStatus
   /** Raw `FECHA_TRANSMISION`. */
   fechaTransmision: IsoDate

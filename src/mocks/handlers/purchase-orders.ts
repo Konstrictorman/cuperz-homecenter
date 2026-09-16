@@ -35,6 +35,7 @@ function toSummary(order: PurchaseOrderRecord): PurchaseOrderSummary {
     ciudadEntrega: order.ciudadEntrega,
     cantidadTiendas: distinctStoreCount(order),
     cantidadTotalSolicitada: totalRequested(order),
+    costoTotalOc: order.costoTotalOc,
     estado: order.estado,
     fechaTransmision: order.fechaTransmision,
     ultimaActualizacion: order.ultimaActualizacion,
@@ -90,7 +91,11 @@ function filterPurchaseOrders(url: URL): Array<PurchaseOrderRecord> {
     .filter((o) => (ordenCompra ? o.ordenCompra.includes(ordenCompra) : true))
     .filter((o) => (estado ? o.estado === estado : true))
     .filter((o) =>
-      withinRange(o.fechaTransmision, fechaTransmisionDesde, fechaTransmisionHasta),
+      withinRange(
+        o.fechaTransmision,
+        fechaTransmisionDesde,
+        fechaTransmisionHasta,
+      ),
     )
     .filter((o) =>
       storeEan

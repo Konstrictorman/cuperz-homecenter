@@ -1,0 +1,474 @@
+{
+  "Estado": true,
+  "Mensaje": "Sentencia ejecutada con éxito.",
+  "Value": [
+    {
+      "ORDEN_COMPRA": 12174949,
+      "CANTIDAD_TOT_OC": 317,
+      "COSTO_TOT_OC": 22062827.84,
+      "FECHA_CANCELACION": "",
+      "STICKER": "262200481869",
+      "ESTADO_OC": "1-PENDIENTE",
+      "TRANSPORTADORA": "7-LOGISTICA PROPIA",
+      "FECHA_MIN_ENTREGA": "30/08/2023 00:00:00",
+      "FECHA_MAX_ENTREGA": "30/08/2023 00:00:00",
+      "TIPO_OC": "4-Venta Empresa",
+      "CODIGO_SESION_RECIBO": -1,
+      "FECHA_TRANSMISION": "",
+      "NOTA_PEDIDO": "22-298975",
+      "CLIENTE": "BLOQUE CERO S.A.S.  ",
+      "CEDULA": "9000691641001",
+      "EMAIL_CLIENTE": "dir.administrativo@bloquecero.com",
+      "TELEFONO_CLIENTE": "0",
+      "BARRIO_ENTREGA": "TUNJA",
+      "CIUDAD_ENTREGA": "TUNJA",
+      "DEPARTAMENTO_ENTREGA": "BOYACA",
+      "DIRECCION_ENTREGA": "CRA 12 N27-31",
+      "BARRIO_FAC": "TUNJA",
+      "CIUDAD_FAC": "TUNJA",
+      "DEPARTAMENTO_FAC": "BOYACA",
+      "DIRECCION_FAC": "AV UNIVERSITARIA N 52-51 LOTE A",
+      "TIENDA_VENTA": "7703670901228",
+      "TIENDA_FACTURACION": "7703670901228",
+      "PUNTO_ENTREGA": "7703670612193",
+      "TIPO_DOCUMENTO": 1,
+      "LOCALIDAD": "7703670901228",
+      "FECHA_PAGO": "12/07/2023 12:00:00 a. m.",
+      "EAN_EMPRESA_COMPRADORA": "7703670900009",
+      "TIPO_DE_ORDEN": "ENTREGA_DIRECTA",
+      "TIPO_ENTREGA": "RETAIL",
+      "CODIGO_DANE_CE": "15001",
+      "NEGOCIACION": "",
+      "VALOR_NEGOCIACION_VE": "",
+      "TIPO_ENTREGA_VE": "",
+      "CEDULA_VE": "9000691641001",
+      "OBSERVACIONES": "TUNJA",
+      "FECHA_NEGOCIACION_VE": "",
+      "CIUDAD_VE": "TUNJA",
+      "DIRECCION_VE": "CRA 12 N27-31",
+      "NIT_CONSTRUCTOR": "9000691641001",
+      "OBSERVACIONES_NPC": "FAVOR ENTREGAR EN LA DIRECCION Cra 12 N27-31, HOSTAL ZAFIRO TUNJA BOYACA. CONTACTO DE ENTREGA:MARTHA REYES. CEL:3214520301. HORARIO: L A V 8AM A 12M Y 2PM A 4PM. FAVOR LLAMAR ANTES DEL DESPACHAR.",
+      "OBSERVACIONES_NPL": "ESPECIALVE-262200481869-298975-22-TUNJA-CRA 12 N27-31-TUNJA-FAVOR ENTREGAR EN LA DIRECCION Cra 12 N27-31, HOSTAL ZAFIRO TUNJA BOYACA. CONTACTO DE ENTREGA:MARTHA REYES. CEL:3214520301. HORARIO: L A V 8AM A 12M Y 2PM A 4PM. ENTREGA INMEDIATA.",
+      "CLIENTE_RECIBE": "MARTHA REYES",
+      "DEPARTAMENTO_VE": "",
+      "BARRIO_VE": "TUNJA",
+      "TELEFONO_VE": "57-4-0000000",
+      "PRODUCTOS": [
+        {
+          "SKU": "478618",
+          "PRODUCTO": "PISO CERAMICA CALAMA MULTIC CD 51X51 cm CJ 1.82 m2",
+          "EAN_PRODUCTO": 7702933053193,
+          "CANTIDAD_SKU": 11,
+          "CANTIDAD_CANCELADA": 0,
+          "COSTO_SKU": 43654.52,
+          "CANTIDAD_DEVUELTA_SKU": 0,
+          "ESTADO_SKU": "1-PENDIENTE",
+          "CONDICION_PAGO": "30 Dias                  ",
+          "DESCUENTO_SKU": 22.06,
+          "UNIDAD_VENTA": "UND   ",
+          "TIENDAS": [
+            {
+              "EAN_TIENDA": "0",
+              "NOMBRE_TIENDA": "",
+              "CANTIDAD": 0
+            }
+          ]
+        },
+        {
+          "SKU": "297474",
+          "PRODUCTO": "PARED SALMA PLANA BEIGE 25x35 cm Cj2 m2",
+          "EAN_PRODUCTO": 7702933033508,
+          "CANTIDAD_SKU": 49,
+          "CANTIDAD_CANCELADA": 0,
+          "COSTO_SKU": 42034,
+          "CANTIDAD_DEVUELTA_SKU": 0,
+          "ESTADO_SKU": "1-PENDIENTE",
+          "CONDICION_PAGO": "30 Dias                  ",
+          "DESCUENTO_SKU": 12,
+          "UNIDAD_VENTA": "UND   ",
+          "TIENDAS": [
+            {
+              "EAN_TIENDA": "0",
+              "NOMBRE_TIENDA": "",
+              "CANTIDAD": 0
+            }
+          ]
+        },
+        {
+          "SKU": "643093",
+          "PRODUCTO": "MP PISO ALAMO TABACO CD 20X92 cm CJ/X 1.14M2 l",
+          "EAN_PRODUCTO": 7702933064328,
+          "CANTIDAD_SKU": 14,
+          "CANTIDAD_CANCELADA": 0,
+          "COSTO_SKU": 47526.6,
+          "CANTIDAD_DEVUELTA_SKU": 0,
+          "ESTADO_SKU": "1-PENDIENTE",
+          "CONDICION_PAGO": "30 Dias                  ",
+          "DESCUENTO_SKU": 11.95,
+          "UNIDAD_VENTA": "UND   ",
+          "TIENDAS": [
+            {
+              "EAN_TIENDA": "0",
+              "NOMBRE_TIENDA": "",
+              "CANTIDAD": 0
+            }
+          ]
+        },
+        {
+          "SKU": "237592",
+          "PRODUCTO": "GRIFERIA LVM MONO BAJO KORAL",
+          "EAN_PRODUCTO": 7706157004474,
+          "CANTIDAD_SKU": 2,
+          "CANTIDAD_CANCELADA": 0,
+          "COSTO_SKU": 90152,
+          "CANTIDAD_DEVUELTA_SKU": 0,
+          "ESTADO_SKU": "1-PENDIENTE",
+          "CONDICION_PAGO": "30 Dias                  ",
+          "DESCUENTO_SKU": 7.65,
+          "UNIDAD_VENTA": "UND   ",
+          "TIENDAS": [
+            {
+              "EAN_TIENDA": "0",
+              "NOMBRE_TIENDA": "",
+              "CANTIDAD": 0
+            }
+          ]
+        },
+        {
+          "SKU": "279314",
+          "PRODUCTO": "SP BARRA DE SEGURIDAD 24pulg LT",
+          "EAN_PRODUCTO": 7706157009110,
+          "CANTIDAD_SKU": 2,
+          "CANTIDAD_CANCELADA": 0,
+          "COSTO_SKU": 95247,
+          "CANTIDAD_DEVUELTA_SKU": 0,
+          "ESTADO_SKU": "1-PENDIENTE",
+          "CONDICION_PAGO": "30 Dias                  ",
+          "DESCUENTO_SKU": 4.14,
+          "UNIDAD_VENTA": "UND   ",
+          "TIENDAS": [
+            {
+              "EAN_TIENDA": "0",
+              "NOMBRE_TIENDA": "",
+              "CANTIDAD": 0
+            }
+          ]
+        },
+        {
+          "SKU": "294800",
+          "PRODUCTO": "SP ACCESORIOS BANO BARRA DE SEGURIDAD PLEGABLE LT",
+          "EAN_PRODUCTO": 7706157009141,
+          "CANTIDAD_SKU": 2,
+          "CANTIDAD_CANCELADA": 0,
+          "COSTO_SKU": 389647,
+          "CANTIDAD_DEVUELTA_SKU": 0,
+          "ESTADO_SKU": "1-PENDIENTE",
+          "CONDICION_PAGO": "30 Dias                  ",
+          "DESCUENTO_SKU": 22.06,
+          "UNIDAD_VENTA": "UND   ",
+          "TIENDAS": [
+            {
+              "EAN_TIENDA": "0",
+              "NOMBRE_TIENDA": "",
+              "CANTIDAD": 0
+            }
+          ]
+        },
+        {
+          "SKU": "68685",
+          "PRODUCTO": "LAVAMANOS COLGAR ACUACER BLANCO",
+          "EAN_PRODUCTO": 7705361280254,
+          "CANTIDAD_SKU": 2,
+          "CANTIDAD_CANCELADA": 0,
+          "COSTO_SKU": 46986,
+          "CANTIDAD_DEVUELTA_SKU": 0,
+          "ESTADO_SKU": "1-PENDIENTE",
+          "CONDICION_PAGO": "30 Dias                  ",
+          "DESCUENTO_SKU": 4.18,
+          "UNIDAD_VENTA": "UND   ",
+          "TIENDAS": [
+            {
+              "EAN_TIENDA": "0",
+              "NOMBRE_TIENDA": "",
+              "CANTIDAD": 0
+            }
+          ]
+        },
+        {
+          "SKU": "277351",
+          "PRODUCTO": "SANITARIO POWER ONE",
+          "EAN_PRODUCTO": 7704372039387,
+          "CANTIDAD_SKU": 2,
+          "CANTIDAD_CANCELADA": 0,
+          "COSTO_SKU": 407274,
+          "CANTIDAD_DEVUELTA_SKU": 0,
+          "ESTADO_SKU": "1-PENDIENTE",
+          "CONDICION_PAGO": "30 Dias                  ",
+          "DESCUENTO_SKU": 22.97,
+          "UNIDAD_VENTA": "UND   ",
+          "TIENDAS": [
+            {
+              "EAN_TIENDA": "0",
+              "NOMBRE_TIENDA": "",
+              "CANTIDAD": 0
+            }
+          ]
+        },
+        {
+          "SKU": "35146",
+          "PRODUCTO": "GRAPAS LAVAMANOS GRV X 2 UND",
+          "EAN_PRODUCTO": 7706157675209,
+          "CANTIDAD_SKU": 2,
+          "CANTIDAD_CANCELADA": 0,
+          "COSTO_SKU": 11094,
+          "CANTIDAD_DEVUELTA_SKU": 0,
+          "ESTADO_SKU": "1-PENDIENTE",
+          "CONDICION_PAGO": "30 Dias                  ",
+          "DESCUENTO_SKU": 21.53,
+          "UNIDAD_VENTA": "UND   ",
+          "TIENDAS": [
+            {
+              "EAN_TIENDA": "0",
+              "NOMBRE_TIENDA": "",
+              "CANTIDAD": 0
+            }
+          ]
+        },
+        {
+          "SKU": "473144",
+          "PRODUCTO": "MP PISO PARED ESTR PET MARCD 30X60 cm CJ1.62 m2 LT",
+          "EAN_PRODUCTO": 7702933053766,
+          "CANTIDAD_SKU": 4,
+          "CANTIDAD_CANCELADA": 0,
+          "COSTO_SKU": 40679.82,
+          "CANTIDAD_DEVUELTA_SKU": 0,
+          "ESTADO_SKU": "1-PENDIENTE",
+          "CONDICION_PAGO": "30 Dias                  ",
+          "DESCUENTO_SKU": 30.61,
+          "UNIDAD_VENTA": "UND   ",
+          "TIENDAS": [
+            {
+              "EAN_TIENDA": "0",
+              "NOMBRE_TIENDA": "",
+              "CANTIDAD": 0
+            }
+          ]
+        },
+        {
+          "SKU": "576850",
+          "PRODUCTO": "VE PARED MARMOLIZADA TANA BEIGE 25X35 CJ 2 m2",
+          "EAN_PRODUCTO": 7702933041732,
+          "CANTIDAD_SKU": 98,
+          "CANTIDAD_CANCELADA": 0,
+          "COSTO_SKU": 41758,
+          "CANTIDAD_DEVUELTA_SKU": 0,
+          "ESTADO_SKU": "1-PENDIENTE",
+          "CONDICION_PAGO": "30 Dias                  ",
+          "DESCUENTO_SKU": 13.67,
+          "UNIDAD_VENTA": "UND   ",
+          "TIENDAS": [
+            {
+              "EAN_TIENDA": "0",
+              "NOMBRE_TIENDA": "",
+              "CANTIDAD": 0
+            }
+          ]
+        },
+        {
+          "SKU": "286688",
+          "PRODUCTO": "SP SILLA DE SEGURIDAD PLEGABLE DUCHA LT",
+          "EAN_PRODUCTO": 7706157009080,
+          "CANTIDAD_SKU": 1,
+          "CANTIDAD_CANCELADA": 0,
+          "COSTO_SKU": 759000,
+          "CANTIDAD_DEVUELTA_SKU": 0,
+          "ESTADO_SKU": "1-PENDIENTE",
+          "CONDICION_PAGO": "30 Dias                  ",
+          "DESCUENTO_SKU": 13.67,
+          "UNIDAD_VENTA": "UND   ",
+          "TIENDAS": [
+            {
+              "EAN_TIENDA": "0",
+              "NOMBRE_TIENDA": "",
+              "CANTIDAD": 0
+            }
+          ]
+        },
+        {
+          "SKU": "643042",
+          "PRODUCTO": "MP PISO PARED BOHIO MARFIL 41X92 cm CJ/X1.14M2 l",
+          "EAN_PRODUCTO": 7702933064526,
+          "CANTIDAD_SKU": 82,
+          "CANTIDAD_CANCELADA": 0,
+          "COSTO_SKU": 43494.42,
+          "CANTIDAD_DEVUELTA_SKU": 0,
+          "ESTADO_SKU": "1-PENDIENTE",
+          "CONDICION_PAGO": "30 Dias                  ",
+          "DESCUENTO_SKU": 12.5,
+          "UNIDAD_VENTA": "UND   ",
+          "TIENDAS": [
+            {
+              "EAN_TIENDA": "0",
+              "NOMBRE_TIENDA": "",
+              "CANTIDAD": 0
+            }
+          ]
+        },
+        {
+          "SKU": "625841",
+          "PRODUCTO": "VE COMBO ACUACER PLUS CON PEDESTAL BLANCO II",
+          "EAN_PRODUCTO": 7704372073091,
+          "CANTIDAD_SKU": 13,
+          "CANTIDAD_CANCELADA": 0,
+          "COSTO_SKU": 251620,
+          "CANTIDAD_DEVUELTA_SKU": 0,
+          "ESTADO_SKU": "1-PENDIENTE",
+          "CONDICION_PAGO": "30 Dias                  ",
+          "DESCUENTO_SKU": 13.88,
+          "UNIDAD_VENTA": "UND   ",
+          "TIENDAS": [
+            {
+              "EAN_TIENDA": "0",
+              "NOMBRE_TIENDA": "",
+              "CANTIDAD": 0
+            }
+          ]
+        },
+        {
+          "SKU": "321861",
+          "PRODUCTO": "GRIFERIA DUCHA 8pulg PALANCA ALUVIA LT",
+          "EAN_PRODUCTO": 7706157057388,
+          "CANTIDAD_SKU": 16,
+          "CANTIDAD_CANCELADA": 0,
+          "COSTO_SKU": 90806,
+          "CANTIDAD_DEVUELTA_SKU": 0,
+          "ESTADO_SKU": "1-PENDIENTE",
+          "CONDICION_PAGO": "30 Dias                  ",
+          "DESCUENTO_SKU": 28.41,
+          "UNIDAD_VENTA": "UND   ",
+          "TIENDAS": [
+            {
+              "EAN_TIENDA": "0",
+              "NOMBRE_TIENDA": "",
+              "CANTIDAD": 0
+            }
+          ]
+        },
+        {
+          "SKU": "311973",
+          "PRODUCTO": "VE KIT ACCESORIOS NILO X4 VE",
+          "EAN_PRODUCTO": 7706157049192,
+          "CANTIDAD_SKU": 2,
+          "CANTIDAD_CANCELADA": 0,
+          "COSTO_SKU": 38099,
+          "CANTIDAD_DEVUELTA_SKU": 0,
+          "ESTADO_SKU": "1-PENDIENTE",
+          "CONDICION_PAGO": "30 Dias                  ",
+          "DESCUENTO_SKU": 4.14,
+          "UNIDAD_VENTA": "UND   ",
+          "TIENDAS": [
+            {
+              "EAN_TIENDA": "0",
+              "NOMBRE_TIENDA": "",
+              "CANTIDAD": 0
+            }
+          ]
+        },
+        {
+          "SKU": "614684",
+          "PRODUCTO": "VE COMBO CONSTRUCTOR 4.8 LITROS II",
+          "EAN_PRODUCTO": 7704372072902,
+          "CANTIDAD_SKU": 15,
+          "CANTIDAD_CANCELADA": 0,
+          "COSTO_SKU": 226406,
+          "CANTIDAD_DEVUELTA_SKU": 0,
+          "ESTADO_SKU": "1-PENDIENTE",
+          "CONDICION_PAGO": "30 Dias                  ",
+          "DESCUENTO_SKU": 7.65,
+          "UNIDAD_VENTA": "UND   ",
+          "TIENDAS": [
+            {
+              "EAN_TIENDA": "0",
+              "NOMBRE_TIENDA": "",
+              "CANTIDAD": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "ORDEN_COMPRA": 12175804,
+      "CANTIDAD_TOT_OC": 250,
+      "COSTO_TOT_OC": 1543000,
+      "FECHA_CANCELACION": "",
+      "STICKER": "-1",
+      "ESTADO_OC": "1-PENDIENTE",
+      "TRANSPORTADORA": "7-LOGISTICA PROPIA",
+      "FECHA_MIN_ENTREGA": "",
+      "FECHA_MAX_ENTREGA": "",
+      "TIPO_OC": "4-Venta Empresa",
+      "CODIGO_SESION_RECIBO": -1,
+      "FECHA_TRANSMISION": "",
+      "NOTA_PEDIDO": "",
+      "CLIENTE": "",
+      "CEDULA": "",
+      "EMAIL_CLIENTE": "",
+      "TELEFONO_CLIENTE": "",
+      "BARRIO_ENTREGA": "",
+      "CIUDAD_ENTREGA": "",
+      "DEPARTAMENTO_ENTREGA": "",
+      "DIRECCION_ENTREGA": "",
+      "BARRIO_FAC": "",
+      "CIUDAD_FAC": "",
+      "DEPARTAMENTO_FAC": "",
+      "DIRECCION_FAC": "",
+      "TIENDA_VENTA": "7703670900801",
+      "TIENDA_FACTURACION": "7703670900801",
+      "PUNTO_ENTREGA": "7703670900801",
+      "TIPO_DOCUMENTO": -1,
+      "LOCALIDAD": "7703670900801",
+      "FECHA_PAGO": "",
+      "EAN_EMPRESA_COMPRADORA": "7703670900009",
+      "TIPO_DE_ORDEN": "ENTREGA_DIRECTA",
+      "TIPO_ENTREGA": "RETAIL",
+      "CODIGO_DANE_CE": "11001",
+      "NEGOCIACION": "4443",
+      "VALOR_NEGOCIACION_VE": "2376750",
+      "TIPO_ENTREGA_VE": "PROV. CLIENTE",
+      "CEDULA_VE": "8902117779002",
+      "OBSERVACIONES": "Avda. 68 Sur Bogota",
+      "FECHA_NEGOCIACION_VE": "07/11/2023 14:10:01",
+      "CIUDAD_VE": "BOGOTA. D.C.",
+      "DIRECCION_VE": "Ac 170 Nº 69 – 47 23001202",
+      "NIT_CONSTRUCTOR": "8902117779002",
+      "OBSERVACIONES_NPC": "",
+      "OBSERVACIONES_NPL": "ESPECIALVE--4443-80-BOGOTA. D.C.-Ac 170 N¿ 69 \u0013 47 23001202--Alexander Puerto-+57 3125238850-Recibe Alexander Puerto 3125238850 Ac 170 N¿ 69 \u0013 47 23001202 horario de lunes a vernes de 8 am a 4 pm ingresa carro sencillo o dobletroque Pedido Urgente -31-ago.-2023",
+      "CLIENTE_RECIBE": "",
+      "DEPARTAMENTO_VE": "CUNDINAMARCA",
+      "BARRIO_VE": "",
+      "TELEFONO_VE": "57-1-7455565",
+      "PRODUCTOS": [
+        {
+          "SKU": "454648",
+          "PRODUCTO": "MP HUELLA PIEDRA BEIGE CD30X30cm LT",
+          "EAN_PRODUCTO": 7705361916573,
+          "CANTIDAD_SKU": 250,
+          "CANTIDAD_CANCELADA": 0,
+          "COSTO_SKU": 6172,
+          "CANTIDAD_DEVUELTA_SKU": 0,
+          "ESTADO_SKU": "1-PENDIENTE",
+          "CONDICION_PAGO": "30 Dias                  ",
+          "DESCUENTO_SKU": 0,
+          "UNIDAD_VENTA": "UND   ",
+          "TIENDAS": [
+            {
+              "EAN_TIENDA": "0",
+              "NOMBRE_TIENDA": "",
+              "CANTIDAD": 0
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

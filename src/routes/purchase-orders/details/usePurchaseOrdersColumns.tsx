@@ -19,6 +19,16 @@ export const usePurchaseOrdersColumns = (
         headerAlign: 'center',
       },
       {
+        field: 'fechaTransmision',
+        headerName: 'Fecha',
+        flex: 1,
+        minWidth: 130,
+        align: 'center',
+        headerAlign: 'center',
+        valueFormatter: (value: PurchaseOrder['fechaTransmision']) =>
+          value ? value.slice(0, 10) : '',
+      },
+      {
         field: 'cliente',
         headerName: 'Cliente',
         flex: 1.5,
@@ -49,6 +59,16 @@ export const usePurchaseOrdersColumns = (
         width: 120,
         headerAlign: 'center',
         align: 'center',
+      },
+      {
+        field: 'costoTotalOc',
+        headerName: 'Costo Total',
+        type: 'number',
+        width: 140,
+        headerAlign: 'center',
+        align: 'center',
+        valueFormatter: (value: PurchaseOrder['costoTotalOc']) =>
+          `$${Math.round(value).toLocaleString('en-US')}`,
       },
       {
         field: 'estado',

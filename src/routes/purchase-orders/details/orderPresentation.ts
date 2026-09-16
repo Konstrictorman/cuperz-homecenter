@@ -62,6 +62,7 @@ export function toPurchaseOrderRow(o: PurchaseOrderSummary): PurchaseOrder {
     ciudadEntrega: o.ciudadEntrega,
     tiendas: o.cantidadTiendas,
     cantidadTotal: o.cantidadTotalSolicitada,
+    costoTotalOc: o.costoTotalOc,
     estadoTone: ui.tone,
     estadoLabel: ui.label,
     fechaTransmision: o.fechaTransmision,
