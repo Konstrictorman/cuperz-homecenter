@@ -1,6 +1,6 @@
 # SPEC 00 — Purchase order response alignment
 
-> **Status:** Approved
+> **Status:** Implemented
 > **Depends on:** None
 > **Date:** 2026-09-15
 > **Objective:** Rewrite the Órdenes de Compra endpoint documentation and the platform's `PurchaseOrderDetail`/`PurchaseOrderLineItem` types to match a real `GetOrdenesDeCompra` response field-for-field, including the Producto→Tienda nesting Homecenter actually uses.
