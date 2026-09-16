@@ -1,6 +1,6 @@
 # SPEC 01 — Purchase order status handling
 
-> **Status:** Draft
+> **Status:** Approved
 > **Depends on:** None
 > **Date:** 2026-09-15
 > **Objective:** Give every `OrderStatus`/`OrderLineStatus` value its own distinct `StatusBadge` tone.
