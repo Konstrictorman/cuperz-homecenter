@@ -63,15 +63,15 @@ function toResult(notice: DispatchNoticeRecord): DispatchNoticeResult {
   }
 }
 
-/** Requested qty per `eanTienda|eanSku`, taken from the order. */
+/** Requested qty per `eanTienda|eanSku`, taken from the order. Homecenter's
+ *  own hierarchy nests this the other way (productos[].tiendas[]) — the
+ *  per-store allocation lives on `tienda.cantidad`, not the line's
+ *  order-wide `cantidadSolicitada`, since a line can span several stores. */
 function requestedQtyMap(order: PurchaseOrderRecord): Map<string, number> {
   const map = new Map<string, number>()
-  for (const store of order.tiendas) {
-    for (const product of store.productos) {
-      map.set(
-        `${store.eanTienda}|${product.eanSku}`,
-        product.cantidadSolicitada,
-      )
+  for (const product of order.productos) {
+    for (const tienda of product.tiendas) {
+      map.set(`${tienda.eanTienda}|${product.eanSku}`, tienda.cantidad)
     }
   }
   return map

@@ -7,16 +7,31 @@
 // (types, functions, variables) are in English.
 
 import { faker } from '@faker-js/faker'
-import { CLIENTS, DELIVERY_POINTS, PRODUCTS, STORES } from './catalog'
+import {
+  CARRIERS,
+  CLIENTS,
+  DELIVERY_CHANNELS,
+  DELIVERY_POINTS,
+  ORDER_FULFILLMENT_TYPES,
+  ORDER_TYPES,
+  PAYMENT_CONDITIONS,
+  PRODUCTS,
+  SALE_UNITS,
+  STORES,
+} from './catalog'
+import type { StoreCatalogEntry } from './catalog'
 import type {
   DispatchNoticeAttempt,
   DispatchNoticeStatus,
   DispatchNoticeStoreInput,
   HomecenterResult,
   IntegrationLogDetail,
+  IsoDateTime,
   OrderLineStatus,
   OrderStatus,
-  PurchaseOrderStore,
+  PurchaseOrderBillingAddress,
+  PurchaseOrderLineItem,
+  PurchaseOrderLineStore,
 } from '#/api/types'
 
 // --- Record shapes (superset of the API DTOs) ---
@@ -27,11 +42,37 @@ export interface PurchaseOrderRecord {
   cliente: string
   ciudadEntrega: string
   direccionEntrega: string
+  barrioEntrega: string
+  departamentoEntrega: string
+  codigoDaneEntrega: string
+  facturacion: PurchaseOrderBillingAddress
   estado: OrderStatus
   codigoSesionRecibo: string | null
   fechaOrden: string
   ultimaActualizacion: string
-  tiendas: Array<PurchaseOrderStore>
+  productos: Array<PurchaseOrderLineItem>
+  costoTotalOc: number
+  transportadora: string
+  fechaMinEntrega: IsoDateTime | null
+  fechaMaxEntrega: IsoDateTime | null
+  fechaCancelacion: IsoDateTime | null
+  sticker: string | null
+  tipoOc: string
+  tipoDocumento: string | null
+  notaPedido: string
+  cedulaComprador: string
+  emailCliente: string
+  telefonoCliente: string
+  clienteRecibe: string
+  eanTiendaVenta: string
+  eanTiendaFacturacion: string
+  localidad: string
+  eanEmpresaCompradora: string
+  tipoDeOrden: string
+  tipoEntrega: string
+  observaciones: string
+  observacionesNpc: string
+  observacionesNpl: string
   /** Reprocessing attempts (§ 1.4). */
   intentos: number
   maxIntentos: number
@@ -76,6 +117,18 @@ function isoDate(d: Date): string {
 
 function isoDateTime(d: Date): string {
   return d.toISOString().replace(/\.\d{3}Z$/, 'Z')
+}
+
+/** Reformats one of our own ISO datetimes back into Homecenter's
+ *  "dd/mm/yyyy HH:mm:ss" shape, for the mock's Homecenter-echo payload only
+ *  (`hc_integracion_log` stores the exact raw exchange, unprocessed — this
+ *  is not date-transformation logic the frontend performs; the platform's
+ *  own API never returns anything but ISO, per
+ *  docs/especificacion-endpoints-backend (2).md, "Convenciones generales"). */
+function toHomecenterFecha24h(iso: IsoDateTime): string {
+  const [date, time] = iso.replace('Z', '').split('T')
+  const [year, month, day] = date.split('-')
+  return `${day}/${month}/${year} ${time}`
 }
 
 export function paginate<T>(rows: Array<T>, page = 1, pageSize = 20) {
@@ -133,37 +186,89 @@ function pickStores(count: number) {
   return faker.helpers.arrayElements(STORES, count)
 }
 
-function buildPurchaseOrderStores(
+/** Splits `total` across `stores.length` entries so they sum back to `total`
+ *  exactly — a mock-data design choice, not a confirmed Homecenter invariant
+ *  (see specs/00-purchase-order-response-update.md § Decisions). */
+function splitQuantityAcrossStores(
+  total: number,
+  stores: Array<StoreCatalogEntry>,
+): Array<PurchaseOrderLineStore> {
+  if (stores.length === 1) {
+    return [
+      {
+        eanTienda: stores[0].eanTienda,
+        nombreTienda: stores[0].nombre,
+        cantidad: total,
+      },
+    ]
+  }
+  const cuts = new Set<number>()
+  while (cuts.size < stores.length - 1) {
+    cuts.add(faker.number.int({ min: 1, max: total - 1 }))
+  }
+  const boundaries = [0, ...Array.from(cuts).sort((a, b) => a - b), total]
+  return stores.map((store, i) => ({
+    eanTienda: store.eanTienda,
+    nombreTienda: store.nombre,
+    cantidad: boundaries[i + 1] - boundaries[i],
+  }))
+}
+
+function buildPurchaseOrderLines(
   status: OrderStatus,
-): Array<PurchaseOrderStore> {
-  const stores = pickStores(faker.number.int({ min: 1, max: 3 }))
-  return stores.map((store) => {
-    const products = faker.helpers
-      .arrayElements(PRODUCTS, faker.number.int({ min: 1, max: 4 }))
-      .map((product) => {
-        const cantidadSolicitada = faker.number.int({ min: 10, max: 400 })
-        const cancelledQty =
-          status === 'CON_ERROR' && faker.datatype.boolean(0.4)
-            ? faker.number.int({
-                min: 1,
-                max: Math.floor(cantidadSolicitada / 4),
-              })
-            : 0
-        let estadoLinea: OrderLineStatus = 'PENDIENTE'
-        if (status === 'DESPACHADA') estadoLinea = 'DESPACHADA'
-        else if (status === 'PROCESANDO') estadoLinea = 'PARCIAL'
-        else if (status === 'CON_ERROR') estadoLinea = 'SUPERA_SOLICITADO'
-        return {
-          eanSku: product.eanSku,
-          descripcion: product.descripcion,
-          cantidadSolicitada,
-          cantidadCancelada: cancelledQty,
-          cantidadDevuelta: 0,
-          estadoLinea,
-        }
-      })
-    return { eanTienda: store.eanTienda, productos: products }
+): Array<PurchaseOrderLineItem> {
+  const products = faker.helpers.arrayElements(
+    PRODUCTS,
+    faker.number.int({ min: 1, max: 4 }),
+  )
+  return products.map((product) => {
+    const cantidadSolicitada = faker.number.int({ min: 10, max: 400 })
+    const cancelledQty =
+      status === 'CON_ERROR' && faker.datatype.boolean(0.4)
+        ? faker.number.int({
+            min: 1,
+            max: Math.floor(cantidadSolicitada / 4),
+          })
+        : 0
+    let estadoLinea: OrderLineStatus = 'PENDIENTE'
+    if (status === 'DESPACHADA') estadoLinea = 'DESPACHADA'
+    else if (status === 'PROCESANDO') estadoLinea = 'PARCIAL'
+    else if (status === 'CON_ERROR') estadoLinea = 'SUPERA_SOLICITADO'
+
+    const stores = pickStores(faker.number.int({ min: 1, max: 3 }))
+
+    return {
+      eanSku: product.eanSku,
+      skuHomecenter: product.skuHomecenter,
+      descripcion: product.descripcion,
+      cantidadSolicitada,
+      cantidadCancelada: cancelledQty,
+      cantidadDevuelta: 0,
+      estadoLinea,
+      costoUnitario: product.costoUnitario,
+      condicionPago: faker.helpers.arrayElement(PAYMENT_CONDITIONS),
+      descuentoSku: faker.number.float({ min: 0, max: 30, fractionDigits: 2 }),
+      unidadVenta: faker.helpers.arrayElement(SALE_UNITS),
+      tiendas: splitQuantityAcrossStores(cantidadSolicitada, stores),
+    }
   })
+}
+
+/** Regroups the (products-first) line items by store — dispatch notices need
+ *  a per-store view, so this transposes the platform's own wire shape back
+ *  for that one consumer instead of storing the data twice. */
+function groupOrderLinesByTienda(
+  productos: Array<PurchaseOrderLineItem>,
+): Array<{ eanTienda: string; items: Array<{ eanSku: string; cantidad: number }> }> {
+  const byTienda = new Map<string, Array<{ eanSku: string; cantidad: number }>>()
+  for (const producto of productos) {
+    for (const tienda of producto.tiendas) {
+      const items = byTienda.get(tienda.eanTienda) ?? []
+      items.push({ eanSku: producto.eanSku, cantidad: tienda.cantidad })
+      byTienda.set(tienda.eanTienda, items)
+    }
+  }
+  return Array.from(byTienda, ([eanTienda, items]) => ({ eanTienda, items }))
 }
 
 function makePurchaseOrder(
@@ -173,12 +278,30 @@ function makePurchaseOrder(
   const deliveryPoint = faker.helpers.arrayElement(DELIVERY_POINTS)
   const orderDate = faker.date.recent({ days: 45 })
   const updatedAt = faker.date.between({ from: orderDate, to: new Date() })
+  const minEntrega = faker.date.soon({ days: 10, refDate: orderDate })
+  const maxEntrega = faker.date.soon({ days: 5, refDate: minEntrega })
+  const productos = buildPurchaseOrderLines(status)
+  const costoTotalOc = productos.reduce(
+    (sum, p) => sum + p.costoUnitario * p.cantidadSolicitada,
+    0,
+  )
+  const departamento = faker.location.state()
+
   return {
     ordenCompra,
     eanPuntoEntrega: deliveryPoint.ean,
     cliente: faker.helpers.arrayElement(CLIENTS),
     ciudadEntrega: deliveryPoint.ciudad,
     direccionEntrega: deliveryPoint.direccion,
+    barrioEntrega: deliveryPoint.ciudad,
+    departamentoEntrega: departamento,
+    codigoDaneEntrega: faker.string.numeric(5),
+    facturacion: {
+      barrio: deliveryPoint.ciudad,
+      ciudad: deliveryPoint.ciudad,
+      departamento,
+      direccion: deliveryPoint.direccion,
+    },
     estado: status,
     codigoSesionRecibo:
       status === 'DESPACHADA' && faker.datatype.boolean(0.5)
@@ -186,7 +309,31 @@ function makePurchaseOrder(
         : null,
     fechaOrden: isoDate(orderDate),
     ultimaActualizacion: isoDateTime(updatedAt),
-    tiendas: buildPurchaseOrderStores(status),
+    productos,
+    costoTotalOc,
+    transportadora: faker.helpers.arrayElement(CARRIERS),
+    fechaMinEntrega: isoDateTime(minEntrega),
+    fechaMaxEntrega: isoDateTime(maxEntrega),
+    fechaCancelacion: faker.datatype.boolean(0.05)
+      ? isoDateTime(faker.date.recent({ days: 5, refDate: updatedAt }))
+      : null,
+    sticker: faker.datatype.boolean(0.85) ? faker.string.numeric(12) : null,
+    tipoOc: faker.helpers.arrayElement(ORDER_TYPES),
+    tipoDocumento: faker.datatype.boolean(0.9) ? '1' : null,
+    notaPedido: `${faker.number.int({ min: 10, max: 99 })}-${faker.number.int({ min: 100_000, max: 999_999 })}`,
+    cedulaComprador: faker.string.numeric(10),
+    emailCliente: faker.internet.email().toLowerCase(),
+    telefonoCliente: faker.phone.number(),
+    clienteRecibe: faker.person.fullName(),
+    eanTiendaVenta: deliveryPoint.ean,
+    eanTiendaFacturacion: deliveryPoint.ean,
+    localidad: deliveryPoint.ean,
+    eanEmpresaCompradora: '7703670900009',
+    tipoDeOrden: faker.helpers.arrayElement(ORDER_FULFILLMENT_TYPES),
+    tipoEntrega: faker.helpers.arrayElement(DELIVERY_CHANNELS),
+    observaciones: deliveryPoint.ciudad,
+    observacionesNpc: `Favor entregar en ${deliveryPoint.direccion}.`,
+    observacionesNpl: faker.string.alphanumeric(10).toUpperCase(),
     intentos: status === 'CON_ERROR' ? faker.number.int({ min: 1, max: 2 }) : 0,
     maxIntentos: 3,
   }
@@ -200,22 +347,80 @@ function purchaseOrderToHomecenterRequest(order: PurchaseOrderRecord) {
   }
 }
 
+/** Mirrors a real `GetOrdenesDeCompra` response (see
+ *  specs/00-purchase-order-response-update.md) — envelope, field names, and
+ *  the PRODUCTOS[].TIENDAS[] nesting all match what Homecenter actually
+ *  sends, not an invented shape. */
 function purchaseOrderToHomecenterResponse(order: PurchaseOrderRecord) {
   return {
-    isError: false,
-    errorMessage: null,
-    ordenes: [
+    Estado: true,
+    Mensaje: 'Sentencia ejecutada con éxito.',
+    Value: [
       {
-        NUMERO_ORDEN: order.ordenCompra,
-        EAN_PUNTO_ENTREGA: order.eanPuntoEntrega,
-        FECHA_ORDEN: order.fechaOrden.split('-').reverse().join('/'),
-        TIENDAS: order.tiendas.map((t) => ({
-          EAN_TIENDA: t.eanTienda,
-          PRODUCTOS: t.productos.map((p) => ({
-            EAN_SKU: p.eanSku,
-            DESCRIPCION: p.descripcion,
-            CANTIDAD_SOLICITADA: p.cantidadSolicitada,
-            ESTADO_SKU: p.estadoLinea,
+        ORDEN_COMPRA: Number(order.ordenCompra),
+        CANTIDAD_TOT_OC: order.productos.reduce(
+          (sum, p) => sum + p.cantidadSolicitada,
+          0,
+        ),
+        COSTO_TOT_OC: order.costoTotalOc,
+        FECHA_CANCELACION: order.fechaCancelacion
+          ? toHomecenterFecha24h(order.fechaCancelacion)
+          : '',
+        STICKER: order.sticker ?? '-1',
+        ESTADO_OC: order.estado,
+        TRANSPORTADORA: order.transportadora,
+        FECHA_MIN_ENTREGA: order.fechaMinEntrega
+          ? toHomecenterFecha24h(order.fechaMinEntrega)
+          : '',
+        FECHA_MAX_ENTREGA: order.fechaMaxEntrega
+          ? toHomecenterFecha24h(order.fechaMaxEntrega)
+          : '',
+        TIPO_OC: order.tipoOc,
+        CODIGO_SESION_RECIBO: order.codigoSesionRecibo ?? -1,
+        FECHA_TRANSMISION: order.fechaOrden.split('-').reverse().join('/'),
+        NOTA_PEDIDO: order.notaPedido,
+        CLIENTE: order.cliente,
+        CEDULA: order.cedulaComprador,
+        EMAIL_CLIENTE: order.emailCliente,
+        TELEFONO_CLIENTE: order.telefonoCliente,
+        BARRIO_ENTREGA: order.barrioEntrega,
+        CIUDAD_ENTREGA: order.ciudadEntrega,
+        DEPARTAMENTO_ENTREGA: order.departamentoEntrega,
+        DIRECCION_ENTREGA: order.direccionEntrega,
+        BARRIO_FAC: order.facturacion.barrio,
+        CIUDAD_FAC: order.facturacion.ciudad,
+        DEPARTAMENTO_FAC: order.facturacion.departamento,
+        DIRECCION_FAC: order.facturacion.direccion,
+        TIENDA_VENTA: order.eanTiendaVenta,
+        TIENDA_FACTURACION: order.eanTiendaFacturacion,
+        PUNTO_ENTREGA: order.eanPuntoEntrega,
+        TIPO_DOCUMENTO: order.tipoDocumento ? Number(order.tipoDocumento) : -1,
+        LOCALIDAD: order.localidad,
+        FECHA_PAGO: '', // SPEC 02's territory — not modeled on this record yet.
+        EAN_EMPRESA_COMPRADORA: order.eanEmpresaCompradora,
+        TIPO_DE_ORDEN: order.tipoDeOrden,
+        TIPO_ENTREGA: order.tipoEntrega,
+        CODIGO_DANE_CE: order.codigoDaneEntrega,
+        OBSERVACIONES: order.observaciones,
+        OBSERVACIONES_NPC: order.observacionesNpc,
+        OBSERVACIONES_NPL: order.observacionesNpl,
+        CLIENTE_RECIBE: order.clienteRecibe,
+        PRODUCTOS: order.productos.map((p) => ({
+          SKU: p.skuHomecenter,
+          PRODUCTO: p.descripcion,
+          EAN_PRODUCTO: Number(p.eanSku),
+          CANTIDAD_SKU: p.cantidadSolicitada,
+          CANTIDAD_CANCELADA: p.cantidadCancelada,
+          COSTO_SKU: p.costoUnitario,
+          CANTIDAD_DEVUELTA_SKU: p.cantidadDevuelta,
+          ESTADO_SKU: p.estadoLinea,
+          CONDICION_PAGO: p.condicionPago,
+          DESCUENTO_SKU: p.descuentoSku,
+          UNIDAD_VENTA: p.unidadVenta,
+          TIENDAS: p.tiendas.map((t) => ({
+            EAN_TIENDA: t.eanTienda,
+            NOMBRE_TIENDA: t.nombreTienda,
+            CANTIDAD: t.cantidad,
           })),
         })),
       },
@@ -257,29 +462,52 @@ function seed(): MockDb {
   canonical.ciudadEntrega = 'Cali'
   canonical.eanPuntoEntrega = '7703670529804'
   canonical.direccionEntrega = 'Cra 12 N27-31, Tunja'
-  canonical.tiendas = [
+  canonical.productos = [
     {
-      eanTienda: '7703670900306',
-      productos: [
+      eanSku: '7703670004288',
+      skuHomecenter: '412001',
+      descripcion: 'MALLA ESLABONADA 1.8x10m METAL 2.1/4x2.1/4 2.5 mm',
+      cantidadSolicitada: 30,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 89000,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
         {
-          eanSku: '7703670004288',
-          descripcion: 'MALLA ESLABONADA 1.8x10m METAL 2.1/4x2.1/4 2.5 mm',
-          cantidadSolicitada: 30,
-          cantidadCancelada: 0,
-          cantidadDevuelta: 0,
-          estadoLinea: 'PENDIENTE',
+          eanTienda: '7703670900306',
+          nombreTienda: 'SODIMAC - CALI SUR',
+          cantidad: 30,
         },
+      ],
+    },
+    {
+      eanSku: '7703670004295',
+      skuHomecenter: '412002',
+      descripcion: 'PISO CERAMICA CALAMA BEIGE 51x51 CM CAJA x 1.30 M2',
+      cantidadSolicitada: 30,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 42500,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
         {
-          eanSku: '7703670004295',
-          descripcion: 'PISO CERAMICA CALAMA BEIGE 51x51 CM CAJA x 1.30 M2',
-          cantidadSolicitada: 30,
-          cantidadCancelada: 0,
-          cantidadDevuelta: 0,
-          estadoLinea: 'PENDIENTE',
+          eanTienda: '7703670900306',
+          nombreTienda: 'SODIMAC - CALI SUR',
+          cantidad: 30,
         },
       ],
     },
   ]
+  canonical.costoTotalOc = canonical.productos.reduce(
+    (sum, p) => sum + p.costoUnitario * p.cantidadSolicitada,
+    0,
+  )
   db.purchaseOrders.push(canonical)
 
   // 44 more generated orders.
@@ -322,19 +550,19 @@ function seed(): MockDb {
       'ERROR_ENVIO',
     ])
     const dispatchedOn = faker.date.recent({ days: 20 })
-    const stores: Array<DispatchNoticeStoreInput> = order.tiendas.map(
-      (t, ti) => ({
-        eanTienda: t.eanTienda,
+    const storeGroups = groupOrderLinesByTienda(order.productos)
+    const stores: Array<DispatchNoticeStoreInput> = storeGroups.map(
+      (group, ti) => ({
+        eanTienda: group.eanTienda,
         contenedores: [
           {
             contenedor: `CONT${String(ti + 1).padStart(3, '0')}`,
-            productos: t.productos.map((p) => ({
-              eanSku: p.eanSku,
+            productos: group.items.map((item) => ({
+              eanSku: item.eanSku,
               cantidad: Math.max(
                 1,
                 Math.floor(
-                  p.cantidadSolicitada *
-                    faker.number.float({ min: 0.3, max: 1 }),
+                  item.cantidad * faker.number.float({ min: 0.3, max: 1 }),
                 ),
               ),
               peso: faker.number.float({ min: 5, max: 320, fractionDigits: 1 }),

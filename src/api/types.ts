@@ -66,18 +66,39 @@ export interface PurchaseOrderSummary {
   ultimaActualizacion: IsoDateTime
 }
 
+/** Per-product store allocation — Homecenter nests this under each product,
+ *  not the other way around (see PurchaseOrderDetail.productos). */
+export interface PurchaseOrderLineStore {
+  eanTienda: string
+  nombreTienda: string
+  cantidad: number
+}
+
 export interface PurchaseOrderLineItem {
   eanSku: string
+  /** Homecenter's own internal product code (raw `SKU`), distinct from eanSku. */
+  skuHomecenter: string
   descripcion: string
   cantidadSolicitada: number
   cantidadCancelada: number
   cantidadDevuelta: number
   estadoLinea: OrderLineStatus
+  /** Raw `COSTO_SKU`. */
+  costoUnitario: number
+  /** Raw `CONDICION_PAGO`, trimmed. */
+  condicionPago: string
+  /** Raw `DESCUENTO_SKU`. */
+  descuentoSku: number
+  /** Raw `UNIDAD_VENTA`, trimmed. */
+  unidadVenta: string
+  tiendas: Array<PurchaseOrderLineStore>
 }
 
-export interface PurchaseOrderStore {
-  eanTienda: string
-  productos: Array<PurchaseOrderLineItem>
+export interface PurchaseOrderBillingAddress {
+  barrio: string
+  ciudad: string
+  departamento: string
+  direccion: string
 }
 
 /** Full shape for `GET /api/v1/ordenes-compra/{ordenCompra}` (§ 1.2). */
@@ -86,9 +107,39 @@ export interface PurchaseOrderDetail {
   eanPuntoEntrega: string
   cliente: string
   direccionEntrega: string
+  barrioEntrega: string
+  departamentoEntrega: string
+  codigoDaneEntrega: string
+  facturacion: PurchaseOrderBillingAddress
   estado: OrderStatus
   codigoSesionRecibo: string | null
-  tiendas: Array<PurchaseOrderStore>
+  productos: Array<PurchaseOrderLineItem>
+  /** Raw `COSTO_TOT_OC`. */
+  costoTotalOc: number
+  transportadora: string
+  fechaMinEntrega: IsoDateTime | null
+  fechaMaxEntrega: IsoDateTime | null
+  fechaCancelacion: IsoDateTime | null
+  /** Raw `STICKER`; Homecenter's `"-1"` sentinel is translated to null. */
+  sticker: string | null
+  /** Raw `TIPO_OC`, e.g. `"4-Venta Empresa"` — opaque, not parsed here. */
+  tipoOc: string
+  /** Raw `TIPO_DOCUMENTO`; Homecenter's `-1` sentinel is translated to null. */
+  tipoDocumento: string | null
+  notaPedido: string
+  cedulaComprador: string
+  emailCliente: string
+  telefonoCliente: string
+  clienteRecibe: string
+  eanTiendaVenta: string
+  eanTiendaFacturacion: string
+  localidad: string
+  eanEmpresaCompradora: string
+  tipoDeOrden: string
+  tipoEntrega: string
+  observaciones: string
+  observacionesNpc: string
+  observacionesNpl: string
 }
 
 /** Query params for `GET /api/v1/ordenes-compra` and `.../export` (§ 1.1, § 1.5). */

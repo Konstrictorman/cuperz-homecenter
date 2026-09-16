@@ -13,10 +13,18 @@ import type {
 } from '#/api/types'
 
 function totalRequested(order: PurchaseOrderRecord): number {
-  return order.tiendas.reduce(
-    (sum, t) => sum + t.productos.reduce((s, p) => s + p.cantidadSolicitada, 0),
-    0,
-  )
+  return order.productos.reduce((sum, p) => sum + p.cantidadSolicitada, 0)
+}
+
+/** Distinct store count across all lines — a product-first order can repeat
+ *  the same store across several lines, so this can't just be an array length
+ *  the way it could when stores were the outer level. */
+function distinctStoreCount(order: PurchaseOrderRecord): number {
+  const eans = new Set<string>()
+  for (const producto of order.productos) {
+    for (const tienda of producto.tiendas) eans.add(tienda.eanTienda)
+  }
+  return eans.size
 }
 
 function toSummary(order: PurchaseOrderRecord): PurchaseOrderSummary {
@@ -25,7 +33,7 @@ function toSummary(order: PurchaseOrderRecord): PurchaseOrderSummary {
     eanPuntoEntrega: order.eanPuntoEntrega,
     cliente: order.cliente,
     ciudadEntrega: order.ciudadEntrega,
-    cantidadTiendas: order.tiendas.length,
+    cantidadTiendas: distinctStoreCount(order),
     cantidadTotalSolicitada: totalRequested(order),
     estado: order.estado,
     fechaOrden: order.fechaOrden,
@@ -39,9 +47,35 @@ function toDetail(order: PurchaseOrderRecord): PurchaseOrderDetail {
     eanPuntoEntrega: order.eanPuntoEntrega,
     cliente: order.cliente,
     direccionEntrega: order.direccionEntrega,
+    barrioEntrega: order.barrioEntrega,
+    departamentoEntrega: order.departamentoEntrega,
+    codigoDaneEntrega: order.codigoDaneEntrega,
+    facturacion: order.facturacion,
     estado: order.estado,
     codigoSesionRecibo: order.codigoSesionRecibo,
-    tiendas: order.tiendas,
+    productos: order.productos,
+    costoTotalOc: order.costoTotalOc,
+    transportadora: order.transportadora,
+    fechaMinEntrega: order.fechaMinEntrega,
+    fechaMaxEntrega: order.fechaMaxEntrega,
+    fechaCancelacion: order.fechaCancelacion,
+    sticker: order.sticker,
+    tipoOc: order.tipoOc,
+    tipoDocumento: order.tipoDocumento,
+    notaPedido: order.notaPedido,
+    cedulaComprador: order.cedulaComprador,
+    emailCliente: order.emailCliente,
+    telefonoCliente: order.telefonoCliente,
+    clienteRecibe: order.clienteRecibe,
+    eanTiendaVenta: order.eanTiendaVenta,
+    eanTiendaFacturacion: order.eanTiendaFacturacion,
+    localidad: order.localidad,
+    eanEmpresaCompradora: order.eanEmpresaCompradora,
+    tipoDeOrden: order.tipoDeOrden,
+    tipoEntrega: order.tipoEntrega,
+    observaciones: order.observaciones,
+    observacionesNpc: order.observacionesNpc,
+    observacionesNpl: order.observacionesNpl,
   }
 }
 
@@ -57,7 +91,11 @@ function filterPurchaseOrders(url: URL): Array<PurchaseOrderRecord> {
     .filter((o) => (estado ? o.estado === estado : true))
     .filter((o) => withinRange(o.fechaOrden, fechaDesde, fechaHasta))
     .filter((o) =>
-      storeEan ? o.tiendas.some((t) => t.eanTienda === storeEan) : true,
+      storeEan
+        ? o.productos.some((p) =>
+            p.tiendas.some((t) => t.eanTienda === storeEan),
+          )
+        : true,
     )
     .sort((a, b) => b.fechaOrden.localeCompare(a.fechaOrden))
 }

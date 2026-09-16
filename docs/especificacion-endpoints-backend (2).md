@@ -15,11 +15,13 @@ Estas reglas aplican a todos los endpoints de este documento. Son **decisiones d
 | ----------------------------- | ------------------------------------------------------------------------------------------------------ |
 | Base path                     | `/api/v1`                                                                                              |
 | Autenticación                 | `Authorization: Bearer <token>` — token emitido tras el login SSO contra OCI IAM                       |
-| Formato de fecha (API propia) | ISO 8601 (`YYYY-MM-DD`). El backend traduce al formato que exige Homecenter (`DD/MM/AAAA`) al llamarlo |
+| Formato de fecha (API propia) | ISO 8601 — `YYYY-MM-DD` para fechas, `YYYY-MM-DDTHH:mm:ss` (opcionalmente con `Z`) para fecha-hora. Ver disclaimer debajo |
 | Paginación                    | Query params `page` (default 1) y `pageSize` (default 20, máx. 100)                                    |
 | Envoltura de listados         | `{ "data": [...], "pagination": { "page", "pageSize", "total", "totalPages" } }`                       |
 | Formato de error              | Ver bloque siguiente                                                                                   |
 | Content-Type                  | `application/json` en todos los endpoints                                                              |
+
+> **Disclaimer — normalización de fechas es responsabilidad exclusiva del backend.** Homecenter envía fechas en varios formatos crudos, no todos consistentes entre sí: `DD/MM/AAAA` simple, `DD/MM/AAAA HH:mm:ss` en 24 horas (`FECHA_MIN_ENTREGA`, `FECHA_MAX_ENTREGA`, `FECHA_CANCELACION`), y una variante con hora de 12 y sufijo de locale en español (`FECHA_PAGO`, ej. `"12/07/2023 12:00:00 a. m."`). Ninguno de estos formatos crudos llega nunca al frontend ni a ningún consumidor de `/api/v1/...` — el backend los normaliza **todos** a ISO 8601 antes de responder, y hace la traducción inversa (ISO → el formato que Homecenter exige) al llamarlo. El frontend nunca implementa lógica de parseo/transformación de fechas de Homecenter; solo lee y escribe el formato ISO de la API propia. El único lugar donde un formato crudo de Homecenter es visible es en `hc_integracion_log` (sección 3), que guarda el payload exacto intercambiado, sin procesar, para auditoría — eso no es una excepción a esta regla, es justamente el registro de lo que había antes de normalizar.
 
 **Formato de error estándar:**
 
@@ -80,7 +82,9 @@ Listado de órdenes ya sincronizadas en la base propia (no consulta a Homecenter
 
 ### 1.2 `GET /api/v1/ordenes-compra/{ordenCompra}`
 
-Detalle completo de una orden: tiendas, productos, cantidades solicitadas/canceladas/devueltas y estado por línea — según el nivel de detalle que ya vimos en la respuesta real de Homecenter (`ESTADO_SKU`, `CODIGO_SESION_RECIBO`, cantidades por producto/tienda).
+Detalle completo de una orden: productos, cantidades solicitadas/canceladas/devueltas, estado por línea, y el desglose por tienda de cada línea.
+
+> **Actualizado (SPEC 00):** el ejemplo de abajo ahora está tomado de una respuesta real de `GetOrdenesDeCompra` (no de la colección Postman), incluyendo su jerarquía real — Homecenter anida el desglose de tiendas **dentro de cada producto** (`PRODUCTOS[].TIENDAS[]`), no al revés. Todos los campos nuevos vienen de esa misma respuesta real; los que aparecían vacíos u opcionales ahí (dirección de facturación, transportadora, fechas de entrega, observaciones, etc.) igual se documentan aquí porque forman parte del contrato.
 
 **Respuesta `200`**
 
@@ -90,25 +94,65 @@ Detalle completo de una orden: tiendas, productos, cantidades solicitadas/cancel
   "eanPuntoEntrega": "7703670529804",
   "cliente": "Cali Sur",
   "direccionEntrega": "Cra 12 N27-31, Tunja",
+  "barrioEntrega": "Tunja",
+  "departamentoEntrega": "Boyacá",
+  "codigoDaneEntrega": "15001",
+  "facturacion": {
+    "barrio": "Tunja",
+    "ciudad": "Tunja",
+    "departamento": "Boyacá",
+    "direccion": "Av Universitaria N 52-51 Lote A"
+  },
   "estado": "PENDIENTE",
   "codigoSesionRecibo": null,
-  "tiendas": [
+  "productos": [
     {
-      "eanTienda": "7703670900306",
-      "productos": [
+      "eanSku": "7703670004288",
+      "skuHomecenter": "478618",
+      "descripcion": "MALLA ESLABONADA 1.8x10m METAL 2.1/4x2.1/4 2.5 mm",
+      "cantidadSolicitada": 30,
+      "cantidadCancelada": 0,
+      "cantidadDevuelta": 0,
+      "estadoLinea": "PENDIENTE",
+      "costoUnitario": 43654.52,
+      "condicionPago": "30 Dias",
+      "descuentoSku": 22.06,
+      "unidadVenta": "UND",
+      "tiendas": [
         {
-          "eanSku": "7703670004288",
-          "descripcion": "MALLA ESLABONADA 1.8x10m METAL 2.1/4x2.1/4 2.5 mm",
-          "cantidadSolicitada": 30,
-          "cantidadCancelada": 0,
-          "cantidadDevuelta": 0,
-          "estadoLinea": "PENDIENTE"
+          "eanTienda": "7703670900306",
+          "nombreTienda": "Cali Sur",
+          "cantidad": 30
         }
       ]
     }
-  ]
+  ],
+  "costoTotalOc": 1309635.6,
+  "transportadora": "7-LOGISTICA PROPIA",
+  "fechaMinEntrega": "2023-08-30T00:00:00Z",
+  "fechaMaxEntrega": "2023-08-30T00:00:00Z",
+  "fechaCancelacion": null,
+  "sticker": "262200481869",
+  "tipoOc": "4-Venta Empresa",
+  "tipoDocumento": "1",
+  "notaPedido": "22-298975",
+  "cedulaComprador": "9000691641001",
+  "emailCliente": "dir.administrativo@bloquecero.com",
+  "telefonoCliente": "0",
+  "clienteRecibe": "Martha Reyes",
+  "eanTiendaVenta": "7703670901228",
+  "eanTiendaFacturacion": "7703670901228",
+  "localidad": "7703670901228",
+  "eanEmpresaCompradora": "7703670900009",
+  "tipoDeOrden": "ENTREGA_DIRECTA",
+  "tipoEntrega": "RETAIL",
+  "observaciones": "Tunja",
+  "observacionesNpc": "Favor entregar en la dirección Cra 12 N27-31, Hostal Zafiro Tunja Boyacá. Contacto de entrega: Martha Reyes. Cel: 3214520301. Horario: L a V 8am a 12m y 2pm a 4pm. Favor llamar antes de despachar.",
+  "observacionesNpl": "ESPECIALVE-262200481869-298975-22-TUNJA-CRA 12 N27-31-TUNJA-..."
 }
 ```
+
+`tipoOc`, `tipoDocumento`, `tipoDeOrden` y `tipoEntrega` se guardan tal como los envía Homecenter (strings opacos, incluyendo el prefijo numérico de `tipoOc`) — no se interpretan en este endpoint. `sticker` y `tipoDocumento` usan `-1` como sentinela de "sin valor" en la respuesta cruda; aquí ya vienen traducidos a `null`. `fechaMinEntrega`/`fechaMaxEntrega`/`fechaCancelacion` llegan crudas como `"dd/mm/aaaa HH:mm:ss"` (24 horas) — el **backend** las normaliza a ISO 8601 antes de responder (ver disclaimer en "Convenciones generales"); cadena vacía → `null`. El frontend nunca ve ni transforma el formato crudo.
 
 **Errores:** `404` con `code: "ORDEN_NO_ENCONTRADA"` si no existe.
 

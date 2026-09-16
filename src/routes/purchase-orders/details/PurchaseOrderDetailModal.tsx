@@ -76,21 +76,21 @@ const PurchaseOrderDetailModal = ({
 
   if (!order) return null
 
-  // The API nests lines under stores → flatten into one grid.
-  const lineas: OrderLineRow[] = (detail?.tiendas ?? []).flatMap((tienda) =>
-    tienda.productos.map((producto) => {
+  // The API nests store allocations under each product → flatten into one grid.
+  const lineas: OrderLineRow[] = (detail?.productos ?? []).flatMap(
+    (producto) => {
       const ui = ORDER_LINE_STATUS_UI[producto.estadoLinea]
-      return {
-        id: `${tienda.eanTienda}-${producto.eanSku}`,
+      return producto.tiendas.map((tienda) => ({
+        id: `${producto.eanSku}-${tienda.eanTienda}`,
         sku: producto.eanSku,
         producto: producto.descripcion,
-        tienda: tienda.eanTienda,
+        tienda: tienda.nombreTienda,
         cantidadSolicitada: producto.cantidadSolicitada,
         cantidadCancelada: producto.cantidadCancelada,
         estadoLineaTone: ui.tone,
         estadoLineaLabel: ui.label,
-      }
-    }),
+      }))
+    },
   )
 
   return (

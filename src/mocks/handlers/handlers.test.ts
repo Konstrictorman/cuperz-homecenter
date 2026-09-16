@@ -49,11 +49,11 @@ describe('purchase orders', () => {
   it('returns the canonical order detail', async () => {
     const { status, body } = await json<{
       ordenCompra: string
-      tiendas: unknown[]
+      productos: unknown[]
     }>('/ordenes-compra/8467343')
     expect(status).toBe(200)
     expect(body.ordenCompra).toBe('8467343')
-    expect(body.tiendas).toHaveLength(1)
+    expect(body.productos).toHaveLength(2)
   })
 
   it('404s an unknown order', async () => {
