@@ -27,4 +27,16 @@ if (typeof globalThis.window !== 'undefined') {
       removeEventListener: () => {},
       dispatchEvent: () => false,
     }) as MediaQueryList
+
+  // jsdom doesn't implement ResizeObserver; TruncatedText observes its
+  // container to re-check overflow after mount. This no-op stub is enough
+  // for tests that don't assert resize behavior; a test that does can
+  // override `window.ResizeObserver` locally (same pattern as the
+  // `window.matchMedia` override in ToolBar.test.tsx) to capture and
+  // trigger the callback itself.
+  window.ResizeObserver = class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  }
 }

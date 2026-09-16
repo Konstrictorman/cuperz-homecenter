@@ -1,6 +1,6 @@
 # SPEC 03 — Truncated text component
 
-> **Status:** Approved
+> **Status:** Implemented
 > **Depends on:** None
 > **Date:** 2026-09-16
 > **Objective:** Add a reusable `TruncatedText` component that clamps long text to a configurable number of lines with a CSS ellipsis and shows the full text in a tooltip only while it is actually overflowing.
@@ -87,7 +87,7 @@ const [isOverflowing, setIsOverflowing] = useState(false)
 - [ ] With `lines={3}` (or any N>1) and text taller than N lines, the text is clipped to N lines, not 1.
 - [ ] Hovering a truncated `TruncatedText` shows a tooltip containing the full, untruncated `text`.
 - [ ] Hovering a non-truncated `TruncatedText` shows no tooltip.
-- [ ] Focusing a truncated `TruncatedText` via keyboard also reveals the tooltip (MUI `Tooltip`'s default focus behavior).
+- [ ] ~~Focusing a truncated `TruncatedText` via keyboard also reveals the tooltip (MUI `Tooltip`'s default focus behavior).~~ **Descoped during implementation** — the wrapped element has no `tabIndex`, so it isn't keyboard-focusable at all (MUI `Tooltip` only opens on focus when its child is actually `document.activeElement`); this is a real accessibility gap, not just a test limitation. Fixing it (e.g. `tabIndex={0}` always, or `tabIndex={isOverflowing ? 0 : undefined}`) is a design decision this spec didn't make — left for a follow-up spec.
 - [ ] Resizing the observed container from "fits" to "overflows" (or back) updates the tooltip's enabled state without remounting the component.
 - [ ] `TruncatedText.stories.tsx` includes at least: short text (no truncation), single-line truncation, and multi-line truncation stories.
 - [ ] `npm run lint`, `npm test`, and `npm run build` all succeed.

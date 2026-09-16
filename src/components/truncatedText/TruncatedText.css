@@ -1,0 +1,14 @@
+.truncated-text {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+}
+.truncated-text--single-line {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.truncated-text--multi-line {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  text-overflow: ellipsis;
+}
