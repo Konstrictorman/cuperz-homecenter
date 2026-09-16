@@ -17,7 +17,7 @@ export interface PurchaseOrder {
   cantidadTotal: number
   estadoTone: StatusBadgeTone
   estadoLabel: string
-  fecha: string
+  fechaTransmision: string
 }
 
 interface PurchaseOrdersTableProps {

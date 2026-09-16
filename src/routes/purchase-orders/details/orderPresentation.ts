@@ -64,7 +64,7 @@ export function toPurchaseOrderRow(o: PurchaseOrderSummary): PurchaseOrder {
     cantidadTotal: o.cantidadTotalSolicitada,
     estadoTone: ui.tone,
     estadoLabel: ui.label,
-    fecha: o.fechaOrden,
+    fechaTransmision: o.fechaTransmision,
   }
 }
 
@@ -78,7 +78,7 @@ export function toPurchaseOrdersQuery(
       filters.estado === 'all'
         ? undefined
         : TONE_TO_ORDER_STATUS[filters.estado],
-    fechaDesde: filters.fechaDesde || undefined,
-    fechaHasta: filters.fechaHasta || undefined,
+    fechaTransmisionDesde: filters.fechaTransmisionDesde || undefined,
+    fechaTransmisionHasta: filters.fechaTransmisionHasta || undefined,
   }
 }

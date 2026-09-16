@@ -1,6 +1,6 @@
 # SPEC 02 — Purchase order date field rename
 
-> **Status:** Draft
+> **Status:** Implemented
 > **Depends on:** None
 > **Date:** 2026-09-15
 > **Objective:** Rename the purchase order's date field and its query filters to `fechaTransmision`/`fechaTransmisionDesde`/`fechaTransmisionHasta` end-to-end, matching Homecenter's real `FECHA_TRANSMISION` source field, and add the still-unused `fechaPago`/`negociacion` fields to `PurchaseOrderDetail`.

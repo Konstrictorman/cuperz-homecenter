@@ -12,15 +12,15 @@ export type OrdersFilterStatus = StatusBadgeTone | 'all'
 export interface OrdersFilterValues {
   ordenCompra: string
   estado: OrdersFilterStatus
-  fechaDesde: string
-  fechaHasta: string
+  fechaTransmisionDesde: string
+  fechaTransmisionHasta: string
 }
 
 export const DEFAULT_ORDERS_FILTER_VALUES: OrdersFilterValues = {
   ordenCompra: '',
   estado: 'all',
-  fechaDesde: '',
-  fechaHasta: '',
+  fechaTransmisionDesde: '',
+  fechaTransmisionHasta: '',
 }
 
 const STATUS_OPTIONS: Array<{ value: OrdersFilterStatus; label: string }> = [
@@ -88,7 +88,7 @@ const OrdersFilterBar = ({ onFilter }: OrdersFilterBarProps) => {
         )}
       </form.Field>
 
-      <form.Field name="fechaDesde">
+      <form.Field name="fechaTransmisionDesde">
         {(field) => (
           <TextField
             label="Fecha desde"
@@ -103,7 +103,7 @@ const OrdersFilterBar = ({ onFilter }: OrdersFilterBarProps) => {
         )}
       </form.Field>
 
-      <form.Field name="fechaHasta">
+      <form.Field name="fechaTransmisionHasta">
         {(field) => (
           <TextField
             label="Fecha hasta"

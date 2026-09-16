@@ -36,7 +36,7 @@ function toSummary(order: PurchaseOrderRecord): PurchaseOrderSummary {
     cantidadTiendas: distinctStoreCount(order),
     cantidadTotalSolicitada: totalRequested(order),
     estado: order.estado,
-    fechaOrden: order.fechaOrden,
+    fechaTransmision: order.fechaTransmision,
     ultimaActualizacion: order.ultimaActualizacion,
   }
 }
@@ -82,14 +82,16 @@ function toDetail(order: PurchaseOrderRecord): PurchaseOrderDetail {
 function filterPurchaseOrders(url: URL): Array<PurchaseOrderRecord> {
   const ordenCompra = url.searchParams.get('ordenCompra')
   const estado = url.searchParams.get('estado')
-  const fechaDesde = url.searchParams.get('fechaDesde')
-  const fechaHasta = url.searchParams.get('fechaHasta')
+  const fechaTransmisionDesde = url.searchParams.get('fechaTransmisionDesde')
+  const fechaTransmisionHasta = url.searchParams.get('fechaTransmisionHasta')
   const storeEan = url.searchParams.get('tienda')
 
   return db.purchaseOrders
     .filter((o) => (ordenCompra ? o.ordenCompra.includes(ordenCompra) : true))
     .filter((o) => (estado ? o.estado === estado : true))
-    .filter((o) => withinRange(o.fechaOrden, fechaDesde, fechaHasta))
+    .filter((o) =>
+      withinRange(o.fechaTransmision, fechaTransmisionDesde, fechaTransmisionHasta),
+    )
     .filter((o) =>
       storeEan
         ? o.productos.some((p) =>
@@ -97,11 +99,11 @@ function filterPurchaseOrders(url: URL): Array<PurchaseOrderRecord> {
           )
         : true,
     )
-    .sort((a, b) => b.fechaOrden.localeCompare(a.fechaOrden))
+    .sort((a, b) => b.fechaTransmision.localeCompare(a.fechaTransmision))
 }
 
 const CSV_HEADER =
-  'ordenCompra;eanPuntoEntrega;cliente;ciudadEntrega;cantidadTiendas;cantidadTotalSolicitada;estado;fechaOrden'
+  'ordenCompra;eanPuntoEntrega;cliente;ciudadEntrega;cantidadTiendas;cantidadTotalSolicitada;estado;fechaTransmision'
 
 export const purchaseOrdersHandlers = [
   // § 1.1
@@ -129,7 +131,7 @@ export const purchaseOrdersHandlers = [
           r.cantidadTiendas,
           r.cantidadTotalSolicitada,
           r.estado,
-          r.fechaOrden,
+          r.fechaTransmision,
         ].join(';'),
       ),
     ].join('\n')

@@ -48,7 +48,7 @@ export interface PurchaseOrderRecord {
   facturacion: PurchaseOrderBillingAddress
   estado: OrderStatus
   codigoSesionRecibo: string | null
-  fechaOrden: string
+  fechaTransmision: string
   ultimaActualizacion: string
   productos: Array<PurchaseOrderLineItem>
   costoTotalOc: number
@@ -311,7 +311,7 @@ function makePurchaseOrder(
       status === 'DESPACHADA' && faker.datatype.boolean(0.5)
         ? `REC-${isoDate(updatedAt).replace(/-/g, '')}-${faker.number.int({ min: 1, max: 9 })}`
         : null,
-    fechaOrden: isoDate(orderDate),
+    fechaTransmision: isoDate(orderDate),
     ultimaActualizacion: isoDateTime(updatedAt),
     productos,
     costoTotalOc,
@@ -394,7 +394,7 @@ function purchaseOrderToHomecenterResponse(order: PurchaseOrderRecord) {
           : '',
         TIPO_OC: order.tipoOc,
         CODIGO_SESION_RECIBO: order.codigoSesionRecibo ?? -1,
-        FECHA_TRANSMISION: order.fechaOrden.split('-').reverse().join('/'),
+        FECHA_TRANSMISION: order.fechaTransmision.split('-').reverse().join('/'),
         NOTA_PEDIDO: order.notaPedido,
         CLIENTE: order.cliente,
         CEDULA: order.cedulaComprador,

@@ -62,7 +62,8 @@ export interface PurchaseOrderSummary {
   cantidadTiendas: number
   cantidadTotalSolicitada: number
   estado: OrderStatus
-  fechaOrden: IsoDate
+  /** Raw `FECHA_TRANSMISION`. */
+  fechaTransmision: IsoDate
   ultimaActualizacion: IsoDateTime
 }
 
@@ -99,6 +100,22 @@ export interface PurchaseOrderBillingAddress {
   ciudad: string
   departamento: string
   direccion: string
+}
+
+/** Raw `NEGOCIACION`/`*_VE`/`NIT_CONSTRUCTOR` project-sale block. Not yet
+ *  surfaced in any screen — see SPEC 02. */
+export interface PurchaseOrderNegotiation {
+  negociacion: string
+  valorNegociacionVe: string
+  tipoEntregaVe: string
+  cedulaVe: string
+  fechaNegociacionVe: IsoDateTime | null
+  ciudadVe: string
+  direccionVe: string
+  departamentoVe: string
+  barrioVe: string
+  telefonoVe: string
+  nitConstructor: string
 }
 
 /** Full shape for `GET /api/v1/ordenes-compra/{ordenCompra}` (§ 1.2). */
@@ -140,6 +157,10 @@ export interface PurchaseOrderDetail {
   observaciones: string
   observacionesNpc: string
   observacionesNpl: string
+  /** Raw `FECHA_PAGO`. Optional/unused — no consuming screen yet, see SPEC 02. */
+  fechaPago?: IsoDateTime | null
+  /** Optional/unused — no consuming screen yet, see SPEC 02. */
+  negociacion?: PurchaseOrderNegotiation
 }
 
 /** Query params for `GET /api/v1/ordenes-compra` and `.../export` (§ 1.1, § 1.5). */
@@ -147,8 +168,8 @@ export interface PurchaseOrdersQuery extends PaginationQuery {
   /** Partial/exact match on the PO number. */
   ordenCompra?: string
   estado?: OrderStatus
-  fechaDesde?: IsoDate
-  fechaHasta?: IsoDate
+  fechaTransmisionDesde?: IsoDate
+  fechaTransmisionHasta?: IsoDate
   /** Store EAN. */
   tienda?: string
 }

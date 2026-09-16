@@ -55,7 +55,7 @@ Listado de órdenes ya sincronizadas en la base propia (no consulta a Homecenter
 | --------------------------- | ------ | ----------- | ---------------------------------------------------- |
 | `ordenCompra`               | string | No          | Búsqueda parcial/exacta por número de OC             |
 | `estado`                    | string | No          | `PENDIENTE`, `DESPACHADA`, `CON_ERROR`, `PROCESANDO` |
-| `fechaDesde` / `fechaHasta` | date   | No          | Rango de fecha de la orden                           |
+| `fechaTransmisionDesde` / `fechaTransmisionHasta` | date   | No          | Rango de fecha de transmisión de la orden (`FECHA_TRANSMISION`) |
 | `tienda`                    | string | No          | Filtra por EAN de tienda                             |
 | `page`, `pageSize`          | int    | No          | Ver convenciones generales                           |
 
@@ -72,7 +72,7 @@ Listado de órdenes ya sincronizadas en la base propia (no consulta a Homecenter
       "cantidadTiendas": 2,
       "cantidadTotalSolicitada": 60,
       "estado": "PENDIENTE",
-      "fechaOrden": "2026-08-15",
+      "fechaTransmision": "2026-08-15",
       "ultimaActualizacion": "2026-08-20T09:14:00Z"
     }
   ],
@@ -150,11 +150,27 @@ Detalle completo de una orden: productos, cantidades solicitadas/canceladas/devu
   "tipoEntrega": "RETAIL",
   "observaciones": "Tunja",
   "observacionesNpc": "Favor entregar en la dirección Cra 12 N27-31, Hostal Zafiro Tunja Boyacá. Contacto de entrega: Martha Reyes. Cel: 3214520301. Horario: L a V 8am a 12m y 2pm a 4pm. Favor llamar antes de despachar.",
-  "observacionesNpl": "ESPECIALVE-262200481869-298975-22-TUNJA-CRA 12 N27-31-TUNJA-..."
+  "observacionesNpl": "ESPECIALVE-262200481869-298975-22-TUNJA-CRA 12 N27-31-TUNJA-...",
+  "fechaPago": null,
+  "negociacion": {
+    "negociacion": "",
+    "valorNegociacionVe": "",
+    "tipoEntregaVe": "",
+    "cedulaVe": "",
+    "fechaNegociacionVe": null,
+    "ciudadVe": "",
+    "direccionVe": "",
+    "departamentoVe": "",
+    "barrioVe": "",
+    "telefonoVe": "",
+    "nitConstructor": ""
+  }
 }
 ```
 
 `tipoOc`, `tipoDocumento`, `tipoDeOrden` y `tipoEntrega` se guardan tal como los envía Homecenter (strings opacos, incluyendo el prefijo numérico de `tipoOc`) — no se interpretan en este endpoint. `sticker` y `tipoDocumento` usan `-1` como sentinela de "sin valor" en la respuesta cruda; aquí ya vienen traducidos a `null`. `fechaMinEntrega`/`fechaMaxEntrega`/`fechaCancelacion` llegan crudas como `"dd/mm/aaaa HH:mm:ss"` (24 horas) — el **backend** las normaliza a ISO 8601 antes de responder (ver disclaimer en "Convenciones generales"); cadena vacía → `null`. El frontend nunca ve ni transforma el formato crudo.
+
+`fechaPago` (de `FECHA_PAGO`) y `negociacion` (del bloque `NEGOCIACION`/`VALOR_NEGOCIACION_VE`/`TIPO_ENTREGA_VE`/`CEDULA_VE`/`FECHA_NEGOCIACION_VE`/`CIUDAD_VE`/`DIRECCION_VE`/`DEPARTAMENTO_VE`/`BARRIO_VE`/`TELEFONO_VE`/`NIT_CONSTRUCTOR`) son campos nuevos, documentados aquí por completitud del contrato — todavía no tienen pantalla consumidora ni se seedean en los mocks (SPEC 02). `fechaPago` y `negociacion.fechaNegociacionVe` ya llegan normalizados a ISO 8601 por el backend, igual que el resto de fechas de este endpoint.
 
 **Errores:** `404` con `code: "ORDEN_NO_ENCONTRADA"` si no existe.
 
@@ -202,7 +218,7 @@ Reintento manual para una orden en estado `CON_ERROR` (ver conversación sobre e
 
 Exporta la información de órdenes en CSV, para consumo manual por los usuarios del módulo Cross-Docking legado (sin integración directa — ver diagrama de arquitectura ya construido).
 
-**Query params:** los mismos filtros de 1.1 (`estado`, `fechaDesde`, `fechaHasta`, `tienda`).
+**Query params:** los mismos filtros de 1.1 (`estado`, `fechaTransmisionDesde`, `fechaTransmisionHasta`, `tienda`).
 
 **Respuesta `200`** — `Content-Type: text/csv`, archivo descargable.
 
