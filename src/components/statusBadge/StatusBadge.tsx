@@ -2,7 +2,14 @@ import MuiChip from '@mui/material/Chip'
 import clsx from 'clsx'
 import './StatusBadge.css'
 
-export type StatusBadgeTone = 'pending' | 'dispatched' | 'error' | 'processing'
+export type StatusBadgeTone =
+  | 'pending'
+  | 'dispatched'
+  | 'error'
+  | 'processing'
+  | 'partial'
+  | 'cancelled'
+  | 'exceeded'
 
 interface StatusBadgeProps {
   label: string

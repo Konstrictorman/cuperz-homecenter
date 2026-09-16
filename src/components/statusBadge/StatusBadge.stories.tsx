@@ -8,7 +8,15 @@ const meta = {
   argTypes: {
     tone: {
       control: 'select',
-      options: ['pending', 'dispatched', 'error', 'processing'],
+      options: [
+        'pending',
+        'dispatched',
+        'error',
+        'processing',
+        'partial',
+        'cancelled',
+        'exceeded',
+      ],
     },
   },
   parameters: {
@@ -64,6 +72,27 @@ export const Processing: Story = {
   },
 }
 
+export const Partial: Story = {
+  args: {
+    label: 'Parcial',
+    tone: 'partial',
+  },
+}
+
+export const Cancelled: Story = {
+  args: {
+    label: 'Cancelada',
+    tone: 'cancelled',
+  },
+}
+
+export const Exceeded: Story = {
+  args: {
+    label: 'Supera solicitado',
+    tone: 'exceeded',
+  },
+}
+
 export const AllTones: Story = {
   args: {
     label: 'Pendiente',
@@ -73,7 +102,7 @@ export const AllTones: Story = {
     docs: {
       description: {
         story:
-          "Every tone side by side, matching the wireframe's four OC states.",
+          "Every tone side by side — the wireframe's four OC states plus the three line-level-only states (Parcial/Cancelada/Supera solicitado).",
       },
     },
   },
@@ -83,6 +112,9 @@ export const AllTones: Story = {
       <StatusBadge label="Despachada" tone="dispatched" />
       <StatusBadge label="Error" tone="error" />
       <StatusBadge label="Procesando" tone="processing" />
+      <StatusBadge label="Parcial" tone="partial" />
+      <StatusBadge label="Cancelada" tone="cancelled" />
+      <StatusBadge label="Excede" tone="exceeded" />
     </div>
   ),
 }

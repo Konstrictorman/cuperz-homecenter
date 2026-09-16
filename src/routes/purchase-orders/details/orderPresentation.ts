@@ -29,17 +29,27 @@ export const ORDER_LINE_STATUS_UI: Record<
 > = {
   PENDIENTE: { tone: 'pending', label: 'Pendiente' },
   DESPACHADA: { tone: 'dispatched', label: 'Despachada' },
-  PARCIAL: { tone: 'processing', label: 'Parcial' },
-  CANCELADA: { tone: 'error', label: 'Cancelada' },
-  SUPERA_SOLICITADO: { tone: 'error', label: 'Supera solicitado' },
+  PARCIAL: { tone: 'partial', label: 'Parcial' },
+  CANCELADA: { tone: 'cancelled', label: 'Cancelada' },
+  SUPERA_SOLICITADO: { tone: 'exceeded', label: 'Supera solicitado' },
 }
 
-/** Filter bar uses badge tones; the API query wants the enum. */
+/** Filter bar uses badge tones; the API query wants the enum.
+ *
+ *  `partial`/`cancelled`/`exceeded` are line-level-only tones — `OrdersFilterBar`
+ *  never offers them as an `estado` filter option (see `STATUS_OPTIONS`), so
+ *  these three entries are unreachable in practice. They exist only to keep
+ *  this `Record` exhaustive over the full `StatusBadgeTone` union; the
+ *  `OrderStatus` each maps to is an arbitrary nearest-fit, not a real
+ *  correspondence. */
 const TONE_TO_ORDER_STATUS: Record<StatusBadgeTone, OrderStatus> = {
   pending: 'PENDIENTE',
   dispatched: 'DESPACHADA',
   error: 'CON_ERROR',
   processing: 'PROCESANDO',
+  partial: 'PROCESANDO',
+  cancelled: 'CON_ERROR',
+  exceeded: 'CON_ERROR',
 }
 
 /** API list row → the shape `PurchaseOrdersTable` renders. */

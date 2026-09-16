@@ -233,7 +233,11 @@ function buildPurchaseOrderLines(
     let estadoLinea: OrderLineStatus = 'PENDIENTE'
     if (status === 'DESPACHADA') estadoLinea = 'DESPACHADA'
     else if (status === 'PROCESANDO') estadoLinea = 'PARCIAL'
-    else if (status === 'CON_ERROR') estadoLinea = 'SUPERA_SOLICITADO'
+    else if (status === 'CON_ERROR') {
+      estadoLinea = faker.datatype.boolean(0.5)
+        ? 'SUPERA_SOLICITADO'
+        : 'CANCELADA'
+    }
 
     const stores = pickStores(faker.number.int({ min: 1, max: 3 }))
 
@@ -347,6 +351,19 @@ function purchaseOrderToHomecenterRequest(order: PurchaseOrderRecord) {
   }
 }
 
+/** Homecenter's raw `ESTADO_SKU` carries a numeric prefix (see
+ *  specs/01-purchase-order-status-handling.md) — only `1-PENDIENTE` is
+ *  confirmed, the rest are unconfirmed placeholders. Local to this mock
+ *  echo builder only: the frontend never resolves this prefix itself (see
+ *  docs/especificacion-endpoints-backend (2).md, "Convenciones generales"). */
+const MOCK_ESTADO_SKU_CODE: Record<OrderLineStatus, string> = {
+  PENDIENTE: '1-PENDIENTE',
+  DESPACHADA: '2-DESPACHADA',
+  PARCIAL: '3-PARCIAL',
+  CANCELADA: '4-CANCELADA',
+  SUPERA_SOLICITADO: '5-SUPERA_SOLICITADO',
+}
+
 /** Mirrors a real `GetOrdenesDeCompra` response (see
  *  specs/00-purchase-order-response-update.md) — envelope, field names, and
  *  the PRODUCTOS[].TIENDAS[] nesting all match what Homecenter actually
@@ -413,7 +430,7 @@ function purchaseOrderToHomecenterResponse(order: PurchaseOrderRecord) {
           CANTIDAD_CANCELADA: p.cantidadCancelada,
           COSTO_SKU: p.costoUnitario,
           CANTIDAD_DEVUELTA_SKU: p.cantidadDevuelta,
-          ESTADO_SKU: p.estadoLinea,
+          ESTADO_SKU: MOCK_ESTADO_SKU_CODE[p.estadoLinea],
           CONDICION_PAGO: p.condicionPago,
           DESCUENTO_SKU: p.descuentoSku,
           UNIDAD_VENTA: p.unidadVenta,

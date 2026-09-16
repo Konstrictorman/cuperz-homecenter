@@ -14,6 +14,9 @@ describe('StatusBadge', () => {
     ['dispatched', 'status-badge--dispatched'],
     ['error', 'status-badge--error'],
     ['processing', 'status-badge--processing'],
+    ['partial', 'status-badge--partial'],
+    ['cancelled', 'status-badge--cancelled'],
+    ['exceeded', 'status-badge--exceeded'],
   ])('applies the %s tone class', (tone, expectedClass) => {
     render(<StatusBadge label="Estado" tone={tone} />)
 
