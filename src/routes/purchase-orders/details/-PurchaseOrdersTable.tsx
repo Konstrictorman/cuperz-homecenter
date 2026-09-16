@@ -6,7 +6,7 @@ import type { GridRowSelectionModel } from '@mui/x-data-grid'
 import DataTable from '#/components/dataTable/DataTable'
 import type { StatusBadgeTone } from '#/components/statusBadge/StatusBadge'
 import ToolBar from '#/components/toolBar/ToolBar'
-import { usePurchaseOrdersColumns } from './usePurchaseOrdersColumns'
+import { usePurchaseOrdersColumns } from './-usePurchaseOrdersColumns'
 
 export interface PurchaseOrder {
   id: string

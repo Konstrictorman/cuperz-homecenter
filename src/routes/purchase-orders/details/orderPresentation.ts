@@ -8,8 +8,8 @@ import type {
   PurchaseOrderSummary,
   PurchaseOrdersQuery,
 } from '#/api/types'
-import type { OrdersFilterValues } from './OrdersFilterBar'
-import type { PurchaseOrder } from './PurchaseOrdersTable'
+import type { OrdersFilterValues } from './-OrdersFilterBar'
+import type { PurchaseOrder } from './-PurchaseOrdersTable'
 
 /** API order status → badge tone + Spanish label. */
 export const ORDER_STATUS_UI: Record<
