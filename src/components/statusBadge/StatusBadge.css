@@ -25,7 +25,7 @@
 
 .status-badge--partial {
   background-color: var(--status-info-600) !important;
-  color: var(--status-info-200) !important;
+  color: var(--status-info-25) !important;
 }
 
 .status-badge--cancelled {
@@ -60,7 +60,7 @@
 
 [data-theme='dark'] .status-badge--partial {
   background-color: var(--status-info-600) !important;
-  color: var(--status-info-200) !important;
+  color: var(--status-info-25) !important;
 }
 
 [data-theme='dark'] .status-badge--cancelled {
