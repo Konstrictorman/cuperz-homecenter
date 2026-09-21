@@ -1,0 +1,27 @@
+.list-chip__list {
+  max-height: 50vh;
+  overflow-y: auto;
+}
+
+/* Popover's own Paper styled-component already sets
+   `max-width: calc(100% - 32px)` as a real (specificity-bearing) rule, so
+   !important is required to win over it — same lesson learned overriding
+   Dialog's Paper before switching this component to Popover. */
+.list-chip__popover {
+  max-width: 240px !important;
+  padding: var(--space-2xs) !important;
+}
+
+.list-chip__item {
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+
+.list-chip__item-text {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.list-chip__item-text .MuiListItemText-primary {
+  line-height: 1.2;
+}
