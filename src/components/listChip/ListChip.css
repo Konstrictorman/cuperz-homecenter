@@ -3,6 +3,16 @@
   overflow-y: auto;
 }
 
+/* Darkens the chip while its popover is open, regardless of which `color`
+   prop is in effect. `filter: brightness()` scales whatever colour the chip
+   already resolved to (light or dark mode, any MUI palette colour) instead
+   of hardcoding a `dark` shade per colour key. */
+.list-chip--active {
+  filter: brightness(0.85);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-lime-300);
+}
+
 /* Popover's own Paper styled-component already sets
    `max-width: calc(100% - 32px)` as a real (specificity-bearing) rule, so
    !important is required to win over it — same lesson learned overriding

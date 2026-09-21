@@ -119,6 +119,22 @@ describe('ListChip', () => {
     expect(chip).toHaveClass('MuiChip-colorInfo')
   })
 
+  it('darkens the chip while the popover is open and reverts once closed', async () => {
+    const user = userEvent.setup()
+    render(<ListChip items={['Uno']} />)
+    const chip = screen.getByText('1').closest('.MuiChip-root')
+
+    expect(chip).not.toHaveClass('list-chip--active')
+
+    await user.click(screen.getByText('1'))
+    expect(chip).toHaveClass('list-chip--active')
+
+    await user.keyboard('{Escape}')
+    await waitFor(() => {
+      expect(chip).not.toHaveClass('list-chip--active')
+    })
+  })
+
   it('passes through other ChipProps such as icon, color, title, and className, overriding the "info" default', () => {
     render(
       <ListChip

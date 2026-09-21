@@ -6,6 +6,7 @@ import List from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
 import ListItemText from '@mui/material/ListItemText'
 import Typography from '@mui/material/Typography'
+import clsx from 'clsx'
 import './ListChip.css'
 
 export interface ListChipProps extends Omit<
@@ -16,7 +17,7 @@ export interface ListChipProps extends Omit<
   items: string[]
 }
 
-const ListChip = ({ items, color = 'info', ...props }: ListChipProps) => {
+const ListChip = ({ items, color = 'info', className, ...props }: ListChipProps) => {
   const chipRef = useRef<HTMLDivElement>(null)
   const [open, setOpen] = useState(false)
   const label = items.length > 9 ? '9+' : String(items.length)
@@ -30,6 +31,7 @@ const ListChip = ({ items, color = 'info', ...props }: ListChipProps) => {
         color={color}
         label={label}
         disabled={!hasItems}
+        className={clsx(className, open && 'list-chip--active')}
         onClick={hasItems ? () => setOpen(true) : undefined}
       />
       <Popover

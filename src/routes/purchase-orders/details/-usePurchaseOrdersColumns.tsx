@@ -4,6 +4,7 @@ import { GridActionsCellItem } from '@mui/x-data-grid'
 import type { GridColDef, GridRenderCellParams } from '@mui/x-data-grid'
 import type { PurchaseOrder } from './-PurchaseOrdersTable'
 import VisibilityIcon from '@mui/icons-material/Visibility'
+import ListChip from '#/components/listChip/ListChip'
 
 export const usePurchaseOrdersColumns = (
   onViewDetail?: (order: PurchaseOrder) => void,
@@ -49,6 +50,15 @@ export const usePurchaseOrdersColumns = (
         headerName: 'Tienda(S)',
         type: 'number',
         width: 110,
+        renderCell: (params: GridRenderCellParams<PurchaseOrder>) => (
+          <ListChip
+            items={Array.from(
+              { length: params.row.tiendas },
+              (_, i) => `Tienda ${i + 1}`,
+            )}
+            color={params.row.estadoTone === 'error' ? 'error' : 'info'}
+          />
+        ),
         headerAlign: 'center',
         align: 'center',
       },
