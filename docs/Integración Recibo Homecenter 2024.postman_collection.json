@@ -1,0 +1,245 @@
+{
+	"info": {
+		"_postman_id": "41619c4c-f556-4523-a9e3-a18ad926a60e",
+		"name": "Integración Recibo Homecenter 2024",
+		"description": "Generado a partir de 'Integración Recibo Homecenter 3 1 (1).pdf' (Homecenter-Sodimac, v1.0, 03/09/2024, autor Hector Lopez).\n\nNOTA: el README/CLAUDE.md de este repo marca Avisos de Recibo como un contrato NO formalizado con Homecenter. Este documento describe un único método de CONSULTA (GET) de recibos por proveedor/orden de compra/rango de fechas — no describe el envío de un aviso de recibo por parte de la plataforma. Tratar como hipótesis de trabajo, no como contrato cerrado, hasta validarlo con Homecenter.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "APIM Integracion Recibo",
+			"item": [
+				{
+					"name": "QA",
+					"item": [
+						{
+							"name": "ObtenerProveedoresXCodintoc",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Ocp-Apim-Subscription-Key",
+										"value": "442c55ae313642028c9eb69dc4220dad"
+									}
+								],
+								"url": {
+									"raw": "https://apim-qa-proxy.sodhc.co/logistica/qa-api-intrecibo/api/Proveedor/ObtenerProveedoresXCodintoc?Proveedor=P$o#v$dPr&eba&OrdenCompra=1234567&FechaInicio=2011-10-12%2000%3A00%3A00.000&FechaFin=2011-10-12%2000%3A00%3A00.000",
+									"protocol": "https",
+									"host": [
+										"apim-qa-proxy",
+										"sodhc",
+										"co"
+									],
+									"path": [
+										"logistica",
+										"qa-api-intrecibo",
+										"api",
+										"Proveedor",
+										"ObtenerProveedoresXCodintoc"
+									],
+									"query": [
+										{
+											"key": "Proveedor",
+											"value": "P$o#v$dPr&eba",
+											"description": "Llave interna asignada por Homecenter a cada proveedor. El valor mostrado es el del ejemplo del documento para el proveedor de pruebas \"PROVEEDOR_PRUEBA\"; reemplazar por la llave real."
+										},
+										{
+											"key": "OrdenCompra",
+											"value": "1234567",
+											"description": "Número de orden de compra (int32) a consultar."
+										},
+										{
+											"key": "FechaInicio",
+											"value": "2011-10-12 00:00:00.000",
+											"description": "Fecha/hora inicio del rango de búsqueda."
+										},
+										{
+											"key": "FechaFin",
+											"value": "2011-10-12 00:00:00.000",
+											"description": "Fecha/hora fin del rango de búsqueda."
+										}
+									]
+								},
+								"description": "Consulta los recibos relacionados a una orden de compra para un proveedor y rango de fechas dados. Único método documentado en el contrato de Integración Recibo v1.0."
+							},
+							"response": [
+								{
+									"name": "ObtenerProveedoresXCodintoc",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Ocp-Apim-Subscription-Key",
+												"value": "442c55ae313642028c9eb69dc4220dad"
+											}
+										],
+										"url": {
+											"raw": "https://apim-qa-proxy.sodhc.co/logistica/qa-api-intrecibo/api/Proveedor/ObtenerProveedoresXCodintoc?Proveedor=P$o#v$dPr&eba&OrdenCompra=1234567&FechaInicio=2011-10-12%2000%3A00%3A00.000&FechaFin=2011-10-12%2000%3A00%3A00.000",
+											"protocol": "https",
+											"host": [
+												"apim-qa-proxy",
+												"sodhc",
+												"co"
+											],
+											"path": [
+												"logistica",
+												"qa-api-intrecibo",
+												"api",
+												"Proveedor",
+												"ObtenerProveedoresXCodintoc"
+											],
+											"query": [
+												{
+													"key": "Proveedor",
+													"value": "P$o#v$dPr&eba"
+												},
+												{
+													"key": "OrdenCompra",
+													"value": "1234567"
+												},
+												{
+													"key": "FechaInicio",
+													"value": "2011-10-12 00:00:00.000"
+												},
+												{
+													"key": "FechaFin",
+													"value": "2011-10-12 00:00:00.000"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json; charset=utf-8"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"isSuccessful\": \"true\",\n  \"isError\": \"false\",\n  \"errorMessage\": null,\n  \"messages\": null,\n  \"result\": [\n    {\n      \"ordenCompra\": 1234567,\n      \"fechaRecibo\": \"2011-10-12T00:00:00\",\n      \"puntoEntrega\": \"12345678910\",\n      \"sesionRecibo\": 12346578,\n      \"skuProducto\": \"123465 \",\n      \"eanProducto\": \"123465789741\",\n      \"cantidadPedida\": 1,\n      \"cantidadRecibida\": 1,\n      \"costo\": 123456,\n      \"numeroDocumento\": \"12345678\",\n      \"novedades\": null\n    }\n  ]\n}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "PROD",
+					"item": [
+						{
+							"name": "ObtenerProveedoresXCodintoc",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Ocp-Apim-Subscription-Key",
+										"value": "209fa70e5b0c4b5c8bddaf0aa54b8e19"
+									}
+								],
+								"url": {
+									"raw": "https://apim-prod-proxy.sodhc.co/logistica/api-intrecibo/api/Proveedor/ObtenerProveedoresXCodintoc?Proveedor=P$o#v$dPr&eba&OrdenCompra=1234567&FechaInicio=2011-10-12%2000%3A00%3A00.000&FechaFin=2011-10-12%2000%3A00%3A00.000",
+									"protocol": "https",
+									"host": [
+										"apim-prod-proxy",
+										"sodhc",
+										"co"
+									],
+									"path": [
+										"logistica",
+										"api-intrecibo",
+										"api",
+										"Proveedor",
+										"ObtenerProveedoresXCodintoc"
+									],
+									"query": [
+										{
+											"key": "Proveedor",
+											"value": "P$o#v$dPr&eba",
+											"description": "Llave interna asignada por Homecenter a cada proveedor. El valor mostrado es el del ejemplo del documento para el proveedor de pruebas \"PROVEEDOR_PRUEBA\"; reemplazar por la llave real."
+										},
+										{
+											"key": "OrdenCompra",
+											"value": "1234567",
+											"description": "Número de orden de compra (int32) a consultar."
+										},
+										{
+											"key": "FechaInicio",
+											"value": "2011-10-12 00:00:00.000",
+											"description": "Fecha/hora inicio del rango de búsqueda."
+										},
+										{
+											"key": "FechaFin",
+											"value": "2011-10-12 00:00:00.000",
+											"description": "Fecha/hora fin del rango de búsqueda."
+										}
+									]
+								},
+								"description": "Consulta los recibos relacionados a una orden de compra para un proveedor y rango de fechas dados. Único método documentado en el contrato de Integración Recibo v1.0."
+							},
+							"response": [
+								{
+									"name": "ObtenerProveedoresXCodintoc",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Ocp-Apim-Subscription-Key",
+												"value": "209fa70e5b0c4b5c8bddaf0aa54b8e19"
+											}
+										],
+										"url": {
+											"raw": "https://apim-prod-proxy.sodhc.co/logistica/api-intrecibo/api/Proveedor/ObtenerProveedoresXCodintoc?Proveedor=P$o#v$dPr&eba&OrdenCompra=1234567&FechaInicio=2011-10-12%2000%3A00%3A00.000&FechaFin=2011-10-12%2000%3A00%3A00.000",
+											"protocol": "https",
+											"host": [
+												"apim-prod-proxy",
+												"sodhc",
+												"co"
+											],
+											"path": [
+												"logistica",
+												"api-intrecibo",
+												"api",
+												"Proveedor",
+												"ObtenerProveedoresXCodintoc"
+											],
+											"query": [
+												{
+													"key": "Proveedor",
+													"value": "P$o#v$dPr&eba"
+												},
+												{
+													"key": "OrdenCompra",
+													"value": "1234567"
+												},
+												{
+													"key": "FechaInicio",
+													"value": "2011-10-12 00:00:00.000"
+												},
+												{
+													"key": "FechaFin",
+													"value": "2011-10-12 00:00:00.000"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json; charset=utf-8"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"isSuccessful\": \"true\",\n  \"isError\": \"false\",\n  \"errorMessage\": null,\n  \"messages\": null,\n  \"result\": [\n    {\n      \"ordenCompra\": 1234567,\n      \"fechaRecibo\": \"2011-10-12T00:00:00\",\n      \"puntoEntrega\": \"12345678910\",\n      \"sesionRecibo\": 12346578,\n      \"skuProducto\": \"123465 \",\n      \"eanProducto\": \"123465789741\",\n      \"cantidadPedida\": 1,\n      \"cantidadRecibida\": 1,\n      \"costo\": 123456,\n      \"numeroDocumento\": \"12345678\",\n      \"novedades\": null\n    }\n  ]\n}"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

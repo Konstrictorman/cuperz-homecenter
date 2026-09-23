@@ -42,6 +42,7 @@ const PurchaseOrdersPage = () => {
           rows={rows}
           loading={isFetching}
           onViewDetail={setSelectedOrder}
+          detailOpen={selectedOrder !== null}
         />
       )}
 

@@ -1,7 +1,7 @@
 import AutorenewOutlinedIcon from '@mui/icons-material/AutorenewOutlined'
 import DownloadIcon from '@mui/icons-material/Download'
 import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { GridRowSelectionModel } from '@mui/x-data-grid'
 import DataTable from '#/components/dataTable/DataTable'
 import type { StatusBadgeTone } from '#/components/statusBadge/StatusBadge'
@@ -25,6 +25,9 @@ interface PurchaseOrdersTableProps {
   rows: PurchaseOrder[]
   loading?: boolean
   onViewDetail?: (order: PurchaseOrder) => void
+  /** Whether the detail modal is currently open, so the toolbar can hide
+   * and the row selection can clear while it's up. */
+  detailOpen?: boolean
 }
 
 const EMPTY_SELECTION: GridRowSelectionModel = {
@@ -40,6 +43,7 @@ const PurchaseOrdersTable = ({
   rows,
   loading,
   onViewDetail,
+  detailOpen = false,
 }: PurchaseOrdersTableProps) => {
   const columns = usePurchaseOrdersColumns(onViewDetail)
   const [selection, setSelection] =
@@ -48,6 +52,12 @@ const PurchaseOrdersTable = ({
   const selected = selectionCount(selection, rows.length)
 
   const clearSelection = () => setSelection(EMPTY_SELECTION)
+
+  // Opening the detail modal shouldn't leave the selection toolbar floating
+  // behind it — drop the selection so both disappear together.
+  useEffect(() => {
+    if (detailOpen) setSelection(EMPTY_SELECTION)
+  }, [detailOpen])
 
   return (
     <>
@@ -60,7 +70,7 @@ const PurchaseOrdersTable = ({
       />
       <ToolBar
         blockInteraction={false}
-        open={selected > 0}
+        open={selected > 0 && !detailOpen}
         selected={selected}
         onSelectAll={() => setSelection({ type: 'exclude', ids: new Set() })}
         onClearSelection={clearSelection}

@@ -1,0 +1,400 @@
+{
+  "info": {
+    "_postman_id": "9a7f5a08-52b5-4a10-95d7-7cf1b9a4d001",
+    "name": "Cuperz Homecenter API",
+    "description": "Coleccion de pruebas para el backend FastAPI Cuperz-Homecenter.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8000" },
+    { "key": "accessToken", "value": "REEMPLAZAR_CON_TOKEN_OCI_IAM" },
+    { "key": "orderNumber", "value": "8467343" },
+    { "key": "syncId", "value": "sync-REEMPLAZAR" },
+    { "key": "noticeId", "value": "av-REEMPLAZAR" },
+    { "key": "lineId", "value": "1" },
+    { "key": "logId", "value": "log-REEMPLAZAR" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      { "key": "token", "value": "{{accessToken}}", "type": "string" }
+    ]
+  },
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health check",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/health" },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"status\": \"ok\"\n}",
+              "header": [{ "key": "Content-Type", "value": "application/json" }]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Ordenes de compra",
+      "item": [
+        {
+          "name": "Listar ordenes locales",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/ordenes-compra?ordenCompra={{orderNumber}}&estado=PENDIENTE&page=1&pageSize=20"
+          },
+          "response": [
+            {
+              "name": "200 listado",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": [{\n    \"ordenCompra\": \"8467343\",\n    \"eanPuntoEntrega\": \"7703670529804\",\n    \"cliente\": \"Sodimac Colombia S.A.\",\n    \"estado\": \"PENDIENTE\",\n    \"observaciones\": null,\n    \"fechaOrden\": \"2026-09-13\"\n  }],\n  \"pagination\": {\"page\": 1, \"pageSize\": 20, \"total\": 1, \"totalPages\": 1}\n}"
+            }
+          ]
+        },
+        {
+          "name": "Detalle de orden local",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/ordenes-compra/{{orderNumber}}"
+          },
+          "response": [
+            {
+              "name": "200 detalle",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"ordenCompra\": \"8467343\",\n  \"eanPuntoEntrega\": \"7703670529804\",\n  \"cliente\": \"Sodimac Colombia S.A.\",\n  \"estado\": \"PENDIENTE\",\n  \"observaciones\": null,\n  \"tiendas\": [{\"eanTienda\": \"7703670900306\", \"productos\": [{\"lineaId\": 1, \"eanSku\": \"7703670004288\", \"cantidadSolicitada\": 30, \"cantidadCancelada\": 0, \"cantidadDevuelta\": 0, \"estadoLinea\": \"PENDIENTE\", \"observaciones\": null}]}]\n}"
+            },
+            {
+              "name": "404 no encontrada",
+              "status": "Not Found",
+              "code": 404,
+              "body": "{\"detail\":{\"code\":\"ORDEN_NO_ENCONTRADA\"}}"
+            }
+          ]
+        },
+        {
+          "name": "Solicitar sincronizacion",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"modo\": \"INCREMENTAL\"\n}" },
+            "url": "{{baseUrl}}/api/v1/ordenes-compra/sincronizar"
+          },
+          "response": [
+            {
+              "name": "202 en cola",
+              "status": "Accepted",
+              "code": 202,
+              "body": "{\"sincronizacionId\":\"sync-20260913-001\",\"estado\":\"PENDIENTE\"}"
+            }
+          ]
+        },
+        {
+          "name": "Consultar sincronizacion",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/ordenes-compra/sincronizar/{{syncId}}"
+          },
+          "response": [
+            {
+              "name": "200 completada",
+              "status": "OK",
+              "code": 200,
+              "body": "{\"sincronizacionId\":\"sync-20260913-001\",\"estado\":\"COMPLETADO\",\"ordenesRecibidas\":12,\"ordenesCreadas\":4,\"ordenesActualizadas\":8,\"error\":null}"
+            }
+          ]
+        },
+        {
+          "name": "Reinyectar orden con error",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/ordenes-compra/{{orderNumber}}/reinyectar"
+          },
+          "response": [
+            {
+              "name": "200 procesando",
+              "status": "OK",
+              "code": 200,
+              "body": "{\"ordenCompra\":\"8467343\",\"estado\":\"PROCESANDO\",\"intentoNumero\":2}"
+            },
+            {
+              "name": "409 no permitido",
+              "status": "Conflict",
+              "code": 409,
+              "body": "{\"detail\":{\"code\":\"REINTENTO_NO_PERMITIDO\"}}"
+            }
+          ]
+        },
+        {
+          "name": "Actualizar estado de orden",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"estado\": \"EN_REVISION\",\n  \"observaciones\": \"Pendiente validar cantidades\"\n}" },
+            "url": "{{baseUrl}}/api/v1/ordenes-compra/{{orderNumber}}/estado"
+          },
+          "response": [
+            {
+              "name": "200 actualizado",
+              "status": "OK",
+              "code": 200,
+              "body": "{\"ordenCompra\":\"8467343\",\"estado\":\"EN_REVISION\",\"observaciones\":\"Pendiente validar cantidades\"}"
+            }
+          ]
+        },
+        {
+          "name": "Actualizar estado de linea",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"estado\": \"VALIDADA\",\n  \"observaciones\": \"Linea confirmada\"\n}" },
+            "url": "{{baseUrl}}/api/v1/ordenes-compra/{{orderNumber}}/lineas/{{lineId}}/estado"
+          },
+          "response": [
+            {
+              "name": "200 actualizado",
+              "status": "OK",
+              "code": 200,
+              "body": "{\"lineaId\":1,\"estado\":\"VALIDADA\",\"observaciones\":\"Linea confirmada\"}"
+            }
+          ]
+        },
+        {
+          "name": "Exportar ordenes CSV",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/ordenes-compra/export"
+          },
+          "response": [
+            {
+              "name": "200 CSV",
+              "status": "OK",
+              "code": 200,
+              "body": "Numero de la Orden de Compra;EAN Entidad a Facturar;Nombre Entidad a Facturar;EAN Lugar Entrega Factura;Nombre Lugar Entrega Factura;F. Documento O/C;F. Minima Entrega;F. Maxima Entrega;F. Solicitada de Entrega;EAN del Item;PLU / SKU;Codigo Item Proveedor;Descripcion del Item;EAN Lugar Entrega Items;Nombre Lugar Entrega Items;Cantidad Total;EAN Punto de Venta;Nombre Punto de Venta;Cantidad Pto Vta;Precio Bruto;Precio Neto;% IVA\n8467343;;;7703670529804;;;;;;7703670004288;;;Producto;7703670529804;;30;7703670900306;;30;;;"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Avisos de despacho",
+      "item": [
+        {
+          "name": "Crear aviso como borrador",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ordenCompra\": \"8467343\",\n  \"eanPuntoEntrega\": \"7703670529804\",\n  \"fechaRealDespacho\": \"2026-09-13\",\n  \"tiendas\": [{\n    \"eanTienda\": \"7703670900306\",\n    \"contenedores\": [{\n      \"contenedor\": \"CONT001\",\n      \"productos\": [{\"eanSku\": \"7703670004288\", \"cantidad\": 10, \"familia\": \"FERRETERIA\", \"peso\": 150.5, \"volumen\": 1.75}]\n    }]\n  }]\n+}"
+            },
+            "url": "{{baseUrl}}/api/v1/avisos-despacho"
+          },
+          "response": [
+            {
+              "name": "201 creado",
+              "status": "Created",
+              "code": 201,
+              "body": "{\"avisoId\":\"av-8467343-a1b2c3d4\",\"ordenCompra\":\"8467343\",\"estado\":\"BORRADOR\"}"
+            }
+          ]
+        },
+        {
+          "name": "Listar avisos",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/v1/avisos-despacho?ordenCompra={{orderNumber}}&estado=BORRADOR&fechaDesde=2026-01-01&fechaHasta=2026-12-31&page=1&pageSize=20" },
+          "response": [
+            {
+              "name": "200 listado",
+              "status": "OK",
+              "code": 200,
+              "body": "{\"data\":[{\"avisoId\":\"av-8467343-a1b2c3d4\",\"ordenCompra\":\"8467343\",\"fechaRealDespacho\":\"2026-09-13\",\"estado\":\"BORRADOR\",\"intentos\":0}],\"pagination\":{\"page\":1,\"pageSize\":20,\"total\":1,\"totalPages\":1}}"
+            }
+          ]
+        },
+        {
+          "name": "Consultar aviso",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/v1/avisos-despacho/{{noticeId}}" },
+          "response": [
+            {
+              "name": "200 detalle",
+              "status": "OK",
+              "code": 200,
+              "body": "{\"avisoId\":\"av-8467343-a1b2c3d4\",\"ordenCompra\":\"8467343\",\"estado\":\"BORRADOR\",\"intentos\":0,\"tiendas\":[]}"
+            }
+          ]
+        },
+        {
+          "name": "Actualizar aviso",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"eanPuntoEntrega\": \"7703670529804\",\n  \"fechaRealDespacho\": \"2026-09-14\"\n}" },
+            "url": "{{baseUrl}}/api/v1/avisos-despacho/{{noticeId}}"
+          },
+          "response": [
+            {
+              "name": "200 actualizado",
+              "status": "OK",
+              "code": 200,
+              "body": "{\"avisoId\":\"av-8467343-a1b2c3d4\",\"ordenCompra\":\"8467343\",\"estado\":\"BORRADOR\",\"fechaRealDespacho\":\"2026-09-14\"}"
+            }
+          ]
+        },
+        {
+          "name": "Enviar aviso a Homecenter",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/avisos-despacho/{{noticeId}}/enviar"
+          },
+          "response": [
+            {
+              "name": "200 enviado",
+              "status": "OK",
+              "code": 200,
+              "body": "{\"avisoId\":\"av-8467343-a1b2c3d4\",\"estado\":\"ENVIADO\",\"homecenter\":{\"isError\":false,\"errorMessage\":null}}"
+            },
+            {
+              "name": "502 Homecenter no disponible",
+              "status": "Bad Gateway",
+              "code": 502,
+              "body": "{\"detail\":{\"code\":\"HOMECENTER_NO_DISPONIBLE\"}}"
+            }
+          ]
+        },
+        {
+          "name": "Consultar EAN128",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/avisos-despacho/{{noticeId}}/ean128"
+          },
+          "response": [
+            {
+              "name": "200 EAN128",
+              "status": "OK",
+              "code": 200,
+              "body": "{\"avisoId\":\"av-8467343-a1b2c3d4\",\"contenedores\":[{\"contenedor\":\"CONT001\",\"eanSku\":\"7703670004288\",\"cantidadDespachada\":10,\"ean128\":\"377000269300030093\"}]}"
+            }
+          ]
+        },
+        {
+          "name": "Eliminar aviso borrador",
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/api/v1/avisos-despacho/{{noticeId}}" },
+          "response": [
+            {
+              "name": "204 eliminado",
+              "status": "No Content",
+              "code": 204,
+              "body": ""
+            },
+            {
+              "name": "409 enviado no eliminable",
+              "status": "Conflict",
+              "code": 409,
+              "body": "{\"detail\":{\"code\":\"AVISO_NO_ELIMINABLE\"}}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Bitacora de integracion",
+      "item": [
+        {
+          "name": "Listar bitacora",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/v1/integracion-log?page=1&pageSize=20" },
+          "response": [
+            {
+              "name": "200 listado",
+              "status": "OK",
+              "code": 200,
+              "body": "{\"data\":[{\"integracionLogId\":\"log-001\",\"tipo\":\"AVISO_DESPACHO\",\"fecha\":\"2026-09-13T14:00:00Z\",\"estado\":\"EXITOSO\",\"referencia\":\"av-8467343-a1b2c3d4\"}],\"pagination\":{\"page\":1,\"pageSize\":20,\"total\":1,\"totalPages\":1}}"
+            }
+          ]
+        },
+        {
+          "name": "Detalle de bitacora",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/v1/integracion-log/{{logId}}" },
+          "response": [
+            {
+              "name": "200 detalle",
+              "status": "OK",
+              "code": 200,
+              "body": "{\"integracionLogId\":\"log-001\",\"tipo\":\"AVISO_DESPACHO\",\"fecha\":\"2026-09-13T14:00:00Z\",\"requestEnviado\":{\"ordenes\":[]},\"respuestaRecibida\":{\"isError\":false}}"
+            },
+            {
+              "name": "404 no encontrado",
+              "status": "Not Found",
+              "code": 404,
+              "body": "{\"detail\":{\"code\":\"LOG_NO_ENCONTRADO\"}}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Listas de valores",
+      "item": [
+        {
+          "name": "Crear lista jerarquica",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"code\": \"CIUDADES\",\n  \"name\": \"Ciudades\",\n  \"parent_id\": null,\n  \"values\": [{\"code\":\"BOGOTA\",\"label\":\"Bogota\",\"sort_order\":1}]\n}" },
+            "url": "{{baseUrl}}/api/v1/listas-valores"
+          },
+          "response": [
+            {
+              "name": "201 creado",
+              "status": "Created",
+              "code": 201,
+              "body": "{\"id\":1,\"code\":\"CIUDADES\",\"name\":\"Ciudades\",\"parent_id\":null,\"active\":true,\"values\":[{\"code\":\"BOGOTA\",\"label\":\"Bogota\",\"sort_order\":1,\"active\":true}]}"
+            }
+          ]
+        },
+        {
+          "name": "Listar listas activas",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/v1/listas-valores" },
+          "response": [
+            {
+              "name": "200 listado",
+              "status": "OK",
+              "code": 200,
+              "body": "[{\"id\":1,\"code\":\"CIUDADES\",\"name\":\"Ciudades\",\"parent_id\":null,\"active\":true,\"values\":[]}]"
+            }
+          ]
+        },
+        {
+          "name": "Consultar lista por codigo",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/v1/listas-valores/CIUDADES" },
+          "response": [
+            {
+              "name": "200 detalle",
+              "status": "OK",
+              "code": 200,
+              "body": "{\"id\":1,\"code\":\"CIUDADES\",\"name\":\"Ciudades\",\"parent_id\":null,\"active\":true,\"values\":[{\"code\":\"BOGOTA\",\"label\":\"Bogota\",\"sort_order\":1,\"active\":true}]}"
+            },
+            {
+              "name": "404 no encontrada",
+              "status": "Not Found",
+              "code": 404,
+              "body": "{\"detail\":{\"code\":\"LISTA_NO_ENCONTRADA\"}}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

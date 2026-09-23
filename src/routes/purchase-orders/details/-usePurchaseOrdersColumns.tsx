@@ -4,7 +4,8 @@ import { GridActionsCellItem } from '@mui/x-data-grid'
 import type { GridColDef, GridRenderCellParams } from '@mui/x-data-grid'
 import type { PurchaseOrder } from './-PurchaseOrdersTable'
 import VisibilityIcon from '@mui/icons-material/Visibility'
-import ListChip from '#/components/listChip/ListChip'
+import DownloadIcon from '@mui/icons-material/Download'
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
 
 export const usePurchaseOrdersColumns = (
   onViewDetail?: (order: PurchaseOrder) => void,
@@ -46,23 +47,6 @@ export const usePurchaseOrdersColumns = (
         align: 'center',
       },
       {
-        field: 'tiendas',
-        headerName: 'Tienda(S)',
-        type: 'number',
-        width: 110,
-        renderCell: (params: GridRenderCellParams<PurchaseOrder>) => (
-          <ListChip
-            items={Array.from(
-              { length: params.row.tiendas },
-              (_, i) => `Tienda ${i + 1}`,
-            )}
-            color={params.row.estadoTone === 'error' ? 'error' : 'info'}
-          />
-        ),
-        headerAlign: 'center',
-        align: 'center',
-      },
-      {
         field: 'cantidadTotal',
         headerName: 'Cant. Total',
         type: 'number',
@@ -96,7 +80,7 @@ export const usePurchaseOrdersColumns = (
       },
       {
         field: 'detalle',
-        headerName: 'Acción',
+        headerName: 'Acciones',
         width: 110,
         sortable: false,
         filterable: false,
@@ -105,6 +89,16 @@ export const usePurchaseOrdersColumns = (
           <GridActionsCellItem
             icon={<VisibilityIcon />}
             label="Ver detalle"
+            onClick={() => onViewDetail?.(params.row)}
+          />,
+          <GridActionsCellItem
+            icon={<DownloadIcon />}
+            label="Descargar CSV"
+            onClick={() => onViewDetail?.(params.row)}
+          />,
+          <GridActionsCellItem
+            icon={<PictureAsPdfIcon />}
+            label="Descargar PDF"
             onClick={() => onViewDetail?.(params.row)}
           />,
         ],

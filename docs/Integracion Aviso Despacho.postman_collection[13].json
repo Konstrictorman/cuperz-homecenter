@@ -1,0 +1,137 @@
+{
+	"info": {
+		"_postman_id": "3d4f9521-7c4a-471e-bf40-dba3745f6210",
+		"name": "Integracion Aviso Despacho",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "APIM Integracion OC",
+			"item": [
+				{
+					"name": "QA",
+					"item": [
+						{
+							"name": "AvisoDespacho",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Ocp-Apim-Subscription-Key",
+										"value": "442c55ae313642028c9eb69dc4220dad"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n\t\"ordenes\": [\r\n\t\t{\r\n\t\t\t\"eanPuntoEntrega\": \"7703670529804\",\r\n\t\t\t\"ordenCompra\": \"8467343\",\r\n\t\t\t\"fechaRealDespacho\": \"2025-05-06\",\r\n\t\t\t\"tiendas\": [\r\n\t\t\t\t{\r\n\t\t\t\t\t\"eanTienda\": \"7703670900306\",\r\n\t\t\t\t\t\"contenedores\": [\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\t\"contenedor\": \"CONT001\",\r\n\t\t\t\t\t\t\t\"productos\": [\r\n\t\t\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\t\t\t\"eanSku\": \"7703670004288\",\r\n\t\t\t\t\t\t\t\t\t\"cantidad\": \"10\",\r\n\t\t\t\t\t\t\t\t\t\"peso\": \"150.5\",\r\n\t\t\t\t\t\t\t\t\t\"volumen\": \"1.75\"\r\n\t\t\t\t\t\t\t\t}\r\n\t\t\t\t\t\t\t]\r\n\t\t\t\t\t\t},\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\t\"contenedor\": \"CONT002\",\r\n\t\t\t\t\t\t\t\"productos\": [\r\n\t\t\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\t\t\t\"eanSku\": \"7703670004288\",\r\n\t\t\t\t\t\t\t\t\t\"cantidad\": \"10\",\r\n\t\t\t\t\t\t\t\t\t\"peso\": \"150.5\",\r\n\t\t\t\t\t\t\t\t\t\"volumen\": \"1.75\"\r\n\t\t\t\t\t\t\t\t}\r\n\t\t\t\t\t\t\t]\r\n\t\t\t\t\t\t},\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\t\"contenedor\": \"CONT003\",\r\n\t\t\t\t\t\t\t\"productos\": [\r\n\t\t\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\t\t\t\"eanSku\": \"7703670004288\",\r\n\t\t\t\t\t\t\t\t\t\"cantidad\": \"10\",\r\n\t\t\t\t\t\t\t\t\t\"peso\": \"150.5\",\r\n\t\t\t\t\t\t\t\t\t\"volumen\": \"1.75\"\r\n\t\t\t\t\t\t\t\t}\r\n\t\t\t\t\t\t\t]\r\n\t\t\t\t\t\t}\r\n\t\t\t\t\t]\r\n\t\t\t\t},\r\n\t\t\t\t{\r\n\t\t\t\t\t\"eanTienda\": \"7703670900580\",\r\n\t\t\t\t\t\"contenedores\": [\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\t\"contenedor\": \"CONT001\",\r\n\t\t\t\t\t\t\t\"productos\": [\r\n\t\t\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\t\t\t\"eanSku\": \"7702098035553\",\r\n\t\t\t\t\t\t\t\t\t\"cantidad\": \"1\",\r\n\t\t\t\t\t\t\t\t\t\"peso\": \"150.5\",\r\n\t\t\t\t\t\t\t\t\t\"volumen\": \"0.75\"\r\n\t\t\t\t\t\t\t\t},\r\n\t\t\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\t\t\t\"eanSku\": \"7702098038660\",\r\n\t\t\t\t\t\t\t\t\t\"cantidad\": \"2\",\r\n\t\t\t\t\t\t\t\t\t\"peso\": \"150.5\",\r\n\t\t\t\t\t\t\t\t\t\"volumen\": \"0.75\"\r\n\t\t\t\t\t\t\t\t}\r\n\t\t\t\t\t\t\t]\r\n\t\t\t\t\t\t},\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\t\"contenedor\": \"CONT002\",\r\n\t\t\t\t\t\t\t\"productos\": [\r\n\t\t\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\t\t\t\"eanSku\": \"7703670004288\",\r\n\t\t\t\t\t\t\t\t\t\"cantidad\": \"3\",\r\n\t\t\t\t\t\t\t\t\t\"peso\": \"150.5\",\r\n\t\t\t\t\t\t\t\t\t\"volumen\": \"0.75\"\r\n\t\t\t\t\t\t\t\t}\r\n\t\t\t\t\t\t\t]\r\n\t\t\t\t\t\t}\r\n\t\t\t\t\t]\r\n\t\t\t\t}\r\n\t\t\t]\r\n\t\t},\r\n\t\t{\r\n\t\t\t\"eanPuntoEntrega\": \"7703670529804\",\r\n\t\t\t\"ordenCompra\": \"17302836\",\r\n\t\t\t\"fechaRealDespacho\": \"2025-05-06\",\r\n\t\t\t\"tiendas\": [\r\n\t\t\t\t{\r\n\t\t\t\t\t\"eanTienda\": \"7703670900153\",\r\n\t\t\t\t\t\"contenedores\": [\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\t\"contenedor\": \"CONTENEDOR54\",\r\n\t\t\t\t\t\t\t\"productos\": [\r\n\t\t\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\t\t\t\"eanSku\": \"7702098007956\",\r\n\t\t\t\t\t\t\t\t\t\"cantidad\": \"4\",\r\n\t\t\t\t\t\t\t\t\t\"peso\": \"12.5\",\r\n\t\t\t\t\t\t\t\t\t\"volumen\": \"2.75\"\r\n\t\t\t\t\t\t\t\t}\r\n\t\t\t\t\t\t\t]\r\n\t\t\t\t\t\t}\r\n\t\t\t\t\t]\r\n\t\t\t\t},\r\n\t\t\t\t{\r\n\t\t\t\t\t\"eanTienda\": \"7703670900115\",\r\n\t\t\t\t\t\"contenedores\": [\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\t\"contenedor\": \"CONTENEDOR54\",\r\n\t\t\t\t\t\t\t\"productos\": [\r\n\t\t\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\t\t\t\"eanSku\": \"7702098007956\",\r\n\t\t\t\t\t\t\t\t\t\"cantidad\": \"5\",\r\n\t\t\t\t\t\t\t\t\t\"peso\": \"12.5\",\r\n\t\t\t\t\t\t\t\t\t\"volumen\": \"2.75\"\r\n\t\t\t\t\t\t\t\t}\r\n\t\t\t\t\t\t\t]\r\n\t\t\t\t\t\t},\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\t\"contenedor\": \"CONTENEDOR70\",\r\n\t\t\t\t\t\t\t\"productos\": [\r\n\t\t\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\t\t\t\"eanSku\": \"7702098007956\",\r\n\t\t\t\t\t\t\t\t\t\"cantidad\": \"15\",\r\n\t\t\t\t\t\t\t\t\t\"peso\": \"12.5\",\r\n\t\t\t\t\t\t\t\t\t\"volumen\": \"2.75\"\r\n\t\t\t\t\t\t\t\t}\r\n\t\t\t\t\t\t\t]\r\n\t\t\t\t\t\t},\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\t\"contenedor\": \"CONTENEDOR70\",\r\n\t\t\t\t\t\t\t\"productos\": [\r\n\t\t\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\t\t\t\"eanSku\": \"7702098007956\",\r\n\t\t\t\t\t\t\t\t\t\"cantidad\": \"15\",\r\n\t\t\t\t\t\t\t\t\t\"peso\": \"12.5\",\r\n\t\t\t\t\t\t\t\t\t\"volumen\": \"2.75\"\r\n\t\t\t\t\t\t\t\t}\r\n\t\t\t\t\t\t\t]\r\n\t\t\t\t\t\t}\r\n\t\t\t\t\t]\r\n\t\t\t\t}\r\n\t\t\t]\r\n\t\t}\r\n\t]\r\n}"
+								},
+								"url": {
+									"raw": "https://apim-qa-proxy.sodhc.co/logistica/qa-api-aviso-despacho/api/AvisoDespacho",
+									"protocol": "https",
+									"host": [
+										"apim-qa-proxy",
+										"sodhc",
+										"co"
+									],
+									"path": [
+										"logistica",
+										"qa-api-aviso-despacho",
+										"api",
+										"AvisoDespacho"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "GetAvisosDespachoPorProducto",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Ocp-Apim-Subscription-Key",
+										"value": "442c55ae313642028c9eb69dc4220dad"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"CodigoIntegracion\": \"16iOQ9TqX9vp1tde6hq57jtd87\",\n  \"TipoOrden\": 2,\n  \"Fecha\": \"2025-01-21\"\n}"
+								},
+								"url": {
+									"raw": "https://apim-qa-proxy.sodhc.co/logistica/qa-api-aviso-despacho/api/AvisoDespacho/GetAvisosDespachoPorProducto/8467343",
+									"protocol": "https",
+									"host": [
+										"apim-qa-proxy",
+										"sodhc",
+										"co"
+									],
+									"path": [
+										"logistica",
+										"qa-api-aviso-despacho",
+										"api",
+										"AvisoDespacho",
+										"GetAvisosDespachoPorProducto",
+										"8467343"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "GetAvisosDespachoPorTienda",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Ocp-Apim-Subscription-Key",
+										"value": "442c55ae313642028c9eb69dc4220dad"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"referenciaProveedor\": \"16iOQ9TqX9vp1tde6hq57jtd87\",\r\n  \"PMG_PO_NUMBER\": \"17301369\"\r\n}"
+								},
+								"url": {
+									"raw": "https://apim-qa-proxy.sodhc.co/logistica/qa-api-aviso-despacho/api/AvisoDespacho/GetAvisosDespachoPorTienda/8467343",
+									"protocol": "https",
+									"host": [
+										"apim-qa-proxy",
+										"sodhc",
+										"co"
+									],
+									"path": [
+										"logistica",
+										"qa-api-aviso-despacho",
+										"api",
+										"AvisoDespacho",
+										"GetAvisosDespachoPorTienda",
+										"8467343"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		}
+	]
+}

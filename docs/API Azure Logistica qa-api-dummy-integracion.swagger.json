@@ -1,0 +1,324 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "API Azure Logistica qa-api-dummy-integracion",
+        "version": "1.0",
+        "description": "Descripción del servicio"
+    },
+    "host": "apim-qa-proxy.sodhc.co",
+    "basePath": "/logistica/qa-api-dummy-integracion",
+    "schemes": [
+        "https"
+    ],
+    "securityDefinitions": {
+        "apiKeyHeader": {
+            "type": "apiKey",
+            "name": "Ocp-Apim-Subscription-Key",
+            "in": "header"
+        },
+        "apiKeyQuery": {
+            "type": "apiKey",
+            "name": "subscription-key",
+            "in": "query"
+        }
+    },
+    "security": [
+        {
+            "apiKeyHeader": []
+        },
+        {
+            "apiKeyQuery": []
+        }
+    ],
+    "paths": {
+        "/api/dummyIntegracion/GenerarEtiqueta/{ordenCompra}/{numTags}": {
+            "get": {
+                "operationId": "get-api-dummyintegracion-generaretiqueta-ordencompra-numtags",
+                "summary": "Metodo para Generar las etiquetas de los avisos de despacho.",
+                "tags": [
+                    "Dummy Integracion Ordenes de Compra"
+                ],
+                "parameters": [
+                    {
+                        "name": "ordenCompra",
+                        "in": "path",
+                        "required": true,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "numTags",
+                        "in": "path",
+                        "required": true,
+                        "type": "integer"
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Void"
+                        },
+                        "examples": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/api/dummyIntegracion/AvisoDespacho": {
+            "post": {
+                "operationId": "post-api-dummyintegracion-avisodespacho",
+                "summary": "Metodo para crear un aviso de despacho.",
+                "tags": [
+                    "Dummy Integracion Ordenes de Compra"
+                ],
+                "parameters": [
+                    {
+                        "name": "avisoDespachoRequest",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/AvisoDespachoRequest"
+                        }
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Void"
+                        },
+                        "examples": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/api/dummyIntegracion/GetOrdenesDeCompra": {
+            "post": {
+                "operationId": "post-api-dummyintegracion-getordenesdecompra",
+                "summary": "Metodo para consultar las ordenes de compra por Referencia Proveedor y Tipo Orden.",
+                "tags": [
+                    "Dummy Integracion Ordenes de Compra"
+                ],
+                "parameters": [
+                    {
+                        "name": "ordenIntegracionRequest",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/OrdenIntegracionRequest"
+                        }
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Void"
+                        },
+                        "examples": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/api/dummyIntegracion/GetAvisosDespachoPorTienda/{ordenesCompra}": {
+            "get": {
+                "operationId": "get-api-dummyintegracion-getavisosdespachoportienda-ordenescompra",
+                "summary": "Metodo para consultar el JsonResponse del aviso de despacho por una o varias Ordenes Compra separadas por coma.",
+                "tags": [
+                    "Dummy Integracion Ordenes de Compra"
+                ],
+                "parameters": [
+                    {
+                        "name": "ordenesCompra",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Void"
+                        },
+                        "examples": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "AvisoDespachoRequest": {
+            "type": "object",
+            "properties": {
+                "ordenes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Ordenes"
+                    },
+                    "x-nullable": true
+                }
+            },
+            "additionalProperties": false,
+            "example": {
+                "ordenes": [
+                    {
+                        "eanPuntoEntrega": "string",
+                        "ordenCompra": "string",
+                        "fechaRealDespacho": "string",
+                        "tiendas": [
+                            {
+                                "eanTienda": "string",
+                                "contenedores": [
+                                    {
+                                        "contenedor": "string",
+                                        "productos": [
+                                            {
+                                                "eanSku": "string",
+                                                "cantidad": "string",
+                                                "familia": "string",
+                                                "peso": "string",
+                                                "volumen": "string"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        "ContenedorDetalle": {
+            "type": "object",
+            "properties": {
+                "contenedor": {
+                    "type": "string",
+                    "x-nullable": true
+                },
+                "productos": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Producto"
+                    },
+                    "x-nullable": true
+                }
+            },
+            "additionalProperties": false
+        },
+        "OrdenIntegracionRequest": {
+            "type": "object",
+            "properties": {
+                "referenciaProveedor": {
+                    "type": "string",
+                    "x-nullable": true
+                },
+                "tipoOrden": {
+                    "type": "integer",
+                    "format": "int32"
+                }
+            },
+            "additionalProperties": false,
+            "example": {
+                "referenciaProveedor": "string",
+                "tipoOrden": 0
+            }
+        },
+        "Ordenes": {
+            "type": "object",
+            "properties": {
+                "eanPuntoEntrega": {
+                    "type": "string",
+                    "x-nullable": true
+                },
+                "ordenCompra": {
+                    "type": "string",
+                    "x-nullable": true
+                },
+                "fechaRealDespacho": {
+                    "type": "string",
+                    "x-nullable": true
+                },
+                "tiendas": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Tienda"
+                    },
+                    "x-nullable": true
+                }
+            },
+            "additionalProperties": false
+        },
+        "Producto": {
+            "type": "object",
+            "properties": {
+                "eanSku": {
+                    "type": "string",
+                    "x-nullable": true
+                },
+                "cantidad": {
+                    "type": "string",
+                    "x-nullable": true
+                },
+                "familia": {
+                    "type": "string",
+                    "x-nullable": true
+                },
+                "peso": {
+                    "type": "string",
+                    "x-nullable": true
+                },
+                "volumen": {
+                    "type": "string",
+                    "x-nullable": true
+                }
+            },
+            "additionalProperties": false
+        },
+        "Tienda": {
+            "type": "object",
+            "properties": {
+                "eanTienda": {
+                    "type": "string",
+                    "x-nullable": true
+                },
+                "contenedores": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ContenedorDetalle"
+                    },
+                    "x-nullable": true
+                }
+            },
+            "additionalProperties": false
+        },
+        "Void": {
+            "type": "object",
+            "additionalProperties": false
+        }
+    },
+    "tags": []
+}
