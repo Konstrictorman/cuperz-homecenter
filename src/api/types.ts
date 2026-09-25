@@ -66,6 +66,18 @@ export interface PurchaseOrderSummary {
   /** Raw `FECHA_TRANSMISION`. */
   fechaTransmision: IsoDate
   ultimaActualizacion: IsoDateTime
+  /** Platform-only flag (not part of Homecenter's contract) — `true` once
+   *  the order is more than 3 months past its `fechaTransmision`, i.e. it
+   *  belongs to the archive rather than the day-to-day listing. Age-derived,
+   *  not user-toggled — see `incluirHistorial` on `PurchaseOrdersQuery`. */
+  archivada: boolean
+  /** Platform-only field (not part of Homecenter's contract) — distinct from
+   *  `PurchaseOrderDetail.notaPedido` (raw `NOTA_PEDIDO`). `null` when unset. */
+  numPedido: string | null
+  /** Raw `FECHA_MIN_ENTREGA`, normalised — see `PurchaseOrderDetail.fechaMinEntrega`. */
+  fechaMinEntrega: IsoDateTime | null
+  /** Raw `FECHA_MAX_ENTREGA`, normalised — see `PurchaseOrderDetail.fechaMaxEntrega`. */
+  fechaMaxEntrega: IsoDateTime | null
 }
 
 /** Per-product store allocation — Homecenter nests this under each product,
@@ -158,6 +170,11 @@ export interface PurchaseOrderDetail {
   observaciones: string
   observacionesNpc: string
   observacionesNpl: string
+  /** Platform-only flag (not part of Homecenter's contract) — `true` once
+   *  the order is more than 3 months past its `fechaTransmision`, i.e. it
+   *  belongs to the archive rather than the day-to-day listing. Age-derived,
+   *  not user-toggled — see `incluirHistorial` on `PurchaseOrdersQuery`. */
+  archivada: boolean
   /** Raw `FECHA_PAGO`. Optional/unused — no consuming screen yet, see SPEC 02. */
   fechaPago?: IsoDateTime | null
   /** Optional/unused — no consuming screen yet, see SPEC 02. */
@@ -173,6 +190,11 @@ export interface PurchaseOrdersQuery extends PaginationQuery {
   fechaTransmisionHasta?: IsoDate
   /** Store EAN. */
   tienda?: string
+  /** Raw `IncluirHistorial`. `false` (the default, sent explicitly when
+   *  omitted) restricts the listing to orders transmitted within the last 3
+   *  months (`archivada: false`); `true` returns the full archive with no
+   *  age cutoff. */
+  incluirHistorial?: boolean
 }
 
 export type SyncMode = 'INCREMENTAL' | 'COMPLETA'

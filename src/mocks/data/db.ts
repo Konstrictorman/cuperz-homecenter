@@ -73,6 +73,14 @@ export interface PurchaseOrderRecord {
   observaciones: string
   observacionesNpc: string
   observacionesNpl: string
+  /** Platform-only flag (not part of Homecenter's contract) — `true` once
+   *  the order is more than 3 months past its `fechaTransmision`, i.e. it
+   *  belongs to the archive rather than the day-to-day listing. Age-derived,
+   *  not user-toggled — see `incluirHistorial` on `PurchaseOrdersQuery`. */
+  archivada: boolean
+  /** Platform-only field (not part of Homecenter's contract) — distinct from
+   *  `notaPedido` (raw `NOTA_PEDIDO`). `null` when unset. */
+  numPedido: string | null
   /** Reprocessing attempts (§ 1.4). */
   intentos: number
   maxIntentos: number
@@ -117,6 +125,14 @@ function isoDate(d: Date): string {
 
 function isoDateTime(d: Date): string {
   return d.toISOString().replace(/\.\d{3}Z$/, 'Z')
+}
+
+/** Orders transmitted before this cutoff are seeded as `archivada` — kept
+ *  out of the default listing unless `incluirHistorial` is set. */
+function isOlderThanThreeMonths(d: Date): boolean {
+  const cutoff = new Date()
+  cutoff.setMonth(cutoff.getMonth() - 3)
+  return d < cutoff
 }
 
 /** Reformats one of our own ISO datetimes back into Homecenter's
@@ -280,7 +296,9 @@ function makePurchaseOrder(
   status: OrderStatus,
 ): PurchaseOrderRecord {
   const deliveryPoint = faker.helpers.arrayElement(DELIVERY_POINTS)
-  const orderDate = faker.date.recent({ days: 45 })
+  // Spans past the 3-month archive cutoff below so the seed actually
+  // includes some orders old enough to be `archivada`.
+  const orderDate = faker.date.recent({ days: 180 })
   const updatedAt = faker.date.between({ from: orderDate, to: new Date() })
   const minEntrega = faker.date.soon({ days: 10, refDate: orderDate })
   const maxEntrega = faker.date.soon({ days: 5, refDate: minEntrega })
@@ -338,6 +356,10 @@ function makePurchaseOrder(
     observaciones: deliveryPoint.ciudad,
     observacionesNpc: `Favor entregar en ${deliveryPoint.direccion}.`,
     observacionesNpl: faker.string.alphanumeric(10).toUpperCase(),
+    archivada: isOlderThanThreeMonths(orderDate),
+    numPedido: faker.datatype.boolean(0.8)
+      ? `${faker.number.int({ min: 10, max: 99 })}-${faker.number.int({ min: 100_000, max: 999_999 })}`
+      : null,
     intentos: status === 'CON_ERROR' ? faker.number.int({ min: 1, max: 2 }) : 0,
     maxIntentos: 3,
   }

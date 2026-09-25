@@ -1,3 +1,5 @@
+import Checkbox from '@mui/material/Checkbox'
+import FormControlLabel from '@mui/material/FormControlLabel'
 import MenuItem from '@mui/material/MenuItem'
 import TextField from '@mui/material/TextField'
 import { useForm } from '@tanstack/react-form'
@@ -14,6 +16,9 @@ export interface OrdersFilterValues {
   estado: OrdersFilterStatus
   fechaTransmisionDesde: string
   fechaTransmisionHasta: string
+  /** Unchecked (default): only orders from the last 3 months. Checked:
+   *  the full archive, with no age restriction. */
+  incluirHistorial: boolean
 }
 
 export const DEFAULT_ORDERS_FILTER_VALUES: OrdersFilterValues = {
@@ -21,6 +26,7 @@ export const DEFAULT_ORDERS_FILTER_VALUES: OrdersFilterValues = {
   estado: 'all',
   fechaTransmisionDesde: '',
   fechaTransmisionHasta: '',
+  incluirHistorial: false,
 }
 
 const STATUS_OPTIONS: Array<{ value: OrdersFilterStatus; label: string }> = [
@@ -114,6 +120,24 @@ const OrdersFilterBar = ({ onFilter }: OrdersFilterBarProps) => {
             value={field.state.value}
             onChange={(event) => field.handleChange(event.target.value)}
             onBlur={field.handleBlur}
+          />
+        )}
+      </form.Field>
+
+      <form.Field name="incluirHistorial">
+        {(field) => (
+          <FormControlLabel
+            className="orders-filter-bar__field orders-filter-bar__checkbox"
+            control={
+              <Checkbox
+                size="small"
+                checked={field.state.value}
+                onChange={(event) => field.handleChange(event.target.checked)}
+                onBlur={field.handleBlur}
+              />
+            }
+            label="Incluir archivo"
+            title="Sin marcar: solo órdenes de los últimos 3 meses. Marcada: todas, sin importar su antigüedad."
           />
         )}
       </form.Field>

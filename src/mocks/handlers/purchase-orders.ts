@@ -39,6 +39,10 @@ function toSummary(order: PurchaseOrderRecord): PurchaseOrderSummary {
     estado: order.estado,
     fechaTransmision: order.fechaTransmision,
     ultimaActualizacion: order.ultimaActualizacion,
+    archivada: order.archivada,
+    numPedido: order.numPedido,
+    fechaMinEntrega: order.fechaMinEntrega,
+    fechaMaxEntrega: order.fechaMaxEntrega,
   }
 }
 
@@ -77,6 +81,7 @@ function toDetail(order: PurchaseOrderRecord): PurchaseOrderDetail {
     observaciones: order.observaciones,
     observacionesNpc: order.observacionesNpc,
     observacionesNpl: order.observacionesNpl,
+    archivada: order.archivada,
   }
 }
 
@@ -86,6 +91,7 @@ function filterPurchaseOrders(url: URL): Array<PurchaseOrderRecord> {
   const fechaTransmisionDesde = url.searchParams.get('fechaTransmisionDesde')
   const fechaTransmisionHasta = url.searchParams.get('fechaTransmisionHasta')
   const storeEan = url.searchParams.get('tienda')
+  const incluirHistorial = url.searchParams.get('incluirHistorial') === 'true'
 
   return db.purchaseOrders
     .filter((o) => (ordenCompra ? o.ordenCompra.includes(ordenCompra) : true))
@@ -104,6 +110,9 @@ function filterPurchaseOrders(url: URL): Array<PurchaseOrderRecord> {
           )
         : true,
     )
+    // Unchecked ⇒ hide the archive (orders older than 3 months); checked ⇒
+    // no age restriction at all.
+    .filter((o) => (incluirHistorial ? true : !o.archivada))
     .sort((a, b) => b.fechaTransmision.localeCompare(a.fechaTransmision))
 }
 

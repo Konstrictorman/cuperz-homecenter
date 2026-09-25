@@ -31,6 +31,26 @@ export const usePurchaseOrdersColumns = (
           value ? value.slice(0, 10) : '',
       },
       {
+        field: 'fechaMinEntrega',
+        headerName: 'Fecha Min. Entrega',
+        flex: 1,
+        minWidth: 130,
+        align: 'center',
+        headerAlign: 'center',
+        valueFormatter: (value: PurchaseOrder['fechaMinEntrega']) =>
+          value ? value.slice(0, 10) : '',
+      },
+      {
+        field: 'fechaMaxEntrega',
+        headerName: 'Fecha Max. Entrega',
+        flex: 1,
+        minWidth: 130,
+        align: 'center',
+        headerAlign: 'center',
+        valueFormatter: (value: PurchaseOrder['fechaMaxEntrega']) =>
+          value ? value.slice(0, 10) : '',
+      },
+      {
         field: 'cliente',
         headerName: 'Cliente',
         flex: 1.5,

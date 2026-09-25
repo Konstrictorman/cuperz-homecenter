@@ -11,7 +11,8 @@
     { "key": "orderNumber", "value": "8467343" },
     { "key": "syncId", "value": "sync-REEMPLAZAR" },
     { "key": "noticeId", "value": "av-REEMPLAZAR" },
-    { "key": "lineId", "value": "1" },
+    { "key": "productId", "value": "1" },
+    { "key": "detailId", "value": "1" },
     { "key": "logId", "value": "log-REEMPLAZAR" }
   ],
   "auth": {
@@ -47,19 +48,19 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/api/v1/ordenes-compra?ordenCompra={{orderNumber}}&estado=PENDIENTE&page=1&pageSize=20"
+            "url": "{{baseUrl}}/api/v1/ordenes-compra?ordenCompra={{orderNumber}}&estado=PENDIENTE&IncluirHistorial=false&page=1&pageSize=20"
           },
           "response": [
             {
               "name": "200 listado",
               "status": "OK",
               "code": 200,
-              "body": "{\n  \"data\": [{\n    \"ordenCompra\": \"8467343\",\n    \"eanPuntoEntrega\": \"7703670529804\",\n    \"cliente\": \"Sodimac Colombia S.A.\",\n    \"estado\": \"PENDIENTE\",\n    \"observaciones\": null,\n    \"fechaOrden\": \"2026-09-13\"\n  }],\n  \"pagination\": {\"page\": 1, \"pageSize\": 20, \"total\": 1, \"totalPages\": 1}\n}"
+              "body": "{\n  \"data\": [{\n    \"ORDEN_COMPRA\": 12174949,\n    \"CANTIDAD_TOT_OC\": 317,\n    \"COSTO_TOT_OC\": 22062827.84,\n    \"STICKER\": \"262200481869\",\n    \"ESTADO_OC\": \"1-PENDIENTE\",\n    \"FECHA_TRANSMISION\": \"\",\n    \"CLIENTE\": \"BLOQUE CERO S.A.S.\",\n    \"CIUDAD_ENTREGA\": \"TUNJA\",\n    \"ordenCompra\": \"12174949\",\n    \"estado\": \"PENDIENTE\"\n  }],\n  \"pagination\": {\"page\": 1, \"pageSize\": 20, \"total\": 1, \"totalPages\": 1}\n}"
             }
           ]
         },
         {
-          "name": "Detalle de orden local",
+          "name": "Detalle de orden local: productos y detalles por tienda",
           "request": {
             "method": "GET",
             "header": [],
@@ -70,7 +71,7 @@
               "name": "200 detalle",
               "status": "OK",
               "code": 200,
-              "body": "{\n  \"ordenCompra\": \"8467343\",\n  \"eanPuntoEntrega\": \"7703670529804\",\n  \"cliente\": \"Sodimac Colombia S.A.\",\n  \"estado\": \"PENDIENTE\",\n  \"observaciones\": null,\n  \"tiendas\": [{\"eanTienda\": \"7703670900306\", \"productos\": [{\"lineaId\": 1, \"eanSku\": \"7703670004288\", \"cantidadSolicitada\": 30, \"cantidadCancelada\": 0, \"cantidadDevuelta\": 0, \"estadoLinea\": \"PENDIENTE\", \"observaciones\": null}]}]\n}"
+              "body": "{\n  \"ORDEN_COMPRA\": 12174949,\n  \"CANTIDAD_TOT_OC\": 317,\n  \"COSTO_TOT_OC\": 22062827.84,\n  \"FECHA_CANCELACION\": \"\",\n  \"STICKER\": \"262200481869\",\n  \"ESTADO_OC\": \"1-PENDIENTE\",\n  \"TRANSPORTADORA\": \"7-LOGISTICA PROPIA\",\n  \"FECHA_MIN_ENTREGA\": \"30/08/2023 00:00:00\",\n  \"FECHA_MAX_ENTREGA\": \"30/08/2023 00:00:00\",\n  \"TIPO_OC\": \"4-Venta Empresa\",\n  \"FECHA_TRANSMISION\": \"\",\n  \"NOTA_PEDIDO\": \"22-298975\",\n  \"CLIENTE\": \"BLOQUE CERO S.A.S.\",\n  \"CEDULA\": \"9000691641001\",\n  \"EMAIL_CLIENTE\": \"dir.administrativo@bloquecero.com\",\n  \"TELEFONO_CLIENTE\": \"0\",\n  \"BARRIO_ENTREGA\": \"TUNJA\",\n  \"CIUDAD_ENTREGA\": \"TUNJA\",\n  \"DEPARTAMENTO_ENTREGA\": \"BOYACA\",\n  \"DIRECCION_ENTREGA\": \"CRA 12 N27-31\",\n  \"PUNTO_ENTREGA\": \"7703670612193\",\n  \"TIPO_DE_ORDEN\": \"ENTREGA_DIRECTA\",\n  \"TIPO_ENTREGA\": \"RETAIL\",\n  \"CODIGO_DANE_CE\": \"15001\",\n  \"CLIENTE_RECIBE\": \"MARTHA REYES\",\n  \"productos\": [{\n    \"SKU\": \"478618\",\n    \"PRODUCTO\": \"PISO CERAMICA CALAMA MULTIC CD 51X51 cm CJ 1.82 m2\",\n    \"EAN_PRODUCTO\": 7702933053193,\n    \"CANTIDAD_SKU\": 11,\n    \"CANTIDAD_CANCELADA\": 0,\n    \"COSTO_SKU\": 43654.52,\n    \"CANTIDAD_DEVUELTA_SKU\": 0,\n    \"ESTADO_SKU\": \"1-PENDIENTE\",\n    \"UNIDAD_VENTA\": \"UND\",\n    \"detalles\": [{\n      \"EAN_TIENDA\": \"0\",\n      \"NOMBRE_TIENDA\": \"\",\n      \"CANTIDAD\": 0\n    }]\n  }]\n}"
             },
             {
               "name": "404 no encontrada",
@@ -153,19 +154,19 @@
           ]
         },
         {
-          "name": "Actualizar estado de linea",
+          "name": "Actualizar estado del detalle de producto por tienda",
           "request": {
             "method": "PATCH",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": { "mode": "raw", "raw": "{\n  \"estado\": \"VALIDADA\",\n  \"observaciones\": \"Linea confirmada\"\n}" },
-            "url": "{{baseUrl}}/api/v1/ordenes-compra/{{orderNumber}}/lineas/{{lineId}}/estado"
+            "url": "{{baseUrl}}/api/v1/ordenes-compra/{{orderNumber}}/productos/{{productId}}/detalles/{{detailId}}/estado"
           },
           "response": [
             {
               "name": "200 actualizado",
               "status": "OK",
               "code": 200,
-              "body": "{\"lineaId\":1,\"estado\":\"VALIDADA\",\"observaciones\":\"Linea confirmada\"}"
+              "body": "{\"detalleId\":1,\"estado\":\"VALIDADA\",\"observaciones\":\"Detalle confirmado\"}"
             }
           ]
         },
