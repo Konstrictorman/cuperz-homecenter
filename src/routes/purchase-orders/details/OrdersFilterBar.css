@@ -24,6 +24,11 @@
   margin-top: var(--space-3xs);
 }
 
+.orders-filter-bar__actions {
+  display: flex;
+  gap: var(--space-xs);
+}
+
 /* Container is `.purchase-orders` (container-type: inline-size). */
 @container (min-width: 32rem) {
   .orders-filter-bar {

@@ -279,8 +279,14 @@ function buildPurchaseOrderLines(
  *  for that one consumer instead of storing the data twice. */
 function groupOrderLinesByTienda(
   productos: Array<PurchaseOrderLineItem>,
-): Array<{ eanTienda: string; items: Array<{ eanSku: string; cantidad: number }> }> {
-  const byTienda = new Map<string, Array<{ eanSku: string; cantidad: number }>>()
+): Array<{
+  eanTienda: string
+  items: Array<{ eanSku: string; cantidad: number }>
+}> {
+  const byTienda = new Map<
+    string,
+    Array<{ eanSku: string; cantidad: number }>
+  >()
   for (const producto of productos) {
     for (const tienda of producto.tiendas) {
       const items = byTienda.get(tienda.eanTienda) ?? []
@@ -289,6 +295,1467 @@ function groupOrderLinesByTienda(
     }
   }
   return Array.from(byTienda, ([eanTienda, items]) => ({ eanTienda, items }))
+}
+
+/** Real Homecenter Cross-Docking order sample (`docs/ORD_15669499 (1).csv`) —
+ *  unlike the rest of this seed, this record isn't `faker`-generated. The
+ *  order number, delivery dates, `eanSku`/`skuHomecenter` pairs, per-store
+ *  quantities, and unit prices below are transcribed verbatim from that
+ *  export (32 SKUs across 35 stores). `descripcion` is empty for every line
+ *  except one because the raw export itself leaves it blank; the "Codigo
+ *  Item Proveedor" column (our own product code, e.g. `T200500009`) has no
+ *  home in `PurchaseOrderLineItem` yet, so it only survives as an inline
+ *  comment. `condicionPago`, `unidadVenta`, and `descuentoSku` aren't in the
+ *  export either — filled in the same made-up way every other seeded order
+ *  does it. See CLAUDE.md's "Open items / unconfirmed with Homecenter". */
+function buildRealSampleOrder(): PurchaseOrderRecord {
+  const productosOrden15669499: Array<PurchaseOrderLineItem> = [
+    {
+      eanSku: '7705666884140',
+      skuHomecenter: '565032',
+      descripcion: '', // Codigo Item Proveedor T200500009
+      cantidadSolicitada: 88,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 12500,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
+        {
+          eanTienda: '7703670900580',
+          nombreTienda: 'SODIMAC - AV EL DORADO',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900689',
+          nombreTienda: 'SODIMAC - BOGOTA CALLE 80',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900801',
+          nombreTienda: 'SODIMAC - BOGOTA SUR',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900702',
+          nombreTienda: 'SODIMAC - BOGOTA NORTE',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900405',
+          nombreTienda: 'SODIMAC - MEDELLIN INDUSTRIALES',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900306',
+          nombreTienda: 'SODIMAC - CALI SUR',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900603',
+          nombreTienda: 'SODIMAC - PEREIRA',
+          cantidad: 8,
+        },
+        {
+          eanTienda: '7703670900412',
+          nombreTienda: 'SODIMAC - MEDELLIN SAN JUAN',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900191',
+          nombreTienda: 'SODIMAC - IBAGUE',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900429',
+          nombreTienda: 'SODIMAC - BELLO',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900153',
+          nombreTienda: 'SODIMAC - BOGOTA CALIMA NQS',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900566',
+          nombreTienda: 'SODIMAC - MONTERIA EL RECREO',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900658',
+          nombreTienda: 'SODIMAC - MANIZALES SAN RAFAEL',
+          cantidad: 8,
+        },
+        {
+          eanTienda: '7703670900115',
+          nombreTienda: 'SODIMAC - BOGOTA CEDRITOS',
+          cantidad: 8,
+        },
+        {
+          eanTienda: '7703670901235',
+          nombreTienda: 'SODIMAC - TINTAL',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900450',
+          nombreTienda: 'SODIMAC - RIONEGRO',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900443',
+          nombreTienda: 'SODIMAC - ENVIGADO',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900214',
+          nombreTienda: 'SODIMAC - YOPAL',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670901228',
+          nombreTienda: 'SODIMAC - TUNJA',
+          cantidad: 4,
+        },
+      ],
+    },
+    {
+      eanSku: '7705666561195',
+      skuHomecenter: '3057531',
+      descripcion: '', // Codigo Item Proveedor T2010BOL42
+      cantidadSolicitada: 10,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 330500,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
+        {
+          eanTienda: '7703670900580',
+          nombreTienda: 'SODIMAC - AV EL DORADO',
+          cantidad: 2,
+        },
+        {
+          eanTienda: '7703670900689',
+          nombreTienda: 'SODIMAC - BOGOTA CALLE 80',
+          cantidad: 3,
+        },
+        {
+          eanTienda: '7703670900603',
+          nombreTienda: 'SODIMAC - PEREIRA',
+          cantidad: 3,
+        },
+        {
+          eanTienda: '7703670900436',
+          nombreTienda: 'SODIMAC - MEDELLIN MOLINOS',
+          cantidad: 1,
+        },
+        {
+          eanTienda: '7703670900122',
+          nombreTienda: 'SODIMAC - CAJICA',
+          cantidad: 1,
+        },
+      ],
+    },
+    {
+      eanSku: '7705666906996',
+      skuHomecenter: '565029',
+      descripcion: '', // Codigo Item Proveedor T200500010
+      cantidadSolicitada: 64,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 29900,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
+        {
+          eanTienda: '7703670900580',
+          nombreTienda: 'SODIMAC - AV EL DORADO',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900689',
+          nombreTienda: 'SODIMAC - BOGOTA CALLE 80',
+          cantidad: 8,
+        },
+        {
+          eanTienda: '7703670900603',
+          nombreTienda: 'SODIMAC - PEREIRA',
+          cantidad: 8,
+        },
+        {
+          eanTienda: '7703670900184',
+          nombreTienda: 'SODIMAC - VILLAVICENCIO',
+          cantidad: 8,
+        },
+        {
+          eanTienda: '7703670900658',
+          nombreTienda: 'SODIMAC - MANIZALES SAN RAFAEL',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900115',
+          nombreTienda: 'SODIMAC - BOGOTA CEDRITOS',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670901235',
+          nombreTienda: 'SODIMAC - TINTAL',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900122',
+          nombreTienda: 'SODIMAC - CAJICA',
+          cantidad: 8,
+        },
+        {
+          eanTienda: '7703670900450',
+          nombreTienda: 'SODIMAC - RIONEGRO',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900207',
+          nombreTienda: 'SODIMAC - GIRARDOT',
+          cantidad: 8,
+        },
+        {
+          eanTienda: '7703670901167',
+          nombreTienda: 'SODIMAC - MOSQUERA',
+          cantidad: 4,
+        },
+      ],
+    },
+    {
+      eanSku: '7705666261484',
+      skuHomecenter: '583900',
+      descripcion: '', // Codigo Item Proveedor T2005INN14
+      cantidadSolicitada: 8,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 68800,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
+        {
+          eanTienda: '7703670900580',
+          nombreTienda: 'SODIMAC - AV EL DORADO',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900122',
+          nombreTienda: 'SODIMAC - CAJICA',
+          cantidad: 4,
+        },
+      ],
+    },
+    {
+      eanSku: '7705666059050',
+      skuHomecenter: '3057529',
+      descripcion: '', // Codigo Item Proveedor T2010BOL40
+      cantidadSolicitada: 13,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 60300,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
+        {
+          eanTienda: '7703670900580',
+          nombreTienda: 'SODIMAC - AV EL DORADO',
+          cantidad: 1,
+        },
+        {
+          eanTienda: '7703670900689',
+          nombreTienda: 'SODIMAC - BOGOTA CALLE 80',
+          cantidad: 6,
+        },
+        {
+          eanTienda: '7703670900603',
+          nombreTienda: 'SODIMAC - PEREIRA',
+          cantidad: 2,
+        },
+        {
+          eanTienda: '7703670900658',
+          nombreTienda: 'SODIMAC - MANIZALES SAN RAFAEL',
+          cantidad: 4,
+        },
+      ],
+    },
+    {
+      eanSku: '7705666939819',
+      skuHomecenter: '565027',
+      descripcion: '', // Codigo Item Proveedor T200500006
+      cantidadSolicitada: 104,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 12500,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
+        {
+          eanTienda: '7703670900580',
+          nombreTienda: 'SODIMAC - AV EL DORADO',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900689',
+          nombreTienda: 'SODIMAC - BOGOTA CALLE 80',
+          cantidad: 8,
+        },
+        {
+          eanTienda: '7703670900702',
+          nombreTienda: 'SODIMAC - BOGOTA NORTE',
+          cantidad: 8,
+        },
+        {
+          eanTienda: '7703670900504',
+          nombreTienda: 'SODIMAC - BARRANQUILLA NORTE',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900313',
+          nombreTienda: 'SODIMAC - CALI NORTE',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900603',
+          nombreTienda: 'SODIMAC - PEREIRA',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900412',
+          nombreTienda: 'SODIMAC - MEDELLIN SAN JUAN',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900108',
+          nombreTienda: 'SODIMAC - SUBA',
+          cantidad: 8,
+        },
+        {
+          eanTienda: '7703670900542',
+          nombreTienda: 'SODIMAC - CARTAGENA LA POPA',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900429',
+          nombreTienda: 'SODIMAC - BELLO',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900900',
+          nombreTienda: 'SODIMAC - CUCUTA',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900436',
+          nombreTienda: 'SODIMAC - MEDELLIN MOLINOS',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900184',
+          nombreTienda: 'SODIMAC - VILLAVICENCIO',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900153',
+          nombreTienda: 'SODIMAC - BOGOTA CALIMA NQS',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900566',
+          nombreTienda: 'SODIMAC - MONTERIA EL RECREO',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900658',
+          nombreTienda: 'SODIMAC - MANIZALES SAN RAFAEL',
+          cantidad: 8,
+        },
+        {
+          eanTienda: '7703670900115',
+          nombreTienda: 'SODIMAC - BOGOTA CEDRITOS',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900443',
+          nombreTienda: 'SODIMAC - ENVIGADO',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900559',
+          nombreTienda: 'SODIMAC - VALLEDUPAR GUATAPURI',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900207',
+          nombreTienda: 'SODIMAC - GIRARDOT',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670901228',
+          nombreTienda: 'SODIMAC - TUNJA',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670901167',
+          nombreTienda: 'SODIMAC - MOSQUERA',
+          cantidad: 4,
+        },
+      ],
+    },
+    {
+      eanSku: '7705666112779',
+      skuHomecenter: '675855',
+      descripcion: '', // Codigo Item Proveedor T2005MFG01
+      cantidadSolicitada: 24,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 22500,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
+        {
+          eanTienda: '7703670900580',
+          nombreTienda: 'SODIMAC - AV EL DORADO',
+          cantidad: 6,
+        },
+        {
+          eanTienda: '7703670900702',
+          nombreTienda: 'SODIMAC - BOGOTA NORTE',
+          cantidad: 6,
+        },
+        {
+          eanTienda: '7703670900191',
+          nombreTienda: 'SODIMAC - IBAGUE',
+          cantidad: 6,
+        },
+        {
+          eanTienda: '7703670900122',
+          nombreTienda: 'SODIMAC - CAJICA',
+          cantidad: 6,
+        },
+      ],
+    },
+    {
+      eanSku: '7705666250495',
+      skuHomecenter: '3057525',
+      descripcion: '', // Codigo Item Proveedor T2010SNA06
+      cantidadSolicitada: 16,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 378000,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
+        {
+          eanTienda: '7703670900580',
+          nombreTienda: 'SODIMAC - AV EL DORADO',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900801',
+          nombreTienda: 'SODIMAC - BOGOTA SUR',
+          cantidad: 1,
+        },
+        {
+          eanTienda: '7703670900702',
+          nombreTienda: 'SODIMAC - BOGOTA NORTE',
+          cantidad: 2,
+        },
+        {
+          eanTienda: '7703670900306',
+          nombreTienda: 'SODIMAC - CALI SUR',
+          cantidad: 1,
+        },
+        {
+          eanTienda: '7703670900504',
+          nombreTienda: 'SODIMAC - BARRANQUILLA NORTE',
+          cantidad: 1,
+        },
+        {
+          eanTienda: '7703670900603',
+          nombreTienda: 'SODIMAC - PEREIRA',
+          cantidad: 2,
+        },
+        {
+          eanTienda: '7703670900412',
+          nombreTienda: 'SODIMAC - MEDELLIN SAN JUAN',
+          cantidad: 1,
+        },
+        {
+          eanTienda: '7703670900115',
+          nombreTienda: 'SODIMAC - BOGOTA CEDRITOS',
+          cantidad: 1,
+        },
+        {
+          eanTienda: '7703670900443',
+          nombreTienda: 'SODIMAC - ENVIGADO',
+          cantidad: 3,
+        },
+      ],
+    },
+    {
+      eanSku: '7705666193457',
+      skuHomecenter: '3072494',
+      descripcion: '', // Codigo Item Proveedor T150501843
+      cantidadSolicitada: 38,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 28200,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
+        {
+          eanTienda: '7703670900580',
+          nombreTienda: 'SODIMAC - AV EL DORADO',
+          cantidad: 6,
+        },
+        {
+          eanTienda: '7703670900801',
+          nombreTienda: 'SODIMAC - BOGOTA SUR',
+          cantidad: 2,
+        },
+        {
+          eanTienda: '7703670900702',
+          nombreTienda: 'SODIMAC - BOGOTA NORTE',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900412',
+          nombreTienda: 'SODIMAC - MEDELLIN SAN JUAN',
+          cantidad: 2,
+        },
+        {
+          eanTienda: '7703670900108',
+          nombreTienda: 'SODIMAC - SUBA',
+          cantidad: 1,
+        },
+        {
+          eanTienda: '7703670900191',
+          nombreTienda: 'SODIMAC - IBAGUE',
+          cantidad: 9,
+        },
+        {
+          eanTienda: '7703670900184',
+          nombreTienda: 'SODIMAC - VILLAVICENCIO',
+          cantidad: 1,
+        },
+        {
+          eanTienda: '7703670900153',
+          nombreTienda: 'SODIMAC - BOGOTA CALIMA NQS',
+          cantidad: 1,
+        },
+        {
+          eanTienda: '7703670900566',
+          nombreTienda: 'SODIMAC - MONTERIA EL RECREO',
+          cantidad: 1,
+        },
+        {
+          eanTienda: '7703670900177',
+          nombreTienda: 'SODIMAC - NEIVA',
+          cantidad: 1,
+        },
+        {
+          eanTienda: '7703670901235',
+          nombreTienda: 'SODIMAC - TINTAL',
+          cantidad: 2,
+        },
+        {
+          eanTienda: '7703670900450',
+          nombreTienda: 'SODIMAC - RIONEGRO',
+          cantidad: 1,
+        },
+        {
+          eanTienda: '7703670900559',
+          nombreTienda: 'SODIMAC - VALLEDUPAR GUATAPURI',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900528',
+          nombreTienda: 'SODIMAC - BARRANQUILLA CENTRO',
+          cantidad: 1,
+        },
+        {
+          eanTienda: '7703670900214',
+          nombreTienda: 'SODIMAC - YOPAL',
+          cantidad: 1,
+        },
+        {
+          eanTienda: '7703670901167',
+          nombreTienda: 'SODIMAC - MOSQUERA',
+          cantidad: 1,
+        },
+      ],
+    },
+    {
+      eanSku: '7707203668268',
+      skuHomecenter: '140948',
+      descripcion: 'JB 3 PIEZAS POLIPROPILENO', // Codigo Item Proveedor 315
+      cantidadSolicitada: 42,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 34600,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
+        {
+          eanTienda: '7703670900580',
+          nombreTienda: 'SODIMAC - AV EL DORADO',
+          cantidad: 6,
+        },
+        {
+          eanTienda: '7703670900702',
+          nombreTienda: 'SODIMAC - BOGOTA NORTE',
+          cantidad: 6,
+        },
+        {
+          eanTienda: '7703670900139',
+          nombreTienda: 'SODIMAC – SOACHA',
+          cantidad: 6,
+        },
+        {
+          eanTienda: '7703670900429',
+          nombreTienda: 'SODIMAC - BELLO',
+          cantidad: 6,
+        },
+        {
+          eanTienda: '7703670900900',
+          nombreTienda: 'SODIMAC - CUCUTA',
+          cantidad: 6,
+        },
+        {
+          eanTienda: '7703670900184',
+          nombreTienda: 'SODIMAC - VILLAVICENCIO',
+          cantidad: 6,
+        },
+        {
+          eanTienda: '7703670900122',
+          nombreTienda: 'SODIMAC - CAJICA',
+          cantidad: 6,
+        },
+      ],
+    },
+    {
+      eanSku: '7703670917724',
+      skuHomecenter: '234348',
+      descripcion: '', // Codigo Item Proveedor T150500900
+      cantidadSolicitada: 24,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 24900,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
+        {
+          eanTienda: '7703670900580',
+          nombreTienda: 'SODIMAC - AV EL DORADO',
+          cantidad: 6,
+        },
+        {
+          eanTienda: '7703670900689',
+          nombreTienda: 'SODIMAC - BOGOTA CALLE 80',
+          cantidad: 6,
+        },
+        {
+          eanTienda: '7703670900702',
+          nombreTienda: 'SODIMAC - BOGOTA NORTE',
+          cantidad: 6,
+        },
+        {
+          eanTienda: '7703670900603',
+          nombreTienda: 'SODIMAC - PEREIRA',
+          cantidad: 6,
+        },
+      ],
+    },
+    {
+      eanSku: '7705666511138',
+      skuHomecenter: '565031',
+      descripcion: '', // Codigo Item Proveedor T200500008
+      cantidadSolicitada: 44,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 40900,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
+        {
+          eanTienda: '7703670900689',
+          nombreTienda: 'SODIMAC - BOGOTA CALLE 80',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900306',
+          nombreTienda: 'SODIMAC - CALI SUR',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900108',
+          nombreTienda: 'SODIMAC - SUBA',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900191',
+          nombreTienda: 'SODIMAC - IBAGUE',
+          cantidad: 8,
+        },
+        {
+          eanTienda: '7703670900436',
+          nombreTienda: 'SODIMAC - MEDELLIN MOLINOS',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900184',
+          nombreTienda: 'SODIMAC - VILLAVICENCIO',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900177',
+          nombreTienda: 'SODIMAC - NEIVA',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900115',
+          nombreTienda: 'SODIMAC - BOGOTA CEDRITOS',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900122',
+          nombreTienda: 'SODIMAC - CAJICA',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900528',
+          nombreTienda: 'SODIMAC - BARRANQUILLA CENTRO',
+          cantidad: 4,
+        },
+      ],
+    },
+    {
+      eanSku: '7705666111505',
+      skuHomecenter: '3072496',
+      descripcion: '', // Codigo Item Proveedor T2005CFY02
+      cantidadSolicitada: 11,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 84900,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
+        {
+          eanTienda: '7703670900689',
+          nombreTienda: 'SODIMAC - BOGOTA CALLE 80',
+          cantidad: 6,
+        },
+        {
+          eanTienda: '7703670900702',
+          nombreTienda: 'SODIMAC - BOGOTA NORTE',
+          cantidad: 1,
+        },
+        {
+          eanTienda: '7703670900412',
+          nombreTienda: 'SODIMAC - MEDELLIN SAN JUAN',
+          cantidad: 4,
+        },
+      ],
+    },
+    {
+      eanSku: '7705666653791',
+      skuHomecenter: '769187',
+      descripcion: '', // Codigo Item Proveedor T2005MAZ01
+      cantidadSolicitada: 8,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 19600,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
+        {
+          eanTienda: '7703670900689',
+          nombreTienda: 'SODIMAC - BOGOTA CALLE 80',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900900',
+          nombreTienda: 'SODIMAC - CUCUTA',
+          cantidad: 4,
+        },
+      ],
+    },
+    {
+      eanSku: '7705666555866',
+      skuHomecenter: '3072495',
+      descripcion: '', // Codigo Item Proveedor T150501844
+      cantidadSolicitada: 37,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 28200,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
+        {
+          eanTienda: '7703670900689',
+          nombreTienda: 'SODIMAC - BOGOTA CALLE 80',
+          cantidad: 1,
+        },
+        {
+          eanTienda: '7703670900801',
+          nombreTienda: 'SODIMAC - BOGOTA SUR',
+          cantidad: 11,
+        },
+        {
+          eanTienda: '7703670900702',
+          nombreTienda: 'SODIMAC - BOGOTA NORTE',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900108',
+          nombreTienda: 'SODIMAC - SUBA',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900191',
+          nombreTienda: 'SODIMAC - IBAGUE',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900429',
+          nombreTienda: 'SODIMAC - BELLO',
+          cantidad: 1,
+        },
+        {
+          eanTienda: '7703670900184',
+          nombreTienda: 'SODIMAC - VILLAVICENCIO',
+          cantidad: 1,
+        },
+        {
+          eanTienda: '7703670900955',
+          nombreTienda: 'SODIMAC - BUCARAMANGA LA ROSITA',
+          cantidad: 1,
+        },
+        {
+          eanTienda: '7703670900153',
+          nombreTienda: 'SODIMAC - BOGOTA CALIMA NQS',
+          cantidad: 1,
+        },
+        {
+          eanTienda: '7703670900566',
+          nombreTienda: 'SODIMAC - MONTERIA EL RECREO',
+          cantidad: 2,
+        },
+        {
+          eanTienda: '7703670900115',
+          nombreTienda: 'SODIMAC - BOGOTA CEDRITOS',
+          cantidad: 2,
+        },
+        {
+          eanTienda: '7703670900528',
+          nombreTienda: 'SODIMAC - BARRANQUILLA CENTRO',
+          cantidad: 1,
+        },
+        {
+          eanTienda: '7703670901167',
+          nombreTienda: 'SODIMAC - MOSQUERA',
+          cantidad: 4,
+        },
+      ],
+    },
+    {
+      eanSku: '7705666905982',
+      skuHomecenter: '565030',
+      descripcion: '', // Codigo Item Proveedor T200500011
+      cantidadSolicitada: 40,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 40900,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
+        {
+          eanTienda: '7703670900689',
+          nombreTienda: 'SODIMAC - BOGOTA CALLE 80',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900702',
+          nombreTienda: 'SODIMAC - BOGOTA NORTE',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900405',
+          nombreTienda: 'SODIMAC - MEDELLIN INDUSTRIALES',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900313',
+          nombreTienda: 'SODIMAC - CALI NORTE',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900108',
+          nombreTienda: 'SODIMAC - SUBA',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900184',
+          nombreTienda: 'SODIMAC - VILLAVICENCIO',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900115',
+          nombreTienda: 'SODIMAC - BOGOTA CEDRITOS',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900207',
+          nombreTienda: 'SODIMAC - GIRARDOT',
+          cantidad: 8,
+        },
+        {
+          eanTienda: '7703670901167',
+          nombreTienda: 'SODIMAC - MOSQUERA',
+          cantidad: 4,
+        },
+      ],
+    },
+    {
+      eanSku: '7705666423561',
+      skuHomecenter: '3057522',
+      descripcion: '', // Codigo Item Proveedor T2010SNA03
+      cantidadSolicitada: 14,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 378000,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
+        {
+          eanTienda: '7703670900689',
+          nombreTienda: 'SODIMAC - BOGOTA CALLE 80',
+          cantidad: 1,
+        },
+        {
+          eanTienda: '7703670900801',
+          nombreTienda: 'SODIMAC - BOGOTA SUR',
+          cantidad: 1,
+        },
+        {
+          eanTienda: '7703670900306',
+          nombreTienda: 'SODIMAC - CALI SUR',
+          cantidad: 1,
+        },
+        {
+          eanTienda: '7703670900603',
+          nombreTienda: 'SODIMAC - PEREIRA',
+          cantidad: 2,
+        },
+        {
+          eanTienda: '7703670900108',
+          nombreTienda: 'SODIMAC - SUBA',
+          cantidad: 1,
+        },
+        {
+          eanTienda: '7703670900436',
+          nombreTienda: 'SODIMAC - MEDELLIN MOLINOS',
+          cantidad: 2,
+        },
+        {
+          eanTienda: '7703670900153',
+          nombreTienda: 'SODIMAC - BOGOTA CALIMA NQS',
+          cantidad: 1,
+        },
+        {
+          eanTienda: '7703670900122',
+          nombreTienda: 'SODIMAC - CAJICA',
+          cantidad: 1,
+        },
+        {
+          eanTienda: '7703670900443',
+          nombreTienda: 'SODIMAC - ENVIGADO',
+          cantidad: 4,
+        },
+      ],
+    },
+    {
+      eanSku: '7705666151952',
+      skuHomecenter: '565028',
+      descripcion: '', // Codigo Item Proveedor T200500007
+      cantidadSolicitada: 48,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 29900,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
+        {
+          eanTienda: '7703670900689',
+          nombreTienda: 'SODIMAC - BOGOTA CALLE 80',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900702',
+          nombreTienda: 'SODIMAC - BOGOTA NORTE',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900603',
+          nombreTienda: 'SODIMAC - PEREIRA',
+          cantidad: 8,
+        },
+        {
+          eanTienda: '7703670900412',
+          nombreTienda: 'SODIMAC - MEDELLIN SAN JUAN',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900108',
+          nombreTienda: 'SODIMAC - SUBA',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900191',
+          nombreTienda: 'SODIMAC - IBAGUE',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900658',
+          nombreTienda: 'SODIMAC - MANIZALES SAN RAFAEL',
+          cantidad: 8,
+        },
+        {
+          eanTienda: '7703670900450',
+          nombreTienda: 'SODIMAC - RIONEGRO',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900559',
+          nombreTienda: 'SODIMAC - VALLEDUPAR GUATAPURI',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670901167',
+          nombreTienda: 'SODIMAC - MOSQUERA',
+          cantidad: 4,
+        },
+      ],
+    },
+    {
+      eanSku: '7705666141090',
+      skuHomecenter: '675854',
+      descripcion: '', // Codigo Item Proveedor T2005MGV01
+      cantidadSolicitada: 6,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 22500,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
+        {
+          eanTienda: '7703670900702',
+          nombreTienda: 'SODIMAC - BOGOTA NORTE',
+          cantidad: 6,
+        },
+      ],
+    },
+    {
+      eanSku: '7705666961032',
+      skuHomecenter: '583583',
+      descripcion: '', // Codigo Item Proveedor T100510003
+      cantidadSolicitada: 4,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 84000,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
+        {
+          eanTienda: '7703670900306',
+          nombreTienda: 'SODIMAC - CALI SUR',
+          cantidad: 4,
+        },
+      ],
+    },
+    {
+      eanSku: '7705666649053',
+      skuHomecenter: '630516',
+      descripcion: '', // Codigo Item Proveedor T302000006
+      cantidadSolicitada: 8,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 105900,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
+        {
+          eanTienda: '7703670900313',
+          nombreTienda: 'SODIMAC - CALI NORTE',
+          cantidad: 8,
+        },
+      ],
+    },
+    {
+      eanSku: '7705666056523',
+      skuHomecenter: '630515',
+      descripcion: '', // Codigo Item Proveedor T302000003
+      cantidadSolicitada: 20,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 89000,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
+        {
+          eanTienda: '7703670900603',
+          nombreTienda: 'SODIMAC - PEREIRA',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900658',
+          nombreTienda: 'SODIMAC - MANIZALES SAN RAFAEL',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900122',
+          nombreTienda: 'SODIMAC - CAJICA',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900665',
+          nombreTienda: 'SODIMAC - ARMENIA',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670901167',
+          nombreTienda: 'SODIMAC - MOSQUERA',
+          cantidad: 4,
+        },
+      ],
+    },
+    {
+      eanSku: '7705666370346',
+      skuHomecenter: '3057534',
+      descripcion: '', // Codigo Item Proveedor T2010BOL45
+      cantidadSolicitada: 4,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 330500,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
+        {
+          eanTienda: '7703670900603',
+          nombreTienda: 'SODIMAC - PEREIRA',
+          cantidad: 2,
+        },
+        {
+          eanTienda: '7703670900658',
+          nombreTienda: 'SODIMAC - MANIZALES SAN RAFAEL',
+          cantidad: 1,
+        },
+        {
+          eanTienda: '7703670900115',
+          nombreTienda: 'SODIMAC - BOGOTA CEDRITOS',
+          cantidad: 1,
+        },
+      ],
+    },
+    {
+      eanSku: '7705666225066',
+      skuHomecenter: '3057530',
+      descripcion: '', // Codigo Item Proveedor T2010BOL41
+      cantidadSolicitada: 3,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 183800,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
+        {
+          eanTienda: '7703670900603',
+          nombreTienda: 'SODIMAC - PEREIRA',
+          cantidad: 3,
+        },
+      ],
+    },
+    {
+      eanSku: '7705666958544',
+      skuHomecenter: '3057532',
+      descripcion: '', // Codigo Item Proveedor T2010BOL43
+      cantidadSolicitada: 4,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 60300,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
+        {
+          eanTienda: '7703670900603',
+          nombreTienda: 'SODIMAC - PEREIRA',
+          cantidad: 3,
+        },
+        {
+          eanTienda: '7703670900139',
+          nombreTienda: 'SODIMAC – SOACHA',
+          cantidad: 1,
+        },
+      ],
+    },
+    {
+      eanSku: '7705666614815',
+      skuHomecenter: '769185',
+      descripcion: '', // Codigo Item Proveedor T2005MSA02
+      cantidadSolicitada: 4,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 19600,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
+        {
+          eanTienda: '7703670900412',
+          nombreTienda: 'SODIMAC - MEDELLIN SAN JUAN',
+          cantidad: 4,
+        },
+      ],
+    },
+    {
+      eanSku: '7705666592779',
+      skuHomecenter: '3057528',
+      descripcion: '', // Codigo Item Proveedor T2010BOL39
+      cantidadSolicitada: 1,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 330500,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
+        {
+          eanTienda: '7703670900412',
+          nombreTienda: 'SODIMAC - MEDELLIN SAN JUAN',
+          cantidad: 1,
+        },
+      ],
+    },
+    {
+      eanSku: '7705666787465',
+      skuHomecenter: '583584',
+      descripcion: '', // Codigo Item Proveedor T100500009
+      cantidadSolicitada: 12,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 81000,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
+        {
+          eanTienda: '7703670900412',
+          nombreTienda: 'SODIMAC - MEDELLIN SAN JUAN',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900191',
+          nombreTienda: 'SODIMAC - IBAGUE',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900122',
+          nombreTienda: 'SODIMAC - CAJICA',
+          cantidad: 4,
+        },
+      ],
+    },
+    {
+      eanSku: '7705666288603',
+      skuHomecenter: '3057533',
+      descripcion: '', // Codigo Item Proveedor T2010BOL44
+      cantidadSolicitada: 9,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 183800,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
+        {
+          eanTienda: '7703670900412',
+          nombreTienda: 'SODIMAC - MEDELLIN SAN JUAN',
+          cantidad: 9,
+        },
+      ],
+    },
+    {
+      eanSku: '7705666987810',
+      skuHomecenter: '3057521',
+      descripcion: '', // Codigo Item Proveedor T2010SNA02
+      cantidadSolicitada: 1,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 210000,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
+        {
+          eanTienda: '7703670900436',
+          nombreTienda: 'SODIMAC - MEDELLIN MOLINOS',
+          cantidad: 1,
+        },
+      ],
+    },
+    {
+      eanSku: '7705666564301',
+      skuHomecenter: '769184',
+      descripcion: '', // Codigo Item Proveedor T2005MIN01
+      cantidadSolicitada: 80,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 12000,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
+        {
+          eanTienda: '7703670900177',
+          nombreTienda: 'SODIMAC - NEIVA',
+          cantidad: 80,
+        },
+      ],
+    },
+    {
+      eanSku: '7705666518748',
+      skuHomecenter: '588886',
+      descripcion: '', // Codigo Item Proveedor T2005INN15
+      cantidadSolicitada: 4,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 44300,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
+        {
+          eanTienda: '7703670900122',
+          nombreTienda: 'SODIMAC - CAJICA',
+          cantidad: 4,
+        },
+      ],
+    },
+  ]
+
+  const cedi = DELIVERY_POINTS[0] // EAN 7703670529804 — matches the CSV's "EAN/Nombre Lugar Entrega Factura".
+  const fechaTransmision = '2026-06-01' // raw "F. Documento O/C": 01/06/2026 12:00
+  const costoTotalOc = productosOrden15669499.reduce(
+    (sum, p) => sum + p.costoUnitario * p.cantidadSolicitada,
+    0,
+  )
+
+  return {
+    ordenCompra: '15669499',
+    eanPuntoEntrega: cedi.ean,
+    cliente: 'Sodimac Colombia S.A.- Home Center', // raw "Nombre Entidad a Facturar"
+    ciudadEntrega: cedi.ciudad,
+    direccionEntrega: cedi.direccion,
+    barrioEntrega: cedi.ciudad,
+    departamentoEntrega: 'Cundinamarca',
+    codigoDaneEntrega: '25286', // DANE code for Funza, Cundinamarca — not in the CSV, filled in for realism.
+    facturacion: {
+      barrio: cedi.ciudad,
+      ciudad: cedi.ciudad,
+      departamento: 'Cundinamarca',
+      direccion: cedi.direccion,
+    },
+    estado: 'PENDIENTE',
+    codigoSesionRecibo: null,
+    fechaTransmision,
+    ultimaActualizacion: `${fechaTransmision}T12:00:00Z`,
+    productos: productosOrden15669499,
+    costoTotalOc,
+    transportadora: '3-TRANSPORTES SODIMAC',
+    fechaMinEntrega: '2026-06-12T00:00:00Z', // raw "F. Minima Entrega"
+    fechaMaxEntrega: '2026-06-16T00:00:00Z', // raw "F. Maxima Entrega"
+    fechaCancelacion: null,
+    sticker: null,
+    tipoOc: '4-Venta Empresa',
+    tipoDocumento: '1',
+    notaPedido: '42-100234',
+    cedulaComprador: '1000000000',
+    emailCliente: 'compras.pruebas@example.com',
+    telefonoCliente: '+57 3000000000',
+    clienteRecibe: 'Bodega CEDI Funza',
+    eanTiendaVenta: cedi.ean,
+    eanTiendaFacturacion: cedi.ean,
+    localidad: cedi.ean,
+    eanEmpresaCompradora: '7703670900009', // raw "EAN Entidad a Facturar"
+    tipoDeOrden: 'CROSS_DOCKING',
+    tipoEntrega: 'RETAIL',
+    observaciones: cedi.ciudad,
+    observacionesNpc: `Favor entregar en ${cedi.direccion}.`,
+    observacionesNpl: 'CDFZ15669499',
+    archivada: isOlderThanThreeMonths(new Date(fechaTransmision)),
+    numPedido: null,
+    intentos: 0,
+    maxIntentos: 3,
+  }
 }
 
 function makePurchaseOrder(
@@ -416,7 +1883,10 @@ function purchaseOrderToHomecenterResponse(order: PurchaseOrderRecord) {
           : '',
         TIPO_OC: order.tipoOc,
         CODIGO_SESION_RECIBO: order.codigoSesionRecibo ?? -1,
-        FECHA_TRANSMISION: order.fechaTransmision.split('-').reverse().join('/'),
+        FECHA_TRANSMISION: order.fechaTransmision
+          .split('-')
+          .reverse()
+          .join('/'),
         NOTA_PEDIDO: order.notaPedido,
         CLIENTE: order.cliente,
         CEDULA: order.cedulaComprador,
@@ -548,6 +2018,9 @@ function seed(): MockDb {
     0,
   )
   db.purchaseOrders.push(canonical)
+
+  // A second, real-world sample order — see buildRealSampleOrder() above.
+  db.purchaseOrders.push(buildRealSampleOrder())
 
   // 44 more generated orders.
   for (let i = 0; i < 44; i += 1) {

@@ -141,41 +141,42 @@ const OrdersFilterBar = ({ onFilter }: OrdersFilterBarProps) => {
           />
         )}
       </form.Field>
+      <div className="orders-filter-bar__actions">
+        <Button
+          type="submit"
+          variant="contained"
+          endIcon={<FilterAltIcon />}
+          className="orders-filter-bar__action"
+        >
+          Filtrar
+        </Button>
 
-      <Button
-        type="submit"
-        variant="contained"
-        endIcon={<FilterAltIcon />}
-        className="orders-filter-bar__action"
-      >
-        Filtrar
-      </Button>
-
-      <form.Subscribe
-        selector={(state) =>
-          Object.keys(DEFAULT_ORDERS_FILTER_VALUES).some(
-            (key) =>
-              state.values[key as keyof OrdersFilterValues] !==
-              DEFAULT_ORDERS_FILTER_VALUES[key as keyof OrdersFilterValues],
-          )
-        }
-      >
-        {(isFiltered) => (
-          <Button
-            type="button"
-            variant="outlined"
-            endIcon={<FilterAltOffIcon />}
-            className="orders-filter-bar__action"
-            disabled={!isFiltered}
-            onClick={() => {
-              form.reset()
-              onFilter(DEFAULT_ORDERS_FILTER_VALUES)
-            }}
-          >
-            Limpiar
-          </Button>
-        )}
-      </form.Subscribe>
+        <form.Subscribe
+          selector={(state) =>
+            Object.keys(DEFAULT_ORDERS_FILTER_VALUES).some(
+              (key) =>
+                state.values[key as keyof OrdersFilterValues] !==
+                DEFAULT_ORDERS_FILTER_VALUES[key as keyof OrdersFilterValues],
+            )
+          }
+        >
+          {(isFiltered) => (
+            <Button
+              type="button"
+              variant="outlined"
+              endIcon={<FilterAltOffIcon />}
+              className="orders-filter-bar__action"
+              disabled={!isFiltered}
+              onClick={() => {
+                form.reset()
+                onFilter(DEFAULT_ORDERS_FILTER_VALUES)
+              }}
+            >
+              Limpiar
+            </Button>
+          )}
+        </form.Subscribe>
+      </div>
     </form>
   )
 }
