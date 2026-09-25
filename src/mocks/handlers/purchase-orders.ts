@@ -6,6 +6,7 @@ import { db, nextLogId, nextSyncId, nowIso, paginate } from '../data/db'
 import type { PurchaseOrderRecord } from '../data/db'
 import type {
   PurchaseOrderDetail,
+  PurchaseOrderStore,
   PurchaseOrderSummary,
   ReprocessOrderResponse,
   SyncPurchaseOrdersRequest,
@@ -46,6 +47,43 @@ function toSummary(order: PurchaseOrderRecord): PurchaseOrderSummary {
   }
 }
 
+/** Inverts Homecenter's raw `productos[].tiendas[]` nesting (as persisted on
+ *  `PurchaseOrderRecord`) into the `/api/v1` contract's `tiendas[].productos[]`
+ *  — the same inversion the real backend performs at this boundary. */
+function toStoreGroupedProducts(
+  productos: PurchaseOrderRecord['productos'],
+): Array<PurchaseOrderStore> {
+  const byTienda = new Map<string, PurchaseOrderStore>()
+  for (const producto of productos) {
+    for (const tienda of producto.tiendas) {
+      let store = byTienda.get(tienda.eanTienda)
+      if (!store) {
+        store = {
+          eanTienda: tienda.eanTienda,
+          nombreTienda: tienda.nombreTienda,
+          productos: [],
+        }
+        byTienda.set(tienda.eanTienda, store)
+      }
+      store.productos.push({
+        eanSku: producto.eanSku,
+        skuHomecenter: producto.skuHomecenter,
+        descripcion: producto.descripcion,
+        cantidad: tienda.cantidad,
+        cantidadSolicitada: producto.cantidadSolicitada,
+        cantidadCancelada: producto.cantidadCancelada,
+        cantidadDevuelta: producto.cantidadDevuelta,
+        estadoLinea: producto.estadoLinea,
+        costoUnitario: producto.costoUnitario,
+        condicionPago: producto.condicionPago,
+        descuentoSku: producto.descuentoSku,
+        unidadVenta: producto.unidadVenta,
+      })
+    }
+  }
+  return Array.from(byTienda.values())
+}
+
 function toDetail(order: PurchaseOrderRecord): PurchaseOrderDetail {
   return {
     ordenCompra: order.ordenCompra,
@@ -58,7 +96,7 @@ function toDetail(order: PurchaseOrderRecord): PurchaseOrderDetail {
     facturacion: order.facturacion,
     estado: order.estado,
     codigoSesionRecibo: order.codigoSesionRecibo,
-    productos: order.productos,
+    tiendas: toStoreGroupedProducts(order.productos),
     costoTotalOc: order.costoTotalOc,
     transportadora: order.transportadora,
     fechaMinEntrega: order.fechaMinEntrega,

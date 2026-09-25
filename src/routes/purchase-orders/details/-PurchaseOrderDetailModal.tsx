@@ -1,12 +1,9 @@
-import type { GridColDef, GridRenderCellParams } from '@mui/x-data-grid'
 import { useQuery } from '@tanstack/react-query'
 import StatusBadge from '#/components/statusBadge/StatusBadge'
-import type { StatusBadgeTone } from '#/components/statusBadge/StatusBadge'
 import Modal from '#/components/modal/Modal'
-import DataTable from '#/components/dataTable/DataTable'
 import { purchaseOrderDetailQueryOptions } from '#/api/purchase-orders'
 import type { PurchaseOrder } from './-PurchaseOrdersTable'
-import { ORDER_LINE_STATUS_UI } from './orderPresentation'
+import PurchaseOrderStoresTable from './-PurchaseOrderStoresTable'
 import './PurchaseOrderDetailModal.css'
 import Typography from '@mui/material/Typography'
 
@@ -15,53 +12,6 @@ interface PurchaseOrderDetailModalProps {
   open: boolean
   onClose: () => void
 }
-
-interface OrderLineRow {
-  id: string
-  sku: string
-  producto: string
-  tienda: string
-  cantidadSolicitada: number
-  cantidadCancelada: number
-  estadoLineaTone: StatusBadgeTone
-  estadoLineaLabel: string
-}
-
-const lineColumns: GridColDef<OrderLineRow>[] = [
-  { field: 'sku', headerName: 'SKU', flex: 1, minWidth: 100 },
-  { field: 'producto', headerName: 'Producto', flex: 2, minWidth: 200 },
-  { field: 'tienda', headerName: 'Tienda', flex: 1, minWidth: 140 },
-  {
-    field: 'cantidadSolicitada',
-    headerName: 'Cant. solicitada',
-    type: 'number',
-    width: 140,
-    headerAlign: 'center',
-    align: 'center',
-  },
-  {
-    field: 'cantidadCancelada',
-    headerName: 'Cant. cancelada',
-    type: 'number',
-    width: 140,
-    headerAlign: 'center',
-    align: 'center',
-  },
-  {
-    field: 'estadoLinea',
-    headerName: 'Estado línea',
-    width: 160,
-    sortable: false,
-    headerAlign: 'center',
-    align: 'center',
-    renderCell: (params: GridRenderCellParams<OrderLineRow>) => (
-      <StatusBadge
-        label={params.row.estadoLineaLabel}
-        tone={params.row.estadoLineaTone}
-      />
-    ),
-  },
-]
 
 const PurchaseOrderDetailModal = ({
   order,
@@ -75,23 +25,6 @@ const PurchaseOrderDetailModal = ({
   })
 
   if (!order) return null
-
-  // The API nests store allocations under each product → flatten into one grid.
-  const lineas: OrderLineRow[] = (detail?.productos ?? []).flatMap(
-    (producto) => {
-      const ui = ORDER_LINE_STATUS_UI[producto.estadoLinea]
-      return producto.tiendas.map((tienda) => ({
-        id: `${producto.eanSku}-${tienda.eanTienda}`,
-        sku: producto.eanSku,
-        producto: producto.descripcion,
-        tienda: tienda.nombreTienda,
-        cantidadSolicitada: producto.cantidadSolicitada,
-        cantidadCancelada: producto.cantidadCancelada,
-        estadoLineaTone: ui.tone,
-        estadoLineaLabel: ui.label,
-      }))
-    },
-  )
 
   return (
     <Modal
@@ -133,14 +66,9 @@ const PurchaseOrderDetailModal = ({
       </div>
 
       <div className="purchase-order-detail-modal__lines">
-        <DataTable
-          rows={lineas}
-          columns={lineColumns}
+        <PurchaseOrderStoresTable
+          tiendas={detail?.tiendas ?? []}
           loading={isPending}
-          getRowId={(row) => row.id}
-          hideFooter
-          disableRowSelectionOnClick
-          autoHeight
         />
       </div>
     </Modal>

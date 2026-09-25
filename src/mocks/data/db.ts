@@ -30,11 +30,41 @@ import type {
   OrderLineStatus,
   OrderStatus,
   PurchaseOrderBillingAddress,
-  PurchaseOrderLineItem,
-  PurchaseOrderLineStore,
 } from '#/api/types'
 
 // --- Record shapes (superset of the API DTOs) ---
+
+/** Per-product store allocation, mirroring Homecenter's raw
+ *  `GetOrdenesDeCompra` nesting (`productos[].tiendas[]`) — this is what the
+ *  backend actually receives/persists on sync. The `/api/v1` DTO
+ *  (`PurchaseOrderDetail.tiendas`, see `#/api/types`) inverts this to
+ *  store-first; that inversion happens at the response boundary in
+ *  `mocks/handlers/purchase-orders.ts` (`toStoreGroupedProducts`), not here. */
+export interface PurchaseOrderRecordStore {
+  eanTienda: string
+  nombreTienda: string
+  cantidad: number
+}
+
+export interface PurchaseOrderLineItem {
+  eanSku: string
+  /** Homecenter's own internal product code (raw `SKU`), distinct from eanSku. */
+  skuHomecenter: string
+  descripcion: string
+  cantidadSolicitada: number
+  cantidadCancelada: number
+  cantidadDevuelta: number
+  estadoLinea: OrderLineStatus
+  /** Raw `COSTO_SKU`. */
+  costoUnitario: number
+  /** Raw `CONDICION_PAGO`, trimmed. */
+  condicionPago: string
+  /** Raw `DESCUENTO_SKU`. */
+  descuentoSku: number
+  /** Raw `UNIDAD_VENTA`, trimmed. */
+  unidadVenta: string
+  tiendas: Array<PurchaseOrderRecordStore>
+}
 
 export interface PurchaseOrderRecord {
   ordenCompra: string
@@ -208,7 +238,7 @@ function pickStores(count: number) {
 function splitQuantityAcrossStores(
   total: number,
   stores: Array<StoreCatalogEntry>,
-): Array<PurchaseOrderLineStore> {
+): Array<PurchaseOrderRecordStore> {
   if (stores.length === 1) {
     return [
       {

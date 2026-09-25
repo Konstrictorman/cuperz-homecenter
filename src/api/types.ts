@@ -80,19 +80,23 @@ export interface PurchaseOrderSummary {
   fechaMaxEntrega: IsoDateTime | null
 }
 
-/** Per-product store allocation — Homecenter nests this under each product,
- *  not the other way around (see PurchaseOrderDetail.productos). */
-export interface PurchaseOrderLineStore {
-  eanTienda: string
-  nombreTienda: string
-  cantidad: number
-}
-
-export interface PurchaseOrderLineItem {
+/** Per-store product line within a `PurchaseOrderDetail`. Homecenter's raw
+ *  `GetOrdenesDeCompra` response nests the other way around
+ *  (`productos[].tiendas[]`) — the backend inverts that into
+ *  `tiendas[].productos[]` before responding, because the platform's screens
+ *  (starting with the purchase-order detail table, grouped/expandable by
+ *  store) consume it store-first. The frontend never sees Homecenter's raw
+ *  shape. */
+export interface PurchaseOrderStoreLine {
   eanSku: string
   /** Homecenter's own internal product code (raw `SKU`), distinct from eanSku. */
   skuHomecenter: string
   descripcion: string
+  /** Quantity requested for this SKU specifically at this store. */
+  cantidad: number
+  /** Raw line total requested for this SKU across every store on the order —
+   *  the same value repeats on each store's entry for the SKU; it is not
+   *  store-specific (see `cantidad`). */
   cantidadSolicitada: number
   cantidadCancelada: number
   cantidadDevuelta: number
@@ -105,7 +109,13 @@ export interface PurchaseOrderLineItem {
   descuentoSku: number
   /** Raw `UNIDAD_VENTA`, trimmed. */
   unidadVenta: string
-  tiendas: Array<PurchaseOrderLineStore>
+}
+
+/** A store within a `PurchaseOrderDetail`, with the products allocated to it. */
+export interface PurchaseOrderStore {
+  eanTienda: string
+  nombreTienda: string
+  productos: Array<PurchaseOrderStoreLine>
 }
 
 export interface PurchaseOrderBillingAddress {
@@ -143,7 +153,7 @@ export interface PurchaseOrderDetail {
   facturacion: PurchaseOrderBillingAddress
   estado: OrderStatus
   codigoSesionRecibo: string | null
-  productos: Array<PurchaseOrderLineItem>
+  tiendas: Array<PurchaseOrderStore>
   /** Raw `COSTO_TOT_OC`. */
   costoTotalOc: number
   transportadora: string

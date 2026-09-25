@@ -46,14 +46,15 @@ describe('purchase orders', () => {
     expect(body.pagination.total).toBeGreaterThan(40)
   })
 
-  it('returns the canonical order detail', async () => {
+  it('returns the canonical order detail grouped by store', async () => {
     const { status, body } = await json<{
       ordenCompra: string
-      productos: unknown[]
+      tiendas: Array<{ eanTienda: string; productos: unknown[] }>
     }>('/ordenes-compra/8467343')
     expect(status).toBe(200)
     expect(body.ordenCompra).toBe('8467343')
-    expect(body.productos).toHaveLength(2)
+    expect(body.tiendas).toHaveLength(1)
+    expect(body.tiendas[0].productos).toHaveLength(2)
   })
 
   it('404s an unknown order', async () => {
