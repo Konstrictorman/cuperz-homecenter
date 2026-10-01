@@ -14,11 +14,6 @@
   width: 100%;
 }
 
-.orders-filter-bar__checkbox {
-  width: auto;
-  margin-left: 0;
-}
-
 .orders-filter-bar__action {
   width: 100%;
   margin-top: var(--space-3xs);
@@ -43,10 +38,6 @@
 
   .orders-filter-bar__field--narrow {
     width: 12rem;
-  }
-
-  .orders-filter-bar__checkbox {
-    width: auto;
   }
 
   .orders-filter-bar__action {

@@ -65,7 +65,6 @@ export function toPurchaseOrderRow(o: PurchaseOrderSummary): PurchaseOrder {
     costoTotalOc: o.costoTotalOc,
     estadoTone: ui.tone,
     estadoLabel: ui.label,
-    archivada: o.archivada,
     numPedido: o.numPedido ?? '',
     fechaTransmision: o.fechaTransmision,
     fechaMinEntrega: o.fechaMinEntrega ?? '',
@@ -85,8 +84,5 @@ export function toPurchaseOrdersQuery(
         : TONE_TO_ORDER_STATUS[filters.estado],
     fechaTransmisionDesde: filters.fechaTransmisionDesde || undefined,
     fechaTransmisionHasta: filters.fechaTransmisionHasta || undefined,
-    // Unlike the other filters, `false` here is a meaningful default (only
-    // the last 3 months) rather than "unset" — always send it explicitly.
-    incluirHistorial: filters.incluirHistorial,
   }
 }

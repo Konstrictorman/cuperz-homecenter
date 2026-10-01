@@ -18,7 +18,6 @@ export interface PurchaseOrder {
   costoTotalOc: number
   estadoTone: StatusBadgeTone
   estadoLabel: string
-  archivada: boolean
   numPedido: string
   fechaTransmision: string
   fechaMinEntrega: string
