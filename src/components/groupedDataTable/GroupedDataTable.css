@@ -1,0 +1,45 @@
+.grouped-data-table {
+  width: 100%;
+}
+
+.grouped-data-table__group-cell {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Group rows reuse DataTable.css's own table tokens (--table-footer-bg is
+ * already themed for both light and dark) instead of introducing new ones,
+ * so a group row reads visually closer to a totals/summary row. */
+.grouped-data-table .MuiDataGrid-row.grouped-data-table__group-row,
+.grouped-data-table .MuiDataGrid-row.grouped-data-table__group-row:hover {
+  background-color: var(--table-footer-bg) !important;
+  font-weight: var(--font-weight-medium);
+}
+
+/* MUI's checkbox column isn't part of the public API, so it can't be
+ * overridden to skip rendering on a group row — `isRowSelectable` (see
+ * GroupedDataTable.tsx) already makes it non-functional there; this hides
+ * it visually too. */
+.grouped-data-table
+  .MuiDataGrid-row.grouped-data-table__group-row
+  .MuiDataGrid-cellCheckbox {
+  visibility: hidden;
+}
+
+/* Grand-total summary, rendered inside the grid's own footer row
+ * (GroupedDataTableFooter, in GroupedDataTable.tsx) alongside the
+ * pagination controls — background/border/color already come from
+ * DataTable.css's `.MuiDataGrid-footerContainer` rule, so only the inline
+ * layout and the left inset (matching the pagination toolbar's own gutter)
+ * are needed here. Label font comes from each item's `variant="body2"`
+ * Typography, matching MUI's own pagination labels (`TablePagination`'s
+ * `selectLabel`/`displayedRows` are `theme.typography.body2`). */
+.grouped-data-table__totals {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 24px;
+  row-gap: 4px;
+  padding-left: 16px;
+}
