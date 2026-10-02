@@ -1774,6 +1774,1018 @@ function buildRealSampleOrder(): PurchaseOrderRecord {
   }
 }
 
+/** Real Homecenter Cross-Docking order sample from `docs/Copy of
+ *  pedidoxtiendas.xlsx` ("PEDIDO POR TIENDAS PARA ALISTAR", sheet `Pedido`)
+ *  — unlike the faker-generated orders, this record's order number, store
+ *  names, SKU codes, per-store quantities and unit prices are transcribed
+ *  verbatim from that export (24 SKUs across 32 stores; every store's and
+ *  every SKU's quantity reconciles exactly against the sheet's own "Valor
+ *  Total Orden" subtotals and top-summary "Cantidad Orden" column).
+ *
+ *  Two gaps the sheet itself doesn't close:
+ *  - It has no "Ean Tienda" value (that column is blank for every store), so
+ *    `eanTienda` below is reused from `buildRealSampleOrder`'s real EANs
+ *    where the store name matches one seen there; the 4 stores with no match
+ *    (MallPlaza NQS, Palmira, Tuluá, Cartagena San Fernando) get a
+ *    synthesized EAN in the same numbering range — not a confirmed
+ *    Homecenter code.
+ *  - Its "Codigo FACTORY" column is Cuperz's own Item Proveedor code, not
+ *    Homecenter's internal SKU — `skuHomecenter` below is reused from
+ *    `buildRealSampleOrder` for the SKUs the two orders share; the rest fall
+ *    back to the Factory code itself (flagged inline) for lack of a real
+ *    value. See CLAUDE.md's "Open items / unconfirmed with Homecenter". */
+function buildPedidoPorTiendasOrder(): PurchaseOrderRecord {
+  const productosPedidoTiendas: Array<PurchaseOrderLineItem> = [
+    {
+      eanSku: '7705666884140',
+      skuHomecenter: '565032',
+      descripcion: 'TAP CUPERZ RIO GRIS 40X60',
+      cantidadSolicitada: 92,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 12500,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
+        {
+          eanTienda: '7703670900122',
+          nombreTienda: 'SODIMAC - CAJICA',
+          cantidad: 8,
+        },
+        {
+          eanTienda: '7703670900161',
+          nombreTienda: 'SODIMAC - MALLPLAZA NQS',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900184',
+          nombreTienda: 'SODIMAC - VILLAVICENCIO',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900191',
+          nombreTienda: 'SODIMAC - IBAGUE',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900214',
+          nombreTienda: 'SODIMAC - YOPAL',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670901228',
+          nombreTienda: 'SODIMAC - TUNJA',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900405',
+          nombreTienda: 'SODIMAC - MEDELLIN INDUSTRIALES',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900412',
+          nombreTienda: 'SODIMAC - MEDELLIN SAN JUAN',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900429',
+          nombreTienda: 'SODIMAC - BELLO',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900443',
+          nombreTienda: 'SODIMAC - ENVIGADO',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900450',
+          nombreTienda: 'SODIMAC - RIONEGRO',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900566',
+          nombreTienda: 'SODIMAC - MONTERIA EL RECREO',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900580',
+          nombreTienda: 'SODIMAC - AV EL DORADO',
+          cantidad: 16,
+        },
+        {
+          eanTienda: '7703670900603',
+          nombreTienda: 'SODIMAC - PEREIRA',
+          cantidad: 8,
+        },
+        {
+          eanTienda: '7703670900689',
+          nombreTienda: 'SODIMAC - BOGOTA CALLE 80',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900702',
+          nombreTienda: 'SODIMAC - BOGOTA NORTE',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900955',
+          nombreTienda: 'SODIMAC - BUCARAMANGA LA ROSITA',
+          cantidad: 8,
+        },
+      ],
+    },
+    {
+      eanSku: '7705666906996',
+      skuHomecenter: '565029',
+      descripcion: 'TAP CUPERZ RIO GRIS 60X110',
+      cantidadSolicitada: 48,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 29900,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
+        {
+          eanTienda: '7703670900108',
+          nombreTienda: 'SODIMAC - SUBA',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900122',
+          nombreTienda: 'SODIMAC - CAJICA',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670901228',
+          nombreTienda: 'SODIMAC - TUNJA',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670901235',
+          nombreTienda: 'SODIMAC - TINTAL',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900405',
+          nombreTienda: 'SODIMAC - MEDELLIN INDUSTRIALES',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900429',
+          nombreTienda: 'SODIMAC - BELLO',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900450',
+          nombreTienda: 'SODIMAC - RIONEGRO',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900542',
+          nombreTienda: 'SODIMAC - CARTAGENA LA POPA',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900580',
+          nombreTienda: 'SODIMAC - AV EL DORADO',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900689',
+          nombreTienda: 'SODIMAC - BOGOTA CALLE 80',
+          cantidad: 8,
+        },
+        {
+          eanTienda: '7703670900801',
+          nombreTienda: 'SODIMAC - BOGOTA SUR',
+          cantidad: 4,
+        },
+      ],
+    },
+    {
+      eanSku: '7705666112779',
+      skuHomecenter: '675855',
+      descripcion: 'TAPETE MULTIUSOS 50X80 FIGURAS GRIS',
+      cantidadSolicitada: 84,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 22500,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
+        {
+          eanTienda: '7703670900108',
+          nombreTienda: 'SODIMAC - SUBA',
+          cantidad: 6,
+        },
+        {
+          eanTienda: '7703670900115',
+          nombreTienda: 'SODIMAC - BOGOTA CEDRITOS',
+          cantidad: 6,
+        },
+        {
+          eanTienda: '7703670900122',
+          nombreTienda: 'SODIMAC - CAJICA',
+          cantidad: 6,
+        },
+        {
+          eanTienda: '7703670900139',
+          nombreTienda: 'SODIMAC – SOACHA',
+          cantidad: 6,
+        },
+        {
+          eanTienda: '7703670900184',
+          nombreTienda: 'SODIMAC - VILLAVICENCIO',
+          cantidad: 6,
+        },
+        {
+          eanTienda: '7703670901167',
+          nombreTienda: 'SODIMAC - MOSQUERA',
+          cantidad: 6,
+        },
+        {
+          eanTienda: '7703670900405',
+          nombreTienda: 'SODIMAC - MEDELLIN INDUSTRIALES',
+          cantidad: 6,
+        },
+        {
+          eanTienda: '7703670900436',
+          nombreTienda: 'SODIMAC - MEDELLIN MOLINOS',
+          cantidad: 6,
+        },
+        {
+          eanTienda: '7703670900450',
+          nombreTienda: 'SODIMAC - RIONEGRO',
+          cantidad: 6,
+        },
+        {
+          eanTienda: '7703670900542',
+          nombreTienda: 'SODIMAC - CARTAGENA LA POPA',
+          cantidad: 6,
+        },
+        {
+          eanTienda: '7703670900559',
+          nombreTienda: 'SODIMAC - VALLEDUPAR GUATAPURI',
+          cantidad: 6,
+        },
+        {
+          eanTienda: '7703670900580',
+          nombreTienda: 'SODIMAC - AV EL DORADO',
+          cantidad: 6,
+        },
+        {
+          eanTienda: '7703670900689',
+          nombreTienda: 'SODIMAC - BOGOTA CALLE 80',
+          cantidad: 6,
+        },
+        {
+          eanTienda: '7703670900801',
+          nombreTienda: 'SODIMAC - BOGOTA SUR',
+          cantidad: 6,
+        },
+      ],
+    },
+    {
+      eanSku: '7703670917724',
+      skuHomecenter: '234348',
+      descripcion: 'JB 2 PZS CASA BONITA',
+      cantidadSolicitada: 18,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 24900,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
+        {
+          eanTienda: '7703670900429',
+          nombreTienda: 'SODIMAC - BELLO',
+          cantidad: 6,
+        },
+        {
+          eanTienda: '7703670900580',
+          nombreTienda: 'SODIMAC - AV EL DORADO',
+          cantidad: 6,
+        },
+        {
+          eanTienda: '7703670900702',
+          nombreTienda: 'SODIMAC - BOGOTA NORTE',
+          cantidad: 6,
+        },
+      ],
+    },
+    {
+      eanSku: '7705666555866',
+      skuHomecenter: '3072495',
+      descripcion: 'JB 2PZS RIO GRIS',
+      cantidadSolicitada: 25,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 28200,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
+        {
+          eanTienda: '7703670900108',
+          nombreTienda: 'SODIMAC - SUBA',
+          cantidad: 2,
+        },
+        {
+          eanTienda: '7703670900122',
+          nombreTienda: 'SODIMAC - CAJICA',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900139',
+          nombreTienda: 'SODIMAC – SOACHA',
+          cantidad: 1,
+        },
+        {
+          eanTienda: '7703670900161',
+          nombreTienda: 'SODIMAC - MALLPLAZA NQS',
+          cantidad: 1,
+        },
+        {
+          eanTienda: '7703670900184',
+          nombreTienda: 'SODIMAC - VILLAVICENCIO',
+          cantidad: 1,
+        },
+        {
+          eanTienda: '7703670901167',
+          nombreTienda: 'SODIMAC - MOSQUERA',
+          cantidad: 1,
+        },
+        {
+          eanTienda: '7703670900313',
+          nombreTienda: 'SODIMAC - CALI NORTE',
+          cantidad: 2,
+        },
+        {
+          eanTienda: '7703670900162',
+          nombreTienda: 'SODIMAC - PALMIRA',
+          cantidad: 2,
+        },
+        {
+          eanTienda: '7703670900542',
+          nombreTienda: 'SODIMAC - CARTAGENA LA POPA',
+          cantidad: 1,
+        },
+        {
+          eanTienda: '7703670900580',
+          nombreTienda: 'SODIMAC - AV EL DORADO',
+          cantidad: 1,
+        },
+        {
+          eanTienda: '7703670900603',
+          nombreTienda: 'SODIMAC - PEREIRA',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900689',
+          nombreTienda: 'SODIMAC - BOGOTA CALLE 80',
+          cantidad: 3,
+        },
+        {
+          eanTienda: '7703670900702',
+          nombreTienda: 'SODIMAC - BOGOTA NORTE',
+          cantidad: 1,
+        },
+        {
+          eanTienda: '7703670900801',
+          nombreTienda: 'SODIMAC - BOGOTA SUR',
+          cantidad: 1,
+        },
+      ],
+    },
+    {
+      eanSku: '7705666906194',
+      // Homecenter's real internal SKU isn't in this source — only the
+      // "Codigo FACTORY" / Item Proveedor code below (see CLAUDE.md's open items).
+      skuHomecenter: 'T150501858',
+      descripcion: 'JB 2 PZS HABANA TAUPE',
+      cantidadSolicitada: 24,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 35300,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
+        {
+          eanTienda: '7703670900184',
+          nombreTienda: 'SODIMAC - VILLAVICENCIO',
+          cantidad: 6,
+        },
+        {
+          eanTienda: '7703670900566',
+          nombreTienda: 'SODIMAC - MONTERIA EL RECREO',
+          cantidad: 6,
+        },
+        {
+          eanTienda: '7703670900580',
+          nombreTienda: 'SODIMAC - AV EL DORADO',
+          cantidad: 6,
+        },
+        {
+          eanTienda: '7703670900702',
+          nombreTienda: 'SODIMAC - BOGOTA NORTE',
+          cantidad: 6,
+        },
+      ],
+    },
+    {
+      eanSku: '7705666791868',
+      // Homecenter's real internal SKU isn't in this source — only the
+      // "Codigo FACTORY" / Item Proveedor code below (see CLAUDE.md's open items).
+      skuHomecenter: 'T2010REV15',
+      descripcion: 'TAP REVERSO GEO TAUPE 160X220',
+      cantidadSolicitada: 3,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 242200,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
+        {
+          eanTienda: '7703670900412',
+          nombreTienda: 'SODIMAC - MEDELLIN SAN JUAN',
+          cantidad: 1,
+        },
+        {
+          eanTienda: '7703670900689',
+          nombreTienda: 'SODIMAC - BOGOTA CALLE 80',
+          cantidad: 1,
+        },
+        {
+          eanTienda: '7703670900955',
+          nombreTienda: 'SODIMAC - BUCARAMANGA LA ROSITA',
+          cantidad: 1,
+        },
+      ],
+    },
+    {
+      eanSku: '7707203668268',
+      skuHomecenter: '140948',
+      descripcion: 'JB 3 PIEZAS',
+      cantidadSolicitada: 18,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 34600,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
+        {
+          eanTienda: '7703670900108',
+          nombreTienda: 'SODIMAC - SUBA',
+          cantidad: 6,
+        },
+        {
+          eanTienda: '7703670900177',
+          nombreTienda: 'SODIMAC - NEIVA',
+          cantidad: 6,
+        },
+        {
+          eanTienda: '7703670900689',
+          nombreTienda: 'SODIMAC - BOGOTA CALLE 80',
+          cantidad: 6,
+        },
+      ],
+    },
+    {
+      eanSku: '7705666625989',
+      // Homecenter's real internal SKU isn't in this source — only the
+      // "Codigo FACTORY" / Item Proveedor code below (see CLAUDE.md's open items).
+      skuHomecenter: 'T2010REV11',
+      descripcion: 'TAP REVERSO ESPINA TAUPE 160X220',
+      cantidadSolicitada: 5,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 242200,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
+        {
+          eanTienda: '7703670900122',
+          nombreTienda: 'SODIMAC - CAJICA',
+          cantidad: 1,
+        },
+        {
+          eanTienda: '7703670900163',
+          nombreTienda: 'SODIMAC - TULUA',
+          cantidad: 1,
+        },
+        {
+          eanTienda: '7703670900160',
+          nombreTienda: 'SODIMAC - CARTAGENA SAN FERNANDO',
+          cantidad: 1,
+        },
+        {
+          eanTienda: '7703670900689',
+          nombreTienda: 'SODIMAC - BOGOTA CALLE 80',
+          cantidad: 1,
+        },
+        {
+          eanTienda: '7703670900702',
+          nombreTienda: 'SODIMAC - BOGOTA NORTE',
+          cantidad: 1,
+        },
+      ],
+    },
+    {
+      eanSku: '7705666031285',
+      // Homecenter's real internal SKU isn't in this source — only the
+      // "Codigo FACTORY" / Item Proveedor code below (see CLAUDE.md's open items).
+      skuHomecenter: 'T2010BOL54',
+      descripcion: 'TAPETE BORLIGHT SANLI 160X230',
+      cantidadSolicitada: 8,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 317300,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
+        {
+          eanTienda: '7703670900443',
+          nombreTienda: 'SODIMAC - ENVIGADO',
+          cantidad: 1,
+        },
+        {
+          eanTienda: '7703670900603',
+          nombreTienda: 'SODIMAC - PEREIRA',
+          cantidad: 3,
+        },
+        {
+          eanTienda: '7703670900689',
+          nombreTienda: 'SODIMAC - BOGOTA CALLE 80',
+          cantidad: 3,
+        },
+        {
+          eanTienda: '7703670900801',
+          nombreTienda: 'SODIMAC - BOGOTA SUR',
+          cantidad: 1,
+        },
+      ],
+    },
+    {
+      eanSku: '7705666261705',
+      // Homecenter's real internal SKU isn't in this source — only the
+      // "Codigo FACTORY" / Item Proveedor code below (see CLAUDE.md's open items).
+      skuHomecenter: 'T2010BOL48',
+      descripcion: 'TAPETE BORLIGHT PAMU 160X230',
+      cantidadSolicitada: 16,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 317300,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
+        {
+          eanTienda: '7703670900443',
+          nombreTienda: 'SODIMAC - ENVIGADO',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900658',
+          nombreTienda: 'SODIMAC - MANIZALES SAN RAFAEL',
+          cantidad: 9,
+        },
+        {
+          eanTienda: '7703670900689',
+          nombreTienda: 'SODIMAC - BOGOTA CALLE 80',
+          cantidad: 3,
+        },
+      ],
+    },
+    {
+      eanSku: '7705666266212',
+      // Homecenter's real internal SKU isn't in this source — only the
+      // "Codigo FACTORY" / Item Proveedor code below (see CLAUDE.md's open items).
+      skuHomecenter: 'T2010BOL51',
+      descripcion: 'TAPETE BORLIGHT BURSA 160X230',
+      cantidadSolicitada: 8,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 317300,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
+        {
+          eanTienda: '7703670900412',
+          nombreTienda: 'SODIMAC - MEDELLIN SAN JUAN',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900689',
+          nombreTienda: 'SODIMAC - BOGOTA CALLE 80',
+          cantidad: 3,
+        },
+        {
+          eanTienda: '7703670900801',
+          nombreTienda: 'SODIMAC - BOGOTA SUR',
+          cantidad: 1,
+        },
+      ],
+    },
+    {
+      eanSku: '7705666905982',
+      skuHomecenter: '565030',
+      descripcion: 'TAP CUPERZ RIO GRIS 60X150',
+      cantidadSolicitada: 36,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 40900,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
+        {
+          eanTienda: '7703670900115',
+          nombreTienda: 'SODIMAC - BOGOTA CEDRITOS',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900161',
+          nombreTienda: 'SODIMAC - MALLPLAZA NQS',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900184',
+          nombreTienda: 'SODIMAC - VILLAVICENCIO',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670901228',
+          nombreTienda: 'SODIMAC - TUNJA',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670901167',
+          nombreTienda: 'SODIMAC - MOSQUERA',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900443',
+          nombreTienda: 'SODIMAC - ENVIGADO',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900689',
+          nombreTienda: 'SODIMAC - BOGOTA CALLE 80',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900702',
+          nombreTienda: 'SODIMAC - BOGOTA NORTE',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900801',
+          nombreTienda: 'SODIMAC - BOGOTA SUR',
+          cantidad: 4,
+        },
+      ],
+    },
+    {
+      eanSku: '7705666935590',
+      // Homecenter's real internal SKU isn't in this source — only the
+      // "Codigo FACTORY" / Item Proveedor code below (see CLAUDE.md's open items).
+      skuHomecenter: 'T2010REV09',
+      descripcion: 'TAP REVERSO ESPINA TAUPE 80X140',
+      cantidadSolicitada: 9,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 87400,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
+        {
+          eanTienda: '7703670901228',
+          nombreTienda: 'SODIMAC - TUNJA',
+          cantidad: 1,
+        },
+        {
+          eanTienda: '7703670900412',
+          nombreTienda: 'SODIMAC - MEDELLIN SAN JUAN',
+          cantidad: 1,
+        },
+        {
+          eanTienda: '7703670900603',
+          nombreTienda: 'SODIMAC - PEREIRA',
+          cantidad: 3,
+        },
+        {
+          eanTienda: '7703670900658',
+          nombreTienda: 'SODIMAC - MANIZALES SAN RAFAEL',
+          cantidad: 3,
+        },
+        {
+          eanTienda: '7703670900955',
+          nombreTienda: 'SODIMAC - BUCARAMANGA LA ROSITA',
+          cantidad: 1,
+        },
+      ],
+    },
+    {
+      eanSku: '7705666261484',
+      skuHomecenter: '583900',
+      descripcion: 'TAP INFANTIL SURTIDO',
+      cantidadSolicitada: 8,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 68800,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
+        {
+          eanTienda: '7703670900603',
+          nombreTienda: 'SODIMAC - PEREIRA',
+          cantidad: 4,
+        },
+        {
+          eanTienda: '7703670900955',
+          nombreTienda: 'SODIMAC - BUCARAMANGA LA ROSITA',
+          cantidad: 4,
+        },
+      ],
+    },
+    {
+      eanSku: '7705666652596',
+      // Homecenter's real internal SKU isn't in this source — only the
+      // "Codigo FACTORY" / Item Proveedor code below (see CLAUDE.md's open items).
+      skuHomecenter: 'T2010BOL50',
+      descripcion: 'TAPETE BORLIGHT BURSA 120X170',
+      cantidadSolicitada: 4,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 176900,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
+        {
+          eanTienda: '7703670900603',
+          nombreTienda: 'SODIMAC - PEREIRA',
+          cantidad: 4,
+        },
+      ],
+    },
+    {
+      eanSku: '7705666653791',
+      skuHomecenter: '769187',
+      descripcion: 'TAPETE MULTIUSOS AZUL 50X80',
+      cantidadSolicitada: 4,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 19600,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
+        {
+          eanTienda: '7703670900603',
+          nombreTienda: 'SODIMAC - PEREIRA',
+          cantidad: 4,
+        },
+      ],
+    },
+    {
+      eanSku: '7705666597095',
+      // Homecenter's real internal SKU isn't in this source — only the
+      // "Codigo FACTORY" / Item Proveedor code below (see CLAUDE.md's open items).
+      skuHomecenter: 'T2010REV13',
+      descripcion: 'TAP REVERSO GEO TAUPE 80X140',
+      cantidadSolicitada: 1,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 87400,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
+        {
+          eanTienda: '7703670900603',
+          nombreTienda: 'SODIMAC - PEREIRA',
+          cantidad: 1,
+        },
+      ],
+    },
+    {
+      eanSku: '7705666935927',
+      // Homecenter's real internal SKU isn't in this source — only the
+      // "Codigo FACTORY" / Item Proveedor code below (see CLAUDE.md's open items).
+      skuHomecenter: 'T2010BOL53',
+      descripcion: 'TAPETE BORLIGHT SANLI 120X170',
+      cantidadSolicitada: 2,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 176900,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
+        {
+          eanTienda: '7703670900603',
+          nombreTienda: 'SODIMAC - PEREIRA',
+          cantidad: 2,
+        },
+      ],
+    },
+    {
+      eanSku: '7705666392737',
+      // Homecenter's real internal SKU isn't in this source — only the
+      // "Codigo FACTORY" / Item Proveedor code below (see CLAUDE.md's open items).
+      skuHomecenter: 'T2010REV10',
+      descripcion: 'TAP REVERSO ESPINA TAUPE 120X160',
+      cantidadSolicitada: 1,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 132600,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
+        {
+          eanTienda: '7703670900429',
+          nombreTienda: 'SODIMAC - BELLO',
+          cantidad: 1,
+        },
+      ],
+    },
+    {
+      eanSku: '7705666420386',
+      // Homecenter's real internal SKU isn't in this source — only the
+      // "Codigo FACTORY" / Item Proveedor code below (see CLAUDE.md's open items).
+      skuHomecenter: 'T2010SNA05',
+      descripcion: 'TAPETE SIENA GEOMETRIC 120X170',
+      cantidadSolicitada: 3,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 210000,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
+        {
+          eanTienda: '7703670900161',
+          nombreTienda: 'SODIMAC - MALLPLAZA NQS',
+          cantidad: 3,
+        },
+      ],
+    },
+    {
+      eanSku: '7705666056523',
+      skuHomecenter: '630515',
+      descripcion: 'GR CURLY GRASS 750 gr 2x1m VERDE',
+      cantidadSolicitada: 4,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 89000,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
+        {
+          eanTienda: '7703670900161',
+          nombreTienda: 'SODIMAC - MALLPLAZA NQS',
+          cantidad: 4,
+        },
+      ],
+    },
+    {
+      eanSku: '7705666869451',
+      // Homecenter's real internal SKU isn't in this source — only the
+      // "Codigo FACTORY" / Item Proveedor code below (see CLAUDE.md's open items).
+      skuHomecenter: 'T2010BOL47',
+      descripcion: 'TAPETE BORLIGHT PAMU 120X170',
+      cantidadSolicitada: 2,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 176900,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
+        {
+          eanTienda: '7703670900115',
+          nombreTienda: 'SODIMAC - BOGOTA CEDRITOS',
+          cantidad: 2,
+        },
+      ],
+    },
+    {
+      eanSku: '7705666787465',
+      skuHomecenter: '583584',
+      descripcion: 'GRAMA GOLDEN 750gr 2mx1m',
+      cantidadSolicitada: 4,
+      cantidadCancelada: 0,
+      cantidadDevuelta: 0,
+      estadoLinea: 'PENDIENTE',
+      costoUnitario: 81000,
+      condicionPago: '30 Dias',
+      descuentoSku: 0,
+      unidadVenta: 'UND',
+      tiendas: [
+        {
+          eanTienda: '7703670900122',
+          nombreTienda: 'SODIMAC - CAJICA',
+          cantidad: 4,
+        },
+      ],
+    },
+  ]
+
+  const cedi = DELIVERY_POINTS[0] // EAN 7703670529804 — matches the sheet's "Punto de Entrega": SOD FUNZA CD (51).
+  const fechaTransmision = '2026-09-22' // raw "Fecha Pedido".
+  const costoTotalOc = productosPedidoTiendas.reduce(
+    (sum, p) => sum + p.costoUnitario * p.cantidadSolicitada,
+    0,
+  )
+
+  return {
+    ordenCompra: '16130755', // raw "Orden Compra".
+    eanPuntoEntrega: cedi.ean,
+    cliente: 'Sodimac Colombia S.A.- Home Center',
+    ciudadEntrega: cedi.ciudad,
+    direccionEntrega: cedi.direccion,
+    barrioEntrega: cedi.ciudad,
+    departamentoEntrega: 'Cundinamarca',
+    codigoDaneEntrega: '25286', // DANE code for Funza, Cundinamarca — not in the sheet, filled in for realism.
+    facturacion: {
+      barrio: cedi.ciudad,
+      ciudad: cedi.ciudad,
+      departamento: 'Cundinamarca',
+      direccion: cedi.direccion,
+    },
+    estado: 'PENDIENTE',
+    codigoSesionRecibo: null,
+    fechaTransmision,
+    ultimaActualizacion: `${fechaTransmision}T12:00:00Z`,
+    productos: productosPedidoTiendas,
+    costoTotalOc,
+    transportadora: '3-TRANSPORTES SODIMAC',
+    // Not in the sheet — same +11/+15 day offset convention as buildRealSampleOrder.
+    fechaMinEntrega: '2026-10-03T00:00:00Z',
+    fechaMaxEntrega: '2026-10-07T00:00:00Z',
+    fechaCancelacion: null,
+    sticker: null,
+    tipoOc: '4-Venta Empresa',
+    tipoDocumento: '1',
+    notaPedido: '42-100235', // Not in the sheet — placeholder, same format as buildRealSampleOrder's.
+    cedulaComprador: '1000000000',
+    emailCliente: 'compras.pruebas@example.com',
+    telefonoCliente: '+57 3000000000',
+    clienteRecibe: 'Bodega CEDI Funza',
+    eanTiendaVenta: cedi.ean,
+    eanTiendaFacturacion: cedi.ean,
+    localidad: cedi.ean,
+    eanEmpresaCompradora: '7703670900009',
+    tipoDeOrden: 'CROSS_DOCKING',
+    tipoEntrega: 'RETAIL',
+    observaciones: cedi.ciudad,
+    observacionesNpc: `Favor entregar en ${cedi.direccion}.`,
+    observacionesNpl: 'CDFZ16130755',
+    // Platform's own tracking number — the sheet's "Registro PEDIDO".
+    numPedido: '13317',
+    intentos: 0,
+    maxIntentos: 3,
+  }
+}
+
 function makePurchaseOrder(
   ordenCompra: string,
   status: OrderStatus,
@@ -2034,6 +3046,9 @@ function seed(): MockDb {
 
   // A second, real-world sample order — see buildRealSampleOrder() above.
   db.purchaseOrders.push(buildRealSampleOrder())
+
+  // A third, real-world sample order — see buildPedidoPorTiendasOrder() above.
+  db.purchaseOrders.push(buildPedidoPorTiendasOrder())
 
   // 44 more generated orders.
   for (let i = 0; i < 44; i += 1) {

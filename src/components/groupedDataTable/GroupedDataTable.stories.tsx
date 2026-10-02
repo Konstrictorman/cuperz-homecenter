@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/tanstack-react'
 import type { GridColDef } from '@mui/x-data-grid'
+import { db } from '#/mocks/data/db'
 import GroupedDataTable from './GroupedDataTable'
 
 interface DemoRow {
@@ -82,6 +83,66 @@ const rows: DemoRow[] = [
   },
 ]
 
+interface RealOrderRow {
+  id: string
+  tienda: string
+  eanSku: string
+  skuHomecenter: string
+  descripcion: string
+  cantidad: number
+  costoUnitario: number
+  valorLinea: number
+}
+
+// Flattens the hand-transcribed OC 15669499 sample seeded in
+// `mocks/data/db.ts` (`buildRealSampleOrder`, itself sourced from
+// `docs/ORD_15669499 (1).csv`) into one row per SKU×tienda pair — the same
+// grain `PurchaseOrderStoresTable` renders, just store-grouped here instead
+// of nested. `descripcion` is blank on most lines because the raw export
+// leaves it blank (see `buildRealSampleOrder`'s comment and the
+// `po-export-csv-gap` note) — left as-is rather than backfilled, so the demo
+// doesn't misrepresent what the real feed actually contains.
+const realOrder = db.purchaseOrders.find((o) => o.ordenCompra === '15669499')
+
+const realOrderRows: Array<RealOrderRow> = (realOrder?.productos ?? []).flatMap(
+  (producto) =>
+    producto.tiendas.map((tienda) => ({
+      id: `${producto.eanSku}-${tienda.eanTienda}`,
+      tienda: tienda.nombreTienda,
+      eanSku: producto.eanSku,
+      skuHomecenter: producto.skuHomecenter,
+      descripcion: producto.descripcion,
+      cantidad: tienda.cantidad,
+      costoUnitario: producto.costoUnitario,
+      valorLinea: tienda.cantidad * producto.costoUnitario,
+    })),
+)
+
+const realOrderColumns: GridColDef[] = [
+  { field: 'tienda', headerName: 'Tienda', flex: 1.5, minWidth: 220 },
+  { field: 'eanSku', headerName: 'EAN SKU', width: 140 },
+  { field: 'skuHomecenter', headerName: 'SKU Homecenter', width: 140 },
+  { field: 'descripcion', headerName: 'Descripción', flex: 1, minWidth: 160 },
+  {
+    field: 'cantidad',
+    headerName: 'Cantidad',
+    type: 'number',
+    width: 110,
+  },
+  {
+    field: 'costoUnitario',
+    headerName: 'Costo Unitario',
+    type: 'number',
+    width: 130,
+  },
+  {
+    field: 'valorLinea',
+    headerName: 'Valor Línea',
+    type: 'number',
+    width: 140,
+  },
+]
+
 const meta = {
   title: 'Components/GroupedDataTable',
   component: GroupedDataTable,
@@ -150,5 +211,30 @@ export const Empty: Story = {
     columns,
     groupBy: 'tienda',
     aggregations: [{ field: 'valorTotalOrden', fn: 'sum' }],
+  },
+}
+
+export const WithPagination: Story = {
+  args: {
+    rows: realOrderRows,
+    columns: realOrderColumns,
+    groupBy: 'tienda',
+    aggregations: [
+      { field: 'cantidad', fn: 'sum' },
+      { field: 'valorLinea', fn: 'sum' },
+    ],
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: `
+Uses the real OC 15669499 Cross-Docking sample seeded in \`mocks/data/db.ts\`
+(transcribed from \`docs/ORD_15669499 (1).csv\`) instead of hand-picked demo
+numbers: 32 SKUs across 35 stores, flattened to one row per SKU×tienda pair
+and grouped by \`tienda\`. \`descripcion\` is blank on most rows — that's the
+raw export, not a display bug.
+        `,
+      },
+    },
   },
 }
