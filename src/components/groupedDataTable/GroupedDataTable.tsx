@@ -7,6 +7,7 @@ import {
 } from 'react'
 import type { ComponentProps } from 'react'
 import {
+  ColumnsPanelTrigger,
   FilterPanelTrigger,
   GridFooterContainer,
   GridLogicOperator,
@@ -47,6 +48,7 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight'
 import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore'
 import UnfoldLessIcon from '@mui/icons-material/UnfoldLess'
+import ViewColumnIcon from '@mui/icons-material/ViewColumn'
 import DataTable from '#/components/dataTable/DataTable'
 import type { DataTableProps } from '#/components/dataTable/DataTable'
 import './GroupedDataTable.css'
@@ -712,6 +714,14 @@ function toGroupAwareColumn<TRow extends GridValidRowModel>(
 
   return {
     ...original,
+    // A `groupBy` field's column carries the expand/collapse chevron (below)
+    // — hiding it via the columns panel (see `GroupedDataTableToolbar`)
+    // would take that chevron with it, stranding every group permanently in
+    // whatever collapse state it was last in. Forced here regardless of
+    // whatever `hideable` the consumer's own column config set, since there
+    // is no correct non-default value for a `groupBy` field. An aggregated
+    // (but not grouped) field has no such restriction — it stays hideable.
+    hideable: isGroupedField ? false : original.hideable,
     renderCell: (params: GridRenderCellParams<GroupedRow<TRow>>) => {
       const row = params.row
 
@@ -851,26 +861,49 @@ function toGroupAwareIsRowSelectable<TRow extends GridValidRowModel>(
   }
 }
 
-/** Default `slots.toolbar` — a visible button that opens the standard
- *  MUI X filter panel (`Column`/`Operator`/`Value`, the same panel reached
- *  from each column's own header menu — see `toGroupAwareColumn` and
- *  specs/04-grouped-data-table-filtering.md). Each column's header menu
- *  already offers a "Filter" item regardless, but that's a hover-to-reveal
- *  per-column control; without a toolbar there is no always-visible icon
- *  for the feature at all, which is the gap this closes. Deliberately
- *  minimal — just the filter trigger (MUI X's own non-deprecated
- *  `FilterPanelTrigger`/`Toolbar`/`ToolbarButton` primitives, the same ones
- *  its own default `GridToolbar` composes from) — not MUI's full default
- *  toolbar, which also bundles a column-visibility selector (risky here:
- *  hiding the `groupBy` field's column would take its chevron with it) and
- *  quick/global-text search (a separate filtering path from `filterModel`,
- *  one `filterRowsByModel` doesn't implement — enabling it would add a
- *  visible control that silently does nothing). `showToolbar` must also be
- *  `true` for any `slots.toolbar` to render at all — defaulted alongside
- *  this below. */
+/** Default `slots.toolbar` — visible buttons for the standard MUI X filter
+ *  panel (`Column`/`Operator`/`Value`, the same panel reached from each
+ *  column's own header menu — see `toGroupAwareColumn` and
+ *  specs/04-grouped-data-table-filtering.md) and the standard MUI X columns
+ *  panel (show/hide per column, search, "Show/Hide All", "Reset" — the same
+ *  panel reached from each column's own header menu's "Manage columns"
+ *  item). Each column's header menu already offers both regardless, but
+ *  that's a hover-to-reveal per-column control; without a toolbar there is
+ *  no always-visible icon for either feature at all, which is the gap this
+ *  closes. Built from MUI X's own non-deprecated `FilterPanelTrigger`/
+ *  `ColumnsPanelTrigger`/`Toolbar`/`ToolbarButton` primitives — the same ones
+ *  its own default `GridToolbar` composes from — rather than MUI's full
+ *  default toolbar, which also bundles quick/global-text search (a separate
+ *  filtering path from `filterModel`, one `filterRowsByModel` doesn't
+ *  implement — enabling it would add a visible control that silently does
+ *  nothing). The columns panel itself (`slots.columnsPanel`) is left at MUI
+ *  X's own default (`GridColumnsPanel`/`GridColumnsManagement`) rather than a
+ *  custom one, unlike the filter panel — Community's column-visibility
+ *  model has no restriction comparable to the forced single-item
+ *  `filterModel` that necessitated `GroupedDataTableFilterPanel`. The one
+ *  guard actually needed — hiding a `groupBy` field's column would take its
+ *  expand/collapse chevron with it — is applied directly on that column via
+ *  `hideable: false` in `toGroupAwareColumn`, which disables (rather than
+ *  removes) its row in the panel, same as MUI X Premium's own screenshots
+ *  show for a non-hideable column. `showToolbar` must also be `true` for any
+ *  `slots.toolbar` to render at all — defaulted alongside this below. */
 function GroupedDataTableToolbar({ filterCount }: ToolbarPropsOverrides) {
   return (
     <Toolbar>
+      <Tooltip title="Columnas">
+        <ColumnsPanelTrigger
+          render={(triggerProps) => (
+            <ToolbarButton
+              // See the matching cast on the filter trigger below for why
+              // this is needed.
+              {...(triggerProps as ComponentProps<typeof ToolbarButton>)}
+              color="inherit"
+            >
+              <ViewColumnIcon fontSize="small" />
+            </ToolbarButton>
+          )}
+        />
+      </Tooltip>
       <Tooltip title="Filtros">
         <FilterPanelTrigger
           render={(triggerProps) => (

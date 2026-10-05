@@ -2448,7 +2448,7 @@ describe('GroupedDataTable — filtering', () => {
     ).toBeInTheDocument()
   })
 
-  it('shows a funnel icon next to a column header while that field has an active filter, matching MUI X Premium\'s own grouped-data-grid screenshot', () => {
+  it("shows a funnel icon next to a column header while that field has an active filter, matching MUI X Premium's own grouped-data-grid screenshot", () => {
     render(
       <GroupedDataTable
         rows={filterRows}
@@ -2633,5 +2633,87 @@ describe('GroupedDataTable — filtering', () => {
     expect(screen.getByText('Sin filtros activos')).toBeInTheDocument()
     expect(screen.getByText('SOD SUBA (2)')).toBeInTheDocument()
     expect(screen.getByText('SOD CEDRITOS (1)')).toBeInTheDocument()
+  })
+})
+
+describe('GroupedDataTable — column visibility', () => {
+  it('shows a visible toolbar columns button by default, opening the standard MUI columns panel', async () => {
+    const user = userEvent.setup()
+    render(<GroupedDataTable rows={rows} columns={columns} groupBy="tienda" />)
+
+    await user.click(screen.getByRole('button', { name: 'Columnas' }))
+
+    expect(
+      screen.getByRole('checkbox', { name: 'Producto' }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('checkbox', { name: 'Show/Hide All' }),
+    ).toBeInTheDocument()
+  })
+
+  it('hides the toolbar columns button when showToolbar is turned off explicitly', () => {
+    render(
+      <GroupedDataTable
+        rows={rows}
+        columns={columns}
+        groupBy="tienda"
+        showToolbar={false}
+      />,
+    )
+
+    expect(
+      screen.queryByRole('button', { name: 'Columnas' }),
+    ).not.toBeInTheDocument()
+  })
+
+  it('disables the groupBy field in the columns panel so its expand/collapse chevron can never be hidden', async () => {
+    const user = userEvent.setup()
+    render(<GroupedDataTable rows={rows} columns={columns} groupBy="tienda" />)
+
+    await user.click(screen.getByRole('button', { name: 'Columnas' }))
+
+    // The "Tienda" field is what `groupBy` groups by — its checkbox is
+    // disabled rather than omitted, same as MUI X Premium's own panel marks
+    // a non-hideable column, and clicking it is a no-op (a disabled
+    // checkbox rejects the pointer interaction outright).
+    expect(screen.getByRole('checkbox', { name: 'Tienda' })).toBeDisabled()
+    expect(screen.getByText('SOD SUBA (2)')).toBeInTheDocument()
+    expect(screen.getByText('SOD CEDRITOS (1)')).toBeInTheDocument()
+  })
+
+  it('hides a non-grouped column from the table once its checkbox is unchecked, and restores it when checked again', async () => {
+    const user = userEvent.setup()
+    render(<GroupedDataTable rows={rows} columns={columns} groupBy="tienda" />)
+
+    await user.click(screen.getByRole('button', { name: 'Columnas' }))
+    const productoCheckbox = screen.getByRole('checkbox', {
+      name: 'Producto',
+    })
+
+    await user.click(productoCheckbox)
+    expect(
+      screen.queryByRole('columnheader', { name: 'Producto' }),
+    ).not.toBeInTheDocument()
+    // Grouping itself is unaffected — the "Tienda" groupBy column is
+    // untouched by hiding an unrelated column.
+    expect(screen.getByText('SOD SUBA (2)')).toBeInTheDocument()
+
+    await user.click(productoCheckbox)
+    expect(
+      screen.getByRole('columnheader', { name: 'Producto' }),
+    ).toBeInTheDocument()
+  })
+
+  it("reaches the columns panel through a column header's own menu, same as the toolbar button", async () => {
+    const user = userEvent.setup()
+    render(<GroupedDataTable rows={rows} columns={columns} groupBy="tienda" />)
+
+    // Opened from the "Producto" column's own menu — MUI's column menu
+    // "Manage columns" item, left untouched by GroupedDataTable — rather
+    // than the toolbar button, but it's the exact same panel either way.
+    await user.click(screen.getByLabelText('Producto column menu'))
+    await user.click(screen.getByRole('menuitem', { name: 'Manage columns' }))
+
+    expect(screen.getByRole('checkbox', { name: 'Tienda' })).toBeDisabled()
   })
 })

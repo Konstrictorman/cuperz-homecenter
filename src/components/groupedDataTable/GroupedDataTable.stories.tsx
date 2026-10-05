@@ -318,6 +318,39 @@ not the full 35-store dataset — matching MUI X Premium's own default
   },
 }
 
+export const WithColumnVisibility: Story = {
+  args: {
+    rows: realOrderRows,
+    columns: realOrderColumns,
+    groupBy: 'tienda',
+    aggregations: [{ field: 'valorLinea', fn: 'sum' }],
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: `
+Reachable two ways, same as filtering above: the toolbar's columns icon
+(\`GroupedDataTableToolbar\`, on by default via \`showToolbar\`) or any column
+header's own menu → "Manage columns". Both open MUI X Community's own
+columns panel (\`GridColumnsPanel\`/\`GridColumnsManagement\`) completely
+unmodified — a search box, one checkbox per column, and "Show/Hide All"/
+"Reset" — unlike the filter panel, Community's column-visibility model has
+no restriction this component needs to work around.
+
+The one guard that *is* needed: "Tienda" is the \`groupBy\` field — hiding its
+column would take the expand/collapse chevron (and group label) with it, so
+its checkbox is disabled rather than togglable (\`hideable: false\` in
+\`toGroupAwareColumn\`), the same way MUI X Premium's own screenshots mark a
+non-hideable column. Every other column — \`eanSku\`, \`skuHomecenter\`,
+\`descripcion\`, \`cantidad\`, \`costoUnitario\`, \`valorLinea\` — hides and shows
+normally; try unchecking a few to narrow the table to just the columns you
+care about.
+        `,
+      },
+    },
+  },
+}
+
 interface DispatchRow {
   id: string
   tienda: string
