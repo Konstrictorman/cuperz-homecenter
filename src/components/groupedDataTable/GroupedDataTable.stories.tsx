@@ -1,7 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/tanstack-react'
+import { GridActionsCellItem } from '@mui/x-data-grid'
 import type { GridColDef } from '@mui/x-data-grid'
+import CampaignIcon from '@mui/icons-material/Campaign'
+import VisibilityIcon from '@mui/icons-material/Visibility'
 import { db } from '#/mocks/data/db'
-import GroupedDataTable from './GroupedDataTable'
+import GroupedDataTable, {
+  isGroupFooterRow,
+  isGroupRow,
+} from './GroupedDataTable'
 
 interface DemoRow {
   id: string
@@ -151,19 +157,25 @@ const meta = {
     docs: {
       description: {
         component: `
-Groups rows by one column (\`groupBy\`) and shows a per-column aggregation
-(\`aggregations\`: sum/count/avg/min/max) on collapsible group rows, built on
-top of \`DataTable\`. This project's \`@mui/x-data-grid\` is the Community
-edition — row grouping/aggregation is a Premium-only feature there — so this
-is hand-built the same way \`PurchaseOrderStoresTable\` is. See
-\`specs/01-grouped-data-table.md\`.
+Groups rows by one or several columns (\`groupBy\`) and shows a per-column
+aggregation (\`aggregations\`: sum/count/avg/min/max, or a custom function via
+\`aggregationFunctions\`) on collapsible group rows, built on top of
+\`DataTable\`. This project's \`@mui/x-data-grid\` is the Community edition —
+row grouping/aggregation is a Premium-only feature there — so this is
+hand-built the same way \`PurchaseOrderStoresTable\` is. See
+\`specs/01-grouped-data-table.md\` and
+\`specs/02-grouped-data-table-advanced-grouping.md\`.
 
-Groups start collapsed; click a group's chevron to expand it. The bar below
-the grid shows the total number of groups and, for each aggregated column, a
-grand total computed over the whole dataset (not just expanded rows).
-Grouping column and aggregations are fixed by the consumer — there's no
-runtime UI to change them, and column sorting is disabled while grouped (it
-would scramble the group/child row pairing).
+Groups start collapsed; click a group's chevron to expand it, or use the
+expand-all/collapse-all toggle in the footer. The footer also shows the total
+number of top-level groups and, for each aggregated column, a grand total
+computed over the whole dataset (not just expanded rows). \`groupBy\` can be
+an array for nested groups (outer to inner), each level indented under its
+parent. \`aggregationPosition\` controls whether a group's aggregate shows
+inline on its own row (the default) or on a dedicated subtotal row appended
+after it. Grouping fields and aggregations are fixed by the consumer —
+there's no runtime UI to change them — and column sorting is disabled while
+grouped (it would scramble the group/child row pairing).
 
 The demo rows below reuse the real store→product shape and numbers from
 \`docs/Copy of pedidoxtiendas.xlsx\` (SOD SUBA / SOD CEDRITOS).
@@ -233,6 +245,235 @@ Uses the real OC 15669499 Cross-Docking sample seeded in \`mocks/data/db.ts\`
 numbers: 32 SKUs across 35 stores, flattened to one row per SKU×tienda pair
 and grouped by \`tienda\`. \`descripcion\` is blank on most rows — that's the
 raw export, not a display bug.
+        `,
+      },
+    },
+  },
+}
+
+export const WithFiltering: Story = {
+  args: {
+    rows: realOrderRows,
+    columns: realOrderColumns,
+    groupBy: 'tienda',
+    aggregations: [{ field: 'valorLinea', fn: 'sum' }],
+    // Reachable two ways in a live grid: the toolbar's own filter icon
+    // (top-left funnel, `GroupedDataTableToolbar` — on by default via
+    // `showToolbar`) or "Tienda"'s column header menu → Filter. Either
+    // opens `GroupedDataTableFilterPanel` — its own
+    // Column/Operator/Value/delete row per filter, "Agregar filtro" and
+    // "Eliminar todos" buttons, replacing MUI X Community's own filter
+    // panel (which cannot show either of those: the underlying `DataGrid`
+    // forces `disableMultipleColumnsFiltering`, so it only ever supports
+    // one filter).
+    //
+    // Seeded via `initialState.filter.filterModel`, *not* the `filterModel`
+    // prop directly — `filterModel` is `GroupedDataTable`'s controlled-prop
+    // escape hatch (same as `paginationModel`, see `WithPagination`'s own
+    // `initialState.pagination.paginationModel`): passing it directly here,
+    // with no `onFilterModelChange` to go with it, would freeze the model
+    // at this starting value forever — every edit in the panel computes a
+    // new model and reports it via that callback, but nothing would be
+    // listening, so the UI could never show the change. `initialState`
+    // only seeds the *first* render; from then on the panel is free to
+    // add, edit, and remove filters normally.
+    initialState: {
+      filter: {
+        filterModel: {
+          items: [{ field: 'tienda', operator: 'contains', value: 'MEDELLIN' }],
+        },
+      },
+    },
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: `
+Both the toolbar's filter button (visible by default — \`showToolbar\`
+defaults to \`true\` here, unlike a plain \`DataGrid\`, precisely so there's
+always a visible icon for this, not just a hover-to-reveal column-header
+menu) and the column header's own "Filter" menu item open the same panel:
+\`GroupedDataTableFilterPanel\`. It replaces MUI X Community's own filter
+panel rather than reusing it — Community's forces
+\`disableMultipleColumnsFiltering\`, hiding the "+ ADD FILTER"/"REMOVE ALL"
+controls from the screenshot this story was requested from and truncating
+\`filterModel.items\` to one entry on every change. This panel instead reads
+and writes \`filterModel\` directly through \`GroupedDataTable\`'s own state
+(bypassing that restriction entirely), supporting any number of filters
+with a delete button on each row, an AND/OR toggle once there's more than
+one, and "Agregar filtro"/"Eliminar todos" buttons.
+
+Filtering runs on the real, un-flattened rows *before* grouping — so a
+column-value filter applies per leaf row (here, \`tienda\` \`contains\`
+"MEDELLIN" keeps only the 3 of 35 stores matching it: "SODIMAC - MEDELLIN
+INDUSTRIALES", "SODIMAC - MEDELLIN MOLINOS", and "SODIMAC - MEDELLIN SAN
+JUAN" — try widening the value to just "SODIMAC" to see all 35 return), and
+a group with zero matching rows simply doesn't appear at all, rather than
+showing empty. The grand-total footer is scoped to the filtered rows too,
+not the full 35-store dataset — matching MUI X Premium's own default
+\`aggregationRowsScope: 'filtered'\`.
+        `,
+      },
+    },
+  },
+}
+
+interface DispatchRow {
+  id: string
+  tienda: string
+  contenedor: string
+  producto: string
+  cantidad: number
+}
+
+const dispatchColumns: GridColDef[] = [
+  { field: 'tienda', headerName: 'Tienda', flex: 1, minWidth: 140 },
+  { field: 'contenedor', headerName: 'Contenedor', flex: 1, minWidth: 120 },
+  { field: 'producto', headerName: 'Producto', flex: 1.5, minWidth: 200 },
+  { field: 'cantidad', headerName: 'Cantidad', type: 'number', width: 110 },
+]
+
+// Illustrative only — not sourced from a real dispatch-notice sample. Shaped
+// after the domain's Orden → Tienda → Contenedor → Producto hierarchy (see
+// the project's root CLAUDE.md); "Contenedor 1" repeats under both stores on
+// purpose, to show that same-named containers at different stores are kept
+// as independent, independently-collapsible nodes.
+const dispatchRows: DispatchRow[] = [
+  {
+    id: '1',
+    tienda: 'SOD SUBA',
+    contenedor: 'Contenedor 1',
+    producto: 'TAP CUPERZ RIO GRIS 60X110',
+    cantidad: 4,
+  },
+  {
+    id: '2',
+    tienda: 'SOD SUBA',
+    contenedor: 'Contenedor 1',
+    producto: 'JB 2PZS RIO GRIS',
+    cantidad: 2,
+  },
+  {
+    id: '3',
+    tienda: 'SOD SUBA',
+    contenedor: 'Contenedor 2',
+    producto: 'JB 3 PIEZAS',
+    cantidad: 6,
+  },
+  {
+    id: '4',
+    tienda: 'SOD CEDRITOS',
+    contenedor: 'Contenedor 1',
+    producto: 'TAPETE MULTIUSOS 50X80 FIGURAS GRIS',
+    cantidad: 6,
+  },
+]
+
+export const MultiLevelGrouping: Story = {
+  args: {
+    rows: dispatchRows,
+    columns: dispatchColumns,
+    groupBy: ['tienda', 'contenedor'],
+    aggregations: [{ field: 'cantidad', fn: 'sum' }],
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          '`groupBy` accepts an array for nested groups — here Tienda → Contenedor, each level indented under its parent. "Contenedor 1" appears under both stores as two independent nodes, each with its own count/collapse state.',
+      },
+    },
+  },
+}
+
+export const WithFooterAggregationPosition: Story = {
+  args: {
+    rows,
+    columns,
+    groupBy: 'tienda',
+    aggregations: [{ field: 'valorTotalOrden', fn: 'sum' }],
+    aggregationPosition: 'footer',
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'With `aggregationPosition="footer"`, a group\'s own row is left blank for aggregated columns and a dedicated "Subtotal <value>" row carries the total instead — shown even while the group is collapsed, same as the dataset-wide grand total.',
+      },
+    },
+  },
+}
+
+// `getActions` checks `isGroupRow`/`isGroupFooterRow` itself —
+// GroupedDataTable never touches an `actions` column's own rendering (see
+// `toGroupAwareColumn` in GroupedDataTable.tsx and
+// specs/03-grouped-data-table-actions-column.md), the same way MUI X
+// Premium's own `getActions` branches on `params.rowNode.type` to vary
+// actions by row kind. The leaf-row action mirrors the real "Ver detalle"
+// action on `PurchaseOrdersTable`
+// (`src/routes/purchase-orders/details/-usePurchaseOrdersColumns.tsx`:
+// `VisibilityIcon` + `GridActionsCellItem`, `onClick` reading the clicked
+// row) rather than inventing a demo-only shape for it.
+const columnsWithActions: GridColDef[] = [
+  ...columns,
+  {
+    field: 'actions',
+    type: 'actions',
+    headerName: '',
+    width: 60,
+    getActions: (params) => {
+      if (isGroupRow(params.row)) {
+        return [
+          <GridActionsCellItem
+            key="maximus"
+            icon={<CampaignIcon fontSize="small" />}
+            label="Maximus"
+            onClick={() => alert(`Maximus: ${params.row.groupValue}`)}
+          />,
+        ]
+      }
+      if (isGroupFooterRow(params.row)) {
+        return []
+      }
+      // Leaf row.
+      return [
+        <GridActionsCellItem
+          key="ver-detalle"
+          icon={<VisibilityIcon fontSize="small" />}
+          label="Ver detalle"
+          onClick={() => alert(`Ver detalle: ${params.row.producto}`)}
+        />,
+      ]
+    },
+  },
+]
+
+export const WithActionsColumn: Story = {
+  args: {
+    rows,
+    columns: columnsWithActions,
+    groupBy: 'tienda',
+    aggregations: [{ field: 'valorTotalOrden', fn: 'sum' }],
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: `
+An \`actions\`-type column (\`getActions\`/\`GridActionsCellItem\`, MUI X's
+standard pattern) works unmodified inside \`GroupedDataTable\` — it isn't a
+\`groupBy\` field or an aggregated column, so \`GroupedDataTable\` never
+touches its rendering, for any row kind. \`getActions\` returns a different
+action depending on which kind of row it was called for: a group row shows
+a "Maximus" icon button (\`alert\`-ing that group's own name, e.g.
+\`Maximus: SOD SUBA\`); a leaf/\`producto\` row — expand a group to see them —
+shows a "Ver detalle" icon button instead, the same \`VisibilityIcon\` +
+\`GridActionsCellItem\` action \`PurchaseOrdersTable\` uses for real
+(\`alert\`-ing that row's own \`producto\`, e.g.
+\`Ver detalle: TAP CUPERZ RIO GRIS 60X110\`, standing in for what would be
+\`onViewDetail?.(params.row)\` there). Both branches are the consumer's own
+\`getActions\` checking the exported \`isGroupRow\`/\`isGroupFooterRow\`
+guards against \`params.row\` — not a \`GroupedDataTable\` prop — the same
+way an MUI X Premium \`getActions\` would branch on \`params.rowNode.type\`.
         `,
       },
     },

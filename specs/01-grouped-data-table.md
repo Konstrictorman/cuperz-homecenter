@@ -28,9 +28,8 @@ The feature request started from a screenshot of MUI X **Data Grid Premium**'s b
 
 **Out of scope (for future specs):**
 
-- Multi-level/nested grouping (e.g. the domain's Orden → Tienda → Contenedor → Producto hierarchy).
-- Runtime UI controls to change the grouping column or a column's aggregation function (the Premium-style column-header dropdown).
-- An expand-all/collapse-all control.
+- Multi-level/nested grouping (e.g. the domain's Orden → Tienda → Contenedor → Producto hierarchy), an expand-all/collapse-all control, and a configurable inline-vs-footer aggregation position/pluggable aggregation functions — all four landed in `specs/02-grouped-data-table-advanced-grouping.md`.
+- Runtime UI controls to change the grouping column or a column's aggregation function (the Premium-style column-header dropdown) — still out of scope as of spec 02.
 - Migrating `PurchaseOrderStoresTable`, or wiring any other screen, to use `GroupedDataTable`.
 - Evaluating or adopting `@mui/x-data-grid-pro`/`-premium`.
 - A group-aware sort comparator that would allow sorting while keeping grouping intact.
@@ -115,9 +114,8 @@ interface GroupRow {
 
 ## What is **not** in this spec
 
-- Multi-level/nested grouping (Orden → Tienda → Contenedor → Producto).
+- Multi-level/nested grouping (Orden → Tienda → Contenedor → Producto), an expand-all/collapse-all control, and configurable aggregation position/functions — see `specs/02-grouped-data-table-advanced-grouping.md`.
 - Runtime UI to change grouping column or per-column aggregation function.
-- Expand-all/collapse-all control.
 - Migrating `PurchaseOrderStoresTable` or any other screen to `GroupedDataTable`.
 - MUI X Pro/Premium license evaluation or adoption.
 - Group-aware sorting.

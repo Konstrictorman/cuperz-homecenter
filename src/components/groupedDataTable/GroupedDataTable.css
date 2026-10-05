@@ -17,14 +17,43 @@
   font-weight: var(--font-weight-medium);
 }
 
-/* MUI's checkbox column isn't part of the public API, so it can't be
- * overridden to skip rendering on a group row — `isRowSelectable` (see
+/* `checkboxSelection` defaults to `false` on GroupedDataTable (see
+ * GroupedDataTable.tsx), matching MUI X Premium's own row-grouping demos —
+ * so by default there's no checkbox column at all. This rule only matters
+ * when a consumer explicitly opts back into `checkboxSelection`: MUI's
+ * checkbox column isn't part of the public API, so it can't be overridden
+ * to skip rendering on a group row — `isRowSelectable` (see
  * GroupedDataTable.tsx) already makes it non-functional there; this hides
  * it visually too. */
 .grouped-data-table
   .MuiDataGrid-row.grouped-data-table__group-row
+  .MuiDataGrid-cellCheckbox,
+.grouped-data-table
+  .MuiDataGrid-row.grouped-data-table__group-footer-row
   .MuiDataGrid-cellCheckbox {
   visibility: hidden;
+}
+
+/* Subtotal rows, shown when `aggregationPosition="footer"` — same
+ * footer-bg token as a group's own header row, but not bold, so a subtotal
+ * row reads as subordinate to the group header above it rather than as
+ * another header. */
+.grouped-data-table .MuiDataGrid-row.grouped-data-table__group-footer-row,
+.grouped-data-table
+  .MuiDataGrid-row.grouped-data-table__group-footer-row:hover {
+  background-color: var(--table-footer-bg) !important;
+  font-style: italic;
+}
+
+.grouped-data-table__group-footer-label {
+  display: inline-block;
+}
+
+/* Expand-all/collapse-all toggle, rendered at the start of the footer's
+ * totals bar (GroupedDataTableFooter, in GroupedDataTable.tsx). */
+.grouped-data-table__bulk-toggle {
+  display: inline-flex;
+  align-items: center;
 }
 
 /* Grand-total summary, rendered inside the grid's own footer row
@@ -42,4 +71,87 @@
   column-gap: 24px;
   row-gap: 4px;
   padding-left: 16px;
+}
+
+/* GroupedDataTableFilterPanel (slots.filterPanel), in GroupedDataTable.tsx —
+ * replaces MUI X Community's own filter panel so `filterModel` can carry
+ * more than one item (see that component's own doc comment). Not scoped
+ * under `.grouped-data-table` like the rules above — the panel renders
+ * inside the grid's own floating Popper, outside this component's root
+ * element in the DOM, which is exactly why `color` needs to be reset here
+ * explicitly: this panel is just a plain `<div>` (no `Paper`/elevation of
+ * its own), so without this it inherits whatever `color` the Popper's own
+ * ancestor chain happens to set — in practice `white`, making the per-row
+ * delete icon (and any other `currentColor`-filled icon in here) render
+ * white-on-white, invisible but still fully present/clickable. Same
+ * `!important` pattern `.modal__title .MuiIconButton-root` already uses in
+ * Modal.css, for the same reason: another portal-rendered surface whose
+ * icon buttons need a color reset no ancestor provides for free. */
+.grouped-data-table__filter-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm, 12px);
+  padding: var(--space-sm, 12px);
+  min-width: 360px;
+  background-color: var(--table-bg, #fff);
+  color: var(--body-text);
+}
+
+.grouped-data-table__filter-panel .MuiIconButton-root {
+  color: var(--body-text) !important;
+}
+
+.grouped-data-table__filter-panel .MuiIconButton-root:hover {
+  background-color: var(--line) !important;
+}
+
+.grouped-data-table__filter-panel-items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs, 8px);
+}
+
+.grouped-data-table__filter-panel-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs, 4px);
+}
+
+.grouped-data-table__filter-panel-row > .MuiFormControl-root,
+.grouped-data-table__filter-panel-row
+  > .MuiInputBase-root:not(.grouped-data-table__filter-panel-logic) {
+  flex: 1;
+  min-width: 0;
+}
+
+/* The AND/OR select (row 2+) and its same-size spacer (row 1, keeping
+ * Column/Operator/Value aligned across every row) stay a fixed, compact
+ * width rather than sharing flex space with Column/Operator/Value. */
+.grouped-data-table__filter-panel-logic,
+.grouped-data-table__filter-panel-logic-spacer {
+  flex: 0 0 64px;
+  width: 64px;
+}
+
+.grouped-data-table__filter-panel-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Header funnel icon (toFilterAwareColumn, in GroupedDataTable.tsx) — shown
+ * next to a column's label while it has at least one active filter item,
+ * matching MUI X Premium's own row-grouping demo screenshot this was
+ * checked against. `--palette-action-active` is the same muted, themed grey
+ * MUI itself uses for this kind of chrome icon (sort arrows, the column
+ * menu's three dots) rather than the stronger `--body-text`, so it reads as
+ * secondary to the header label, not another piece of data. */
+.grouped-data-table__header-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.grouped-data-table__header-filter-icon {
+  color: var(--palette-action-active);
 }

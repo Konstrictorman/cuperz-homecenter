@@ -1,6 +1,8 @@
 import { fireEvent, render, screen, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { GridActionsCellItem } from '@mui/x-data-grid'
 import type { GridColDef } from '@mui/x-data-grid'
-import GroupedDataTable from './GroupedDataTable'
+import GroupedDataTable, { isGroupRow } from './GroupedDataTable'
 
 interface DemoRow {
   id: string
@@ -71,6 +73,44 @@ describe('GroupedDataTable', () => {
     expect(screen.queryByText('Tapete B')).not.toBeInTheDocument()
   })
 
+  it("shows a right-pointing chevron while collapsed and a down-pointing one once expanded, matching MUI X Premium's own grouping column", () => {
+    render(<GroupedDataTable rows={rows} columns={columns} groupBy="tienda" />)
+
+    const subaChevron = screen.getAllByLabelText('Expandir grupo')[0]
+    expect(
+      within(subaChevron).getByTestId('KeyboardArrowRightIcon'),
+    ).toBeInTheDocument()
+    expect(
+      within(subaChevron).queryByTestId('KeyboardArrowDownIcon'),
+    ).not.toBeInTheDocument()
+
+    fireEvent.click(subaChevron)
+
+    const expandedChevron = screen.getByLabelText('Contraer grupo')
+    expect(
+      within(expandedChevron).getByTestId('KeyboardArrowDownIcon'),
+    ).toBeInTheDocument()
+    expect(
+      within(expandedChevron).queryByTestId('KeyboardArrowRightIcon'),
+    ).not.toBeInTheDocument()
+  })
+
+  it('leaves the grouped field blank on leaf rows instead of repeating the group value on every one of them', () => {
+    render(<GroupedDataTable rows={rows} columns={columns} groupBy="tienda" />)
+
+    fireEvent.click(screen.getAllByLabelText('Expandir grupo')[0])
+
+    const tapeteARow = screen
+      .getByText('Tapete A')
+      .closest('.MuiDataGrid-row') as HTMLElement
+    expect(tapeteARow.querySelector('[data-field="tienda"]')).toHaveTextContent(
+      '',
+    )
+    // The row's own field still renders normally — only the grouped field
+    // is suppressed.
+    expect(within(tapeteARow).getByText('Tapete A')).toBeInTheDocument()
+  })
+
   it('shows the configured aggregation on group rows and leaves non-aggregated columns blank', () => {
     render(
       <GroupedDataTable
@@ -110,8 +150,21 @@ describe('GroupedDataTable', () => {
     ).toBeInTheDocument()
   })
 
-  it('does not render a functional checkbox on group rows, and keeps it on child rows', () => {
+  it("renders no checkboxes by default, matching MUI X Premium's own row-grouping demos", () => {
     render(<GroupedDataTable rows={rows} columns={columns} groupBy="tienda" />)
+
+    expect(screen.queryAllByRole('checkbox')).toHaveLength(0)
+  })
+
+  it('when checkboxSelection is explicitly opted into, does not render a functional checkbox on group rows, and keeps it on child rows', () => {
+    render(
+      <GroupedDataTable
+        rows={rows}
+        columns={columns}
+        groupBy="tienda"
+        checkboxSelection
+      />,
+    )
 
     const subaGroupRow = screen
       .getByText('SOD SUBA (2)')
@@ -1576,5 +1629,1009 @@ describe('GroupedDataTable', () => {
         screen.getByText(`Total Valor Total Orden: ${grandTotal}`),
       ).toBeInTheDocument()
     })
+  })
+})
+
+describe('GroupedDataTable — multi-level grouping', () => {
+  interface NestedRow {
+    id: string
+    tienda: string
+    contenedor: string
+    producto: string
+    cantidad: number
+  }
+
+  const nestedColumns: GridColDef[] = [
+    { field: 'tienda', headerName: 'Tienda', flex: 1 },
+    { field: 'contenedor', headerName: 'Contenedor', flex: 1 },
+    { field: 'producto', headerName: 'Producto', flex: 1 },
+    { field: 'cantidad', headerName: 'Cantidad', type: 'number' },
+  ]
+
+  // Tienda A/C1 and Tienda B/C1 share the literal container name "C1" on
+  // purpose — exercises that collapse state and group identity are keyed by
+  // the full path, not just the innermost value.
+  const nestedRows: NestedRow[] = [
+    {
+      id: '1',
+      tienda: 'Tienda A',
+      contenedor: 'C1',
+      producto: 'P1',
+      cantidad: 2,
+    },
+    {
+      id: '2',
+      tienda: 'Tienda A',
+      contenedor: 'C1',
+      producto: 'P2',
+      cantidad: 3,
+    },
+    {
+      id: '3',
+      tienda: 'Tienda A',
+      contenedor: 'C2',
+      producto: 'P3',
+      cantidad: 5,
+    },
+    {
+      id: '4',
+      tienda: 'Tienda B',
+      contenedor: 'C1',
+      producto: 'P4',
+      cantidad: 7,
+    },
+  ]
+
+  it('nests a group row per groupBy field, with a recursive leaf count at every level', () => {
+    render(
+      <GroupedDataTable
+        rows={nestedRows}
+        columns={nestedColumns}
+        groupBy={['tienda', 'contenedor']}
+      />,
+    )
+
+    // Top level only — Tienda A's count (3) covers both its containers.
+    expect(screen.getByText('Tienda A (3)')).toBeInTheDocument()
+    expect(screen.getByText('Tienda B (1)')).toBeInTheDocument()
+    expect(screen.queryByText('C1 (2)')).not.toBeInTheDocument()
+    expect(screen.queryByText('P1')).not.toBeInTheDocument()
+
+    const tiendaARow = screen
+      .getByText('Tienda A (3)')
+      .closest('.MuiDataGrid-row') as HTMLElement
+    fireEvent.click(within(tiendaARow).getByLabelText('Expandir grupo'))
+
+    // Tienda A's own two containers are now visible; Tienda B's "C1" is
+    // not, since Tienda B is still collapsed.
+    expect(screen.getByText('C1 (2)')).toBeInTheDocument()
+    expect(screen.getByText('C2 (1)')).toBeInTheDocument()
+    expect(screen.queryByText('C1 (1)')).not.toBeInTheDocument()
+    expect(screen.queryByText('P1')).not.toBeInTheDocument()
+  })
+
+  it('keeps same-named containers under different stores independently collapsible', () => {
+    render(
+      <GroupedDataTable
+        rows={nestedRows}
+        columns={nestedColumns}
+        groupBy={['tienda', 'contenedor']}
+      />,
+    )
+
+    // Re-queried fresh right before each click rather than held across
+    // state-changing actions — expanding a group inserts rows, and MUI's
+    // row virtualization doesn't guarantee a previously-found element stays
+    // attached once the row list shifts under it.
+    const groupRow = (text: string) =>
+      screen.getByText(text).closest('.MuiDataGrid-row') as HTMLElement
+
+    fireEvent.click(
+      within(groupRow('Tienda A (3)')).getByLabelText('Expandir grupo'),
+    )
+    fireEvent.click(
+      within(groupRow('Tienda B (1)')).getByLabelText('Expandir grupo'),
+    )
+
+    // Both stores' own "C1" are now visible as sibling group rows with
+    // different counts (2 vs 1) — not merged into one node.
+    expect(screen.getByText('C1 (2)')).toBeInTheDocument()
+    expect(screen.getByText('C1 (1)')).toBeInTheDocument()
+
+    fireEvent.click(within(groupRow('C1 (2)')).getByLabelText('Expandir grupo'))
+
+    expect(screen.getByText('P1')).toBeInTheDocument()
+    expect(screen.getByText('P2')).toBeInTheDocument()
+    // Tienda B's own C1 is still collapsed — expanding Tienda A's C1 didn't
+    // affect it even though both nodes are labeled "C1".
+    expect(screen.queryByText('P4')).not.toBeInTheDocument()
+  })
+})
+
+describe('GroupedDataTable — expand-all / collapse-all', () => {
+  interface ExpandCollapseRow {
+    id: string
+    tienda: string
+    producto: string
+  }
+
+  const expandCollapseColumns: GridColDef[] = [
+    { field: 'tienda', headerName: 'Tienda', flex: 1 },
+    { field: 'producto', headerName: 'Producto', flex: 1 },
+  ]
+
+  const expandCollapseRows: ExpandCollapseRow[] = [
+    { id: '1', tienda: 'SOD SUBA', producto: 'Tapete A' },
+    { id: '2', tienda: 'SOD CEDRITOS', producto: 'Tapete B' },
+  ]
+
+  it('expands every group at once, and collapses every group at once', () => {
+    render(
+      <GroupedDataTable
+        rows={expandCollapseRows}
+        columns={expandCollapseColumns}
+        groupBy="tienda"
+      />,
+    )
+
+    expect(screen.queryByText('Tapete A')).not.toBeInTheDocument()
+    expect(screen.queryByText('Tapete B')).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByLabelText('Expandir todos los grupos'))
+
+    expect(screen.getByText('Tapete A')).toBeInTheDocument()
+    expect(screen.getByText('Tapete B')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByLabelText('Contraer todos los grupos'))
+
+    expect(screen.queryByText('Tapete A')).not.toBeInTheDocument()
+    expect(screen.queryByText('Tapete B')).not.toBeInTheDocument()
+  })
+
+  it('hides the expand-all/collapse-all toggle when there are no groups', () => {
+    render(
+      <GroupedDataTable
+        rows={[]}
+        columns={expandCollapseColumns}
+        groupBy="tienda"
+      />,
+    )
+
+    expect(
+      screen.queryByLabelText('Expandir todos los grupos'),
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByLabelText('Contraer todos los grupos'),
+    ).not.toBeInTheDocument()
+  })
+})
+
+describe('GroupedDataTable — aggregationPosition', () => {
+  interface FooterPositionRow {
+    id: string
+    tienda: string
+    producto: string
+    valorTotalOrden: number
+  }
+
+  const footerPositionColumns: GridColDef[] = [
+    { field: 'tienda', headerName: 'Tienda', flex: 1 },
+    { field: 'producto', headerName: 'Producto', flex: 1 },
+    {
+      field: 'valorTotalOrden',
+      headerName: 'Valor Total Orden',
+      type: 'number',
+    },
+  ]
+
+  const footerPositionRows: FooterPositionRow[] = [
+    {
+      id: '1',
+      tienda: 'SOD SUBA',
+      producto: 'Tapete A',
+      valorTotalOrden: 119600,
+    },
+    {
+      id: '2',
+      tienda: 'SOD SUBA',
+      producto: 'Tapete B',
+      valorTotalOrden: 135000,
+    },
+  ]
+
+  it('moves the aggregate off the group row and onto its own subtotal row when set to "footer"', () => {
+    render(
+      <GroupedDataTable
+        rows={footerPositionRows}
+        columns={footerPositionColumns}
+        groupBy="tienda"
+        aggregations={[{ field: 'valorTotalOrden', fn: 'sum' }]}
+        aggregationPosition="footer"
+      />,
+    )
+
+    const groupRow = screen
+      .getByText('SOD SUBA (2)')
+      .closest('.MuiDataGrid-row') as HTMLElement
+    expect(
+      groupRow.querySelector('[data-field="valorTotalOrden"]'),
+    ).toHaveTextContent('')
+
+    // The subtotal row is visible even though the group itself is still
+    // collapsed.
+    const subtotalLabel = screen.getByText('Subtotal SOD SUBA')
+    const subtotalRow = subtotalLabel.closest('.MuiDataGrid-row') as HTMLElement
+    expect(
+      within(subtotalRow).getByText(String(119600 + 135000)),
+    ).toBeInTheDocument()
+  })
+})
+
+describe('GroupedDataTable — custom aggregationFunctions', () => {
+  interface CustomAggregationRow {
+    id: string
+    tienda: string
+    producto: string
+    valorTotalOrden: number
+  }
+
+  const customAggregationColumns: GridColDef[] = [
+    { field: 'tienda', headerName: 'Tienda', flex: 1 },
+    { field: 'producto', headerName: 'Producto', flex: 1 },
+    {
+      field: 'valorTotalOrden',
+      headerName: 'Valor Total Orden',
+      type: 'number',
+    },
+  ]
+
+  const customAggregationRows: CustomAggregationRow[] = [
+    {
+      id: '1',
+      tienda: 'SOD SUBA',
+      producto: 'Tapete A',
+      valorTotalOrden: 119600,
+    },
+    {
+      id: '2',
+      tienda: 'SOD SUBA',
+      producto: 'Tapete B',
+      valorTotalOrden: 135000,
+    },
+    {
+      id: '3',
+      tienda: 'SOD CEDRITOS',
+      producto: 'Tapete C',
+      valorTotalOrden: 135000,
+    },
+  ]
+
+  function median(values: ReadonlyArray<number>): number {
+    if (values.length === 0) return 0
+    const sorted = [...values].sort((a, b) => a - b)
+    const mid = Math.floor(sorted.length / 2)
+    return sorted.length % 2 !== 0
+      ? sorted[mid]
+      : (sorted[mid - 1] + sorted[mid]) / 2
+  }
+
+  it('uses a consumer-provided aggregation function referenced by name', () => {
+    render(
+      <GroupedDataTable
+        rows={customAggregationRows}
+        columns={customAggregationColumns}
+        groupBy="tienda"
+        aggregations={[{ field: 'valorTotalOrden', fn: 'median' }]}
+        aggregationFunctions={{ median }}
+      />,
+    )
+
+    // median([119600, 135000]) = 127300 (even count, average of the two
+    // middle values); median([119600, 135000, 135000]) = 135000 (odd count,
+    // the middle value once sorted) — hardcoded rather than computed via
+    // `median` itself, so this doesn't just check the function against
+    // itself.
+    const subaRow = screen
+      .getByText('SOD SUBA (2)')
+      .closest('.MuiDataGrid-row') as HTMLElement
+    expect(within(subaRow).getByText('127300')).toBeInTheDocument()
+
+    expect(
+      screen.getByText('Total Valor Total Orden: 135000'),
+    ).toBeInTheDocument()
+  })
+})
+
+describe('GroupedDataTable — pagination counts only top-level groups', () => {
+  interface PaginationRow {
+    id: string
+    tienda: string
+    producto: string
+  }
+
+  const paginationColumns: GridColDef[] = [
+    { field: 'tienda', headerName: 'Tienda', flex: 1 },
+    { field: 'producto', headerName: 'Producto', flex: 1 },
+  ]
+
+  // Tienda A (3 products), Tienda B (2), Tienda C (1) — 3 top-level groups,
+  // 6 leaf rows total.
+  const paginationRows: PaginationRow[] = [
+    { id: '1', tienda: 'Tienda A', producto: 'P1' },
+    { id: '2', tienda: 'Tienda A', producto: 'P2' },
+    { id: '3', tienda: 'Tienda A', producto: 'P3' },
+    { id: '4', tienda: 'Tienda B', producto: 'P4' },
+    { id: '5', tienda: 'Tienda B', producto: 'P5' },
+    { id: '6', tienda: 'Tienda C', producto: 'P6' },
+  ]
+
+  it('keeps every other top-level group on the page once one is expanded, instead of its children eating the page budget', () => {
+    render(
+      <GroupedDataTable
+        rows={paginationRows}
+        columns={paginationColumns}
+        groupBy="tienda"
+        initialState={{ pagination: { paginationModel: { pageSize: 2 } } }}
+        pageSizeOptions={[2, 10]}
+      />,
+    )
+
+    // Page 1 of a 2-per-page split over 3 top-level groups: A and B, not C.
+    expect(screen.getByText('Tienda A (3)')).toBeInTheDocument()
+    expect(screen.getByText('Tienda B (2)')).toBeInTheDocument()
+    expect(screen.queryByText('Tienda C (1)')).not.toBeInTheDocument()
+
+    const tiendaARow = screen
+      .getByText('Tienda A (3)')
+      .closest('.MuiDataGrid-row') as HTMLElement
+    fireEvent.click(within(tiendaARow).getByLabelText('Expandir grupo'))
+
+    // All 3 of Tienda A's children are now visible — before this fix, 3
+    // additional flattened rows would have pushed Tienda B off a
+    // pageSize-2 page. It must still be here.
+    expect(screen.getByText('P1')).toBeInTheDocument()
+    expect(screen.getByText('P2')).toBeInTheDocument()
+    expect(screen.getByText('P3')).toBeInTheDocument()
+    expect(screen.getByText('Tienda B (2)')).toBeInTheDocument()
+    expect(screen.queryByText('Tienda C (1)')).not.toBeInTheDocument()
+  })
+
+  it('bases the page count on the top-level group count, unaffected by expand state', () => {
+    render(
+      <GroupedDataTable
+        rows={paginationRows}
+        columns={paginationColumns}
+        groupBy="tienda"
+        initialState={{ pagination: { paginationModel: { pageSize: 2 } } }}
+        pageSizeOptions={[2, 10]}
+      />,
+    )
+
+    const tiendaARow = screen
+      .getByText('Tienda A (3)')
+      .closest('.MuiDataGrid-row') as HTMLElement
+    fireEvent.click(within(tiendaARow).getByLabelText('Expandir grupo'))
+
+    // 3 top-level groups over a page size of 2 is 2 pages, regardless of
+    // how many leaf rows are currently expanded into view.
+    fireEvent.click(screen.getByLabelText('Go to next page'))
+
+    expect(screen.getByText('Tienda C (1)')).toBeInTheDocument()
+    expect(screen.queryByText('Tienda A (3)')).not.toBeInTheDocument()
+    expect(screen.queryByText('Tienda B (2)')).not.toBeInTheDocument()
+  })
+})
+
+describe('GroupedDataTable — actions column', () => {
+  interface ActionsRow {
+    id: string
+    tienda: string
+    producto: string
+  }
+
+  // `getActions` branches on row kind itself, via the exported `isGroupRow`
+  // guard — GroupedDataTable never inspects or touches an `actions`-type
+  // column's own rendering (see `toGroupAwareColumn`). Each action's
+  // `onClick` alerts the specific row it was called for, by that row's own
+  // name — `group.groupValue` for the group action, `producto` for the
+  // leaf action — not a fixed string, so a wrong/stale row can't slip past
+  // a test that only checks the action ran at all.
+  const actionsColumns: GridColDef[] = [
+    { field: 'tienda', headerName: 'Tienda', flex: 1 },
+    { field: 'producto', headerName: 'Producto', flex: 1 },
+    {
+      field: 'actions',
+      type: 'actions',
+      getActions: (params) =>
+        isGroupRow(params.row)
+          ? [
+              <GridActionsCellItem
+                key="maximus"
+                icon={<span />}
+                label="Maximus"
+                onClick={() => alert(`Maximus: ${params.row.groupValue}`)}
+              />,
+            ]
+          : [
+              <GridActionsCellItem
+                key="ver-detalle"
+                icon={<span />}
+                label="Ver detalle"
+                onClick={() =>
+                  alert(`Ver detalle: ${(params.row as ActionsRow).producto}`)
+                }
+              />,
+            ],
+    },
+  ]
+
+  const actionsRows: ActionsRow[] = [
+    { id: '1', tienda: 'SOD SUBA', producto: 'Tapete A' },
+    { id: '2', tienda: 'SOD CEDRITOS', producto: 'Tapete B' },
+  ]
+
+  // Split across separate tests (rather than one interacting with multiple
+  // action buttons) so each only ever fires one MUI ripple-enabled button
+  // click — avoids a benign act() warning from one click's ripple animation
+  // still settling when a second, unrelated click fires.
+  it("runs the group action's handler with that group's own name when clicked", async () => {
+    const user = userEvent.setup()
+    const alertSpy = jest.spyOn(window, 'alert').mockImplementation(() => {})
+
+    render(
+      <GroupedDataTable
+        rows={actionsRows}
+        columns={actionsColumns}
+        groupBy="tienda"
+      />,
+    )
+
+    const groupRow = screen
+      .getByText('SOD SUBA (1)')
+      .closest('.MuiDataGrid-row') as HTMLElement
+    // `userEvent` (rather than `fireEvent`) properly awaits MUI's ripple
+    // animation instead of leaving it to settle after the test moves on.
+    await user.click(within(groupRow).getByRole('button', { name: 'Maximus' }))
+
+    expect(alertSpy).toHaveBeenCalledWith('Maximus: SOD SUBA')
+    alertSpy.mockRestore()
+  })
+
+  it("runs the leaf action's handler with that row's own name when clicked", async () => {
+    const user = userEvent.setup()
+    const alertSpy = jest.spyOn(window, 'alert').mockImplementation(() => {})
+
+    render(
+      <GroupedDataTable
+        rows={actionsRows}
+        columns={actionsColumns}
+        groupBy="tienda"
+      />,
+    )
+
+    fireEvent.click(screen.getAllByLabelText('Expandir grupo')[0])
+    const leafRow = screen
+      .getByText('Tapete A')
+      .closest('.MuiDataGrid-row') as HTMLElement
+    await user.click(
+      within(leafRow).getByRole('button', { name: 'Ver detalle' }),
+    )
+
+    expect(alertSpy).toHaveBeenCalledWith('Ver detalle: Tapete A')
+    alertSpy.mockRestore()
+  })
+
+  it('shows the group action only on group rows and the leaf action only on leaf rows', () => {
+    render(
+      <GroupedDataTable
+        rows={actionsRows}
+        columns={actionsColumns}
+        groupBy="tienda"
+      />,
+    )
+
+    const groupRow = screen
+      .getByText('SOD SUBA (1)')
+      .closest('.MuiDataGrid-row') as HTMLElement
+    expect(
+      within(groupRow).queryByRole('button', { name: 'Ver detalle' }),
+    ).not.toBeInTheDocument()
+
+    fireEvent.click(within(groupRow).getByLabelText('Expandir grupo'))
+    const leafRow = screen
+      .getByText('Tapete A')
+      .closest('.MuiDataGrid-row') as HTMLElement
+    expect(
+      within(leafRow).queryByRole('button', { name: 'Maximus' }),
+    ).not.toBeInTheDocument()
+  })
+})
+
+describe('GroupedDataTable — filtering', () => {
+  interface FilterRow {
+    id: string
+    tienda: string
+    producto: string
+    valorTotalOrden: number
+  }
+
+  const filterColumns: GridColDef[] = [
+    { field: 'tienda', headerName: 'Tienda', flex: 1 },
+    { field: 'producto', headerName: 'Producto', flex: 1 },
+    {
+      field: 'valorTotalOrden',
+      headerName: 'Valor Total Orden',
+      type: 'number',
+    },
+  ]
+
+  const filterRows: FilterRow[] = [
+    {
+      id: '1',
+      tienda: 'SOD SUBA',
+      producto: 'Tapete A',
+      valorTotalOrden: 119600,
+    },
+    {
+      id: '2',
+      tienda: 'SOD SUBA',
+      producto: 'Tapete B',
+      valorTotalOrden: 135000,
+    },
+    {
+      id: '3',
+      tienda: 'SOD CEDRITOS',
+      producto: 'Felpudo C',
+      valorTotalOrden: 50000,
+    },
+  ]
+
+  it('shows a visible toolbar filter button by default, opening the filter panel', async () => {
+    const user = userEvent.setup()
+    render(
+      <GroupedDataTable
+        rows={filterRows}
+        columns={filterColumns}
+        groupBy="tienda"
+      />,
+    )
+
+    await user.click(screen.getByRole('button', { name: 'Filtros' }))
+
+    expect(screen.getByText('Sin filtros activos')).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: 'Agregar filtro' }),
+    ).toBeInTheDocument()
+  })
+
+  it('hides the toolbar filter button when showToolbar is turned off explicitly', () => {
+    render(
+      <GroupedDataTable
+        rows={filterRows}
+        columns={filterColumns}
+        groupBy="tienda"
+        showToolbar={false}
+      />,
+    )
+
+    expect(
+      screen.queryByRole('button', { name: 'Filtros' }),
+    ).not.toBeInTheDocument()
+  })
+
+  it('shows every group unfiltered when filterModel has no items', () => {
+    render(
+      <GroupedDataTable
+        rows={filterRows}
+        columns={filterColumns}
+        groupBy="tienda"
+      />,
+    )
+
+    expect(screen.getByText('SOD SUBA (2)')).toBeInTheDocument()
+    expect(screen.getByText('SOD CEDRITOS (1)')).toBeInTheDocument()
+  })
+
+  it('filters leaf rows before grouping, dropping a group entirely once none of its rows match', () => {
+    render(
+      <GroupedDataTable
+        rows={filterRows}
+        columns={filterColumns}
+        groupBy="tienda"
+        filterModel={{
+          items: [{ field: 'producto', operator: 'contains', value: 'Tapete' }],
+        }}
+      />,
+    )
+
+    // Both of SOD SUBA's rows are "Tapete …", so it keeps its full count —
+    // SOD CEDRITOS's only row ("Felpudo C") doesn't match "Tapete" at all,
+    // so the group itself disappears rather than showing with count 0.
+    expect(screen.getByText('SOD SUBA (2)')).toBeInTheDocument()
+    expect(screen.queryByText(/SOD CEDRITOS/)).not.toBeInTheDocument()
+  })
+
+  it('filters on the groupBy field itself the same way as any other field', () => {
+    render(
+      <GroupedDataTable
+        rows={filterRows}
+        columns={filterColumns}
+        groupBy="tienda"
+        filterModel={{
+          items: [{ field: 'tienda', operator: 'equals', value: 'SOD SUBA' }],
+        }}
+      />,
+    )
+
+    expect(screen.getByText('SOD SUBA (2)')).toBeInTheDocument()
+    expect(screen.queryByText(/SOD CEDRITOS/)).not.toBeInTheDocument()
+  })
+
+  it('computes the grand total over the filtered rows only, not the full dataset', () => {
+    render(
+      <GroupedDataTable
+        rows={filterRows}
+        columns={filterColumns}
+        groupBy="tienda"
+        aggregations={[{ field: 'valorTotalOrden', fn: 'sum' }]}
+        filterModel={{
+          items: [{ field: 'producto', operator: 'contains', value: 'Tapete' }],
+        }}
+      />,
+    )
+
+    // Only the two "Tapete" rows count: 119600 + 135000 — "Felpudo C"'s
+    // 50000 is excluded from the grand total, not just hidden from view.
+    expect(
+      screen.getByText(`Total Valor Total Orden: ${119600 + 135000}`),
+    ).toBeInTheDocument()
+  })
+
+  it('supports numeric comparison operators', () => {
+    render(
+      <GroupedDataTable
+        rows={filterRows}
+        columns={filterColumns}
+        groupBy="tienda"
+        filterModel={{
+          items: [{ field: 'valorTotalOrden', operator: '>', value: 130000 }],
+        }}
+      />,
+    )
+
+    // Only SOD SUBA's 135000 row clears 130000 (its 119600 row doesn't);
+    // SOD CEDRITOS's 50000 row doesn't either, dropping that group entirely.
+    expect(screen.getByText('SOD SUBA (1)')).toBeInTheDocument()
+    expect(screen.queryByText(/SOD CEDRITOS/)).not.toBeInTheDocument()
+  })
+
+  it("reaches the filter panel through a column header's own menu, same as the toolbar button, and resets to the first page once a filter narrows the result", async () => {
+    const user = userEvent.setup()
+
+    render(
+      <GroupedDataTable
+        rows={filterRows}
+        columns={filterColumns}
+        groupBy="tienda"
+        initialState={{ pagination: { paginationModel: { pageSize: 1 } } }}
+        pageSizeOptions={[1, 10]}
+      />,
+    )
+
+    // 2 groups over a page size of 1 is 2 pages — move to the second.
+    await user.click(screen.getByLabelText('Go to next page'))
+    expect(screen.getByText('SOD CEDRITOS (1)')).toBeInTheDocument()
+    expect(screen.queryByText(/SOD SUBA/)).not.toBeInTheDocument()
+
+    // Opened from the "Producto" column's own menu — MUI's column menu
+    // "Filter" item, left untouched by GroupedDataTable — rather than the
+    // toolbar button, but it's the exact same panel either way.
+    await user.click(screen.getByLabelText('Producto column menu'))
+    await user.click(screen.getByRole('menuitem', { name: 'Filter' }))
+    await user.click(screen.getByRole('button', { name: 'Agregar filtro' }))
+    await user.click(screen.getByRole('combobox', { name: 'Columna' }))
+    await user.click(screen.getByRole('option', { name: 'Producto' }))
+    await user.type(screen.getByLabelText('Valor'), 'Tapete')
+
+    // Narrows the result to SOD SUBA only, and the page reset to the first
+    // one — without that reset, this would be stuck on the now
+    // out-of-range second page, showing nothing.
+    expect(screen.getByText('SOD SUBA (2)')).toBeInTheDocument()
+    expect(screen.queryByText(/SOD CEDRITOS/)).not.toBeInTheDocument()
+  })
+
+  it('adds, edits, and removes individual filters, and clears all of them at once', async () => {
+    const user = userEvent.setup()
+
+    render(
+      <GroupedDataTable
+        rows={filterRows}
+        columns={filterColumns}
+        groupBy="tienda"
+      />,
+    )
+
+    await user.click(screen.getByRole('button', { name: 'Filtros' }))
+
+    // Add a first filter: Producto contiene "Tapete".
+    await user.click(screen.getByRole('button', { name: 'Agregar filtro' }))
+    await user.click(screen.getByRole('combobox', { name: 'Columna' }))
+    await user.click(screen.getByRole('option', { name: 'Producto' }))
+    await user.type(screen.getByLabelText('Valor'), 'Tapete')
+    expect(screen.getByText('SOD SUBA (2)')).toBeInTheDocument()
+    expect(screen.queryByText(/SOD CEDRITOS/)).not.toBeInTheDocument()
+
+    // Add a second filter — both rows now exist, with an AND/OR toggle
+    // between them (defaults to AND).
+    await user.click(screen.getByRole('button', { name: 'Agregar filtro' }))
+    expect(screen.getAllByLabelText('Eliminar filtro')).toHaveLength(2)
+    expect(
+      screen.getByRole('combobox', { name: 'Operador lógico' }),
+    ).toBeInTheDocument()
+
+    // Remove just the second filter — back to one row, no logic toggle.
+    await user.click(screen.getAllByLabelText('Eliminar filtro')[1])
+    expect(screen.getAllByLabelText('Eliminar filtro')).toHaveLength(1)
+    expect(
+      screen.queryByRole('combobox', { name: 'Operador lógico' }),
+    ).not.toBeInTheDocument()
+    // The remaining (first) filter is still in effect.
+    expect(screen.getByText('SOD SUBA (2)')).toBeInTheDocument()
+    expect(screen.queryByText(/SOD CEDRITOS/)).not.toBeInTheDocument()
+
+    // Remove all — every group is visible again.
+    await user.click(screen.getByRole('button', { name: 'Eliminar todos' }))
+    expect(screen.queryByLabelText('Eliminar filtro')).not.toBeInTheDocument()
+    expect(screen.getByText('Sin filtros activos')).toBeInTheDocument()
+    expect(screen.getByText('SOD SUBA (2)')).toBeInTheDocument()
+    expect(screen.getByText('SOD CEDRITOS (1)')).toBeInTheDocument()
+  })
+
+  it("shows an AND/OR combo box on every row from the second one on, matching MUI X Premium's own panel — editable on the second row, disabled (mirroring it) on any row after that", async () => {
+    const user = userEvent.setup()
+
+    render(
+      <GroupedDataTable
+        rows={filterRows}
+        columns={filterColumns}
+        groupBy="tienda"
+      />,
+    )
+
+    await user.click(screen.getByRole('button', { name: 'Filtros' }))
+
+    // First row: no AND/OR combo box at all.
+    await user.click(screen.getByRole('button', { name: 'Agregar filtro' }))
+    expect(
+      screen.queryByRole('combobox', { name: 'Operador lógico' }),
+    ).not.toBeInTheDocument()
+
+    // Second row: exactly one AND/OR combo box, enabled.
+    await user.click(screen.getByRole('button', { name: 'Agregar filtro' }))
+    let logicCombos = screen.getAllByRole('combobox', {
+      name: 'Operador lógico',
+    })
+    expect(logicCombos).toHaveLength(1)
+    expect(logicCombos[0]).not.toHaveAttribute('aria-disabled', 'true')
+
+    // Third row: a second AND/OR combo box appears, disabled — it mirrors
+    // the one editable value (`filterModel.logicOperator`), not an
+    // independent choice per row.
+    await user.click(screen.getByRole('button', { name: 'Agregar filtro' }))
+    logicCombos = screen.getAllByRole('combobox', { name: 'Operador lógico' })
+    expect(logicCombos).toHaveLength(2)
+    expect(logicCombos[0]).not.toHaveAttribute('aria-disabled', 'true')
+    expect(logicCombos[1]).toHaveAttribute('aria-disabled', 'true')
+  })
+
+  it('uses a close ("X") icon to remove an individual filter and a delete-forever icon for "Eliminar todos", matching MUI X Premium\'s own panel', async () => {
+    const user = userEvent.setup()
+
+    render(
+      <GroupedDataTable
+        rows={filterRows}
+        columns={filterColumns}
+        groupBy="tienda"
+      />,
+    )
+
+    await user.click(screen.getByRole('button', { name: 'Filtros' }))
+    await user.click(screen.getByRole('button', { name: 'Agregar filtro' }))
+
+    expect(
+      within(screen.getByLabelText('Eliminar filtro')).getByTestId('CloseIcon'),
+    ).toBeInTheDocument()
+    expect(
+      within(
+        screen.getByRole('button', { name: 'Eliminar todos' }),
+      ).getByTestId('DeleteForeverIcon'),
+    ).toBeInTheDocument()
+  })
+
+  it('shows a funnel icon next to a column header while that field has an active filter, matching MUI X Premium\'s own grouped-data-grid screenshot', () => {
+    render(
+      <GroupedDataTable
+        rows={filterRows}
+        columns={filterColumns}
+        groupBy="tienda"
+        filterModel={{
+          items: [{ field: 'producto', operator: 'contains', value: 'Tapete' }],
+        }}
+      />,
+    )
+
+    // "Producto" is filtered — it gets the icon.
+    expect(
+      within(
+        screen.getByRole('columnheader', { name: /Producto/ }),
+      ).getByTestId('FilterAltOutlinedIcon'),
+    ).toBeInTheDocument()
+
+    // "Tienda" (the groupBy field, untouched by this filter) and
+    // "Valor Total Orden" don't.
+    expect(
+      within(
+        screen.getByRole('columnheader', { name: /Tienda/ }),
+      ).queryByTestId('FilterAltOutlinedIcon'),
+    ).not.toBeInTheDocument()
+    expect(
+      within(
+        screen.getByRole('columnheader', { name: /Valor Total Orden/ }),
+      ).queryByTestId('FilterAltOutlinedIcon'),
+    ).not.toBeInTheDocument()
+  })
+
+  it('moves the funnel icon off a field once its only filter item is removed, and does not show it for an item with no value yet', async () => {
+    const user = userEvent.setup()
+
+    render(
+      <GroupedDataTable
+        rows={filterRows}
+        columns={filterColumns}
+        groupBy="tienda"
+      />,
+    )
+
+    await user.click(screen.getByRole('button', { name: 'Filtros' }))
+    await user.click(screen.getByRole('button', { name: 'Agregar filtro' }))
+    await user.click(screen.getByRole('combobox', { name: 'Columna' }))
+    await user.click(screen.getByRole('option', { name: 'Producto' }))
+
+    // Added, but with no value yet — not "active" (same definition
+    // `rowMatchesFilterModel` itself uses), so no icon yet.
+    expect(
+      within(
+        screen.getByRole('columnheader', { name: /Producto/ }),
+      ).queryByTestId('FilterAltOutlinedIcon'),
+    ).not.toBeInTheDocument()
+
+    await user.type(screen.getByLabelText('Valor'), 'Tapete')
+    expect(
+      within(
+        screen.getByRole('columnheader', { name: /Producto/ }),
+      ).getByTestId('FilterAltOutlinedIcon'),
+    ).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Eliminar todos' }))
+    expect(
+      within(
+        screen.getByRole('columnheader', { name: /Producto/ }),
+      ).queryByTestId('FilterAltOutlinedIcon'),
+    ).not.toBeInTheDocument()
+  })
+
+  it('keeps the toolbar filter button in the document, re-clickable, and off the colliding "default" palette colour once the last filter is cleared', async () => {
+    // Regression test: `GroupedDataTableToolbar` used to pass
+    // `color="default"` once `filterCount` dropped to 0. This project's
+    // theme (src/theme/index.ts) adds a *literal* `palette.default` entry
+    // (meant for `<Button color="default">`, with `main: '#ffffff'` in both
+    // colour schemes) — but MUI's `IconButton` resolves any colour prop,
+    // `'default'` included, straight off `theme.palette[color].main`. That
+    // rendered the icon fully white against the white toolbar — invisible in
+    // a real browser (confirmed via Playwright; jsdom never reproduces the
+    // actual computed colour, see spec 04's Risks table on visual-only
+    // regressions) — with no visible trigger left to reopen the panel. Fixed
+    // by using `'inherit'` for the no-active-filter state instead, which has
+    // its own dedicated `IconButton` colour variant untouched by the
+    // palette. This test asserts the button survives the 0-filter state
+    // and never again picks up `MuiIconButton-colorDefault` — the exact
+    // class that pulled in the broken white colour.
+    const user = userEvent.setup()
+
+    render(
+      <GroupedDataTable
+        rows={filterRows}
+        columns={filterColumns}
+        groupBy="tienda"
+        initialState={{
+          filter: {
+            filterModel: {
+              items: [
+                { field: 'tienda', operator: 'equals', value: 'SOD SUBA' },
+              ],
+            },
+          },
+        }}
+      />,
+    )
+
+    const filterButton = screen.getByRole('button', { name: 'Filtros' })
+    await user.click(filterButton)
+    await user.click(screen.getByRole('button', { name: 'Eliminar todos' }))
+
+    expect(filterButton).toBeInTheDocument()
+    expect(filterButton.className).not.toContain('MuiIconButton-colorDefault')
+    expect(filterButton.className).toContain('MuiIconButton-colorInherit')
+
+    // Still functional: closing (the panel is still open from clearing the
+    // filter above) and reopening it works exactly like any other toggle —
+    // this is the exact interaction the white-on-white icon made impossible
+    // to find in a real browser.
+    await user.click(filterButton)
+    expect(screen.queryByText('Sin filtros activos')).not.toBeInTheDocument()
+    await user.click(filterButton)
+    expect(screen.getByText('Sin filtros activos')).toBeInTheDocument()
+  })
+
+  it('lets every panel control actually change the result when seeded with a starting filter via initialState (not the filterModel prop)', async () => {
+    const user = userEvent.setup()
+
+    // Seeded the same way `WithFiltering` (the story) does — via
+    // `initialState.filter.filterModel`, not the `filterModel` prop. Passing
+    // `filterModel` directly with no `onFilterModelChange` would make this
+    // component *controlled* with nothing listening for its changes: every
+    // button in the panel would still compute a new model and report it,
+    // but the UI would never reflect it, since nothing applies that report
+    // back. That was a real, reported bug in the `WithFiltering` story —
+    // "Add filter"/"Eliminar todos"/per-item delete all looked broken, and
+    // the preset value looked hardcoded/uneditable, for exactly this
+    // reason. `initialState` only seeds the first render; this test is the
+    // regression guard for that specific mistake.
+    render(
+      <GroupedDataTable
+        rows={filterRows}
+        columns={filterColumns}
+        groupBy="tienda"
+        initialState={{
+          filter: {
+            filterModel: {
+              items: [
+                { field: 'producto', operator: 'contains', value: 'Felpudo' },
+              ],
+            },
+          },
+        }}
+      />,
+    )
+
+    // Starting filter is in effect: only SOD CEDRITOS ("Felpudo C") matches.
+    expect(screen.getByText('SOD CEDRITOS (1)')).toBeInTheDocument()
+    expect(screen.queryByText(/SOD SUBA/)).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Filtros' }))
+
+    // Editing the seeded filter's own value actually changes the result —
+    // this is the specific interaction that looked "hardcoded" in the bug
+    // report.
+    const valueInput = screen.getByLabelText('Valor')
+    await user.clear(valueInput)
+    await user.type(valueInput, 'Tapete')
+    expect(screen.getByText('SOD SUBA (2)')).toBeInTheDocument()
+    expect(screen.queryByText(/SOD CEDRITOS/)).not.toBeInTheDocument()
+
+    // "Agregar filtro" actually adds a second, independently removable row.
+    await user.click(screen.getByRole('button', { name: 'Agregar filtro' }))
+    expect(screen.getAllByLabelText('Eliminar filtro')).toHaveLength(2)
+
+    // Removing one row actually removes just that row.
+    await user.click(screen.getAllByLabelText('Eliminar filtro')[1])
+    expect(screen.getAllByLabelText('Eliminar filtro')).toHaveLength(1)
+
+    // "Eliminar todos" actually clears every filter.
+    await user.click(screen.getByRole('button', { name: 'Eliminar todos' }))
+    expect(screen.queryByLabelText('Eliminar filtro')).not.toBeInTheDocument()
+    expect(screen.getByText('Sin filtros activos')).toBeInTheDocument()
+    expect(screen.getByText('SOD SUBA (2)')).toBeInTheDocument()
+    expect(screen.getByText('SOD CEDRITOS (1)')).toBeInTheDocument()
   })
 })
