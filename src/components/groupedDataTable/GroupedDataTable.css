@@ -155,3 +155,49 @@
 .grouped-data-table__header-filter-icon {
   color: var(--palette-action-active);
 }
+
+/* GroupedDataTableAggregationHeader (toAggregationAwareColumn, in
+ * GroupedDataTable.tsx) — the vertical-ellipsis aggregation menu MUI X
+ * Premium's own column headers offer, rebuilt here for this Community-only
+ * component. `-main` stacks the column's own label above the small active-
+ * function label (`-fn`); `-trigger` (the ellipsis button) is pushed to the
+ * row's far end by `margin-left: auto` below, matching the "label, then
+ * icon" layout the Premium screenshot this was checked against shows.
+ * `min-width: 0` on `-main` is what lets `-label`'s own `text-overflow:
+ * ellipsis` actually engage inside a flex row instead of the flex item
+ * refusing to shrink past its content's natural width. */
+.grouped-data-table__aggregation-header {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  width: 100%;
+  min-width: 0;
+}
+
+.grouped-data-table__aggregation-header-main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.2;
+}
+
+.grouped-data-table__aggregation-header-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The active function's name (e.g. "sum", "avg") — muted and small,
+ * matching MUI X Premium's own styling for this label (a secondary detail
+ * under the column name, not another piece of data), same
+ * `--palette-action-active` token the filter icon above already uses for
+ * the same reason. */
+.grouped-data-table__aggregation-header-fn {
+  font-size: 11px;
+  color: var(--palette-action-active);
+}
+
+.grouped-data-table__aggregation-header-trigger {
+  margin-left: auto;
+  flex-shrink: 0;
+}

@@ -5,7 +5,7 @@ import {
   useMemo,
   useState,
 } from 'react'
-import type { ComponentProps } from 'react'
+import type { ComponentProps, ReactNode } from 'react'
 import {
   ColumnsPanelTrigger,
   FilterPanelTrigger,
@@ -34,6 +34,7 @@ import clsx from 'clsx'
 import Badge from '@mui/material/Badge'
 import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
+import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import Select from '@mui/material/Select'
 import TextField from '@mui/material/TextField'
@@ -46,6 +47,7 @@ import FilterAltOutlinedIcon from '@mui/icons-material/FilterAltOutlined'
 import FilterListIcon from '@mui/icons-material/FilterList'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight'
+import MoreVertIcon from '@mui/icons-material/MoreVert'
 import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore'
 import UnfoldLessIcon from '@mui/icons-material/UnfoldLess'
 import ViewColumnIcon from '@mui/icons-material/ViewColumn'
@@ -183,11 +185,39 @@ export type GroupedDataTableProps<TRow extends GridValidRowModel> =
      *  see specs/02-grouped-data-table-advanced-grouping.md. */
     groupBy: GroupByField<TRow> | ReadonlyArray<GroupByField<TRow>>
     /** Per-column aggregation shown on every group. A column not listed
-     *  here is left blank on group/subtotal rows. */
+     *  here is left blank on group/subtotal rows. Uncontrolled by default —
+     *  every numeric, non-`groupBy` column's header carries a
+     *  vertical-ellipsis menu (mirroring MUI X Premium's own column-header
+     *  "Aggregation" control, rebuilt here since row grouping/aggregation
+     *  is Premium-only in `@mui/x-data-grid` Community) a user can open to
+     *  set, change, or clear (`"Sin agregación"`) that column's function
+     *  without the consumer managing any state — passed alone (no
+     *  `onAggregationsChange`), this only *seeds* that menu's state, the
+     *  same way `initialState` seeds `paginationModel`/`filterModel` below;
+     *  it's read once, and every menu selection updates a plain internal
+     *  copy from then on, left for the consumer's own prop value. See
+     *  `onAggregationsChange` to make it a real controlled prop instead
+     *  (NOT simply "pass this prop and it's controlled", unlike
+     *  `paginationModel`/`filterModel` — this prop had no change-reporting
+     *  counterpart before this menu existed, and every call site in this
+     *  codebase already passes a plain literal with no handler; treating
+     *  that as controlled would make the menu a no-op for all of them). */
     aggregations?: Array<ColumnAggregation<TRow>>
-    /** Named aggregation functions available to `aggregations[].fn`,
-     *  merged over `DEFAULT_AGGREGATION_FUNCTIONS` — add a new name or
-     *  override a built-in one. */
+    /** Called whenever the aggregation model changes — from a user picking
+     *  a different function in a column header's menu, most of the time.
+     *  Passing this is what opts `aggregations` into being a real
+     *  controlled prop (see its own doc comment for why presence of
+     *  `aggregations` alone isn't enough here) — once given, the live
+     *  `aggregations` prop value is authoritative on every render, same as
+     *  any other controlled React input, and the consumer is responsible
+     *  for feeding a selection's reported model back into it. */
+    onAggregationsChange?: (
+      aggregations: Array<ColumnAggregation<TRow>>,
+    ) => void
+    /** Named aggregation functions available to `aggregations[].fn` (and
+     *  offered, by name, in each eligible column header's aggregation
+     *  menu), merged over `DEFAULT_AGGREGATION_FUNCTIONS` — add a new name
+     *  or override a built-in one. */
     aggregationFunctions?: Record<string, AggregationFunction>
     /** @default 'inline' */
     aggregationPosition?: AggregationPosition
@@ -826,6 +856,149 @@ function toFilterAwareColumn<TRow extends GridValidRowModel>(
   }
 }
 
+interface GroupedDataTableAggregationHeaderProps {
+  headerName: string
+  headerContent: ReactNode
+  currentFn: string | undefined
+  availableFunctions: ReadonlyArray<string>
+  onSelect: (fn: string | null) => void
+}
+
+/** The actual header content `toAggregationAwareColumn` renders for one
+ *  eligible column — a component of its own (not an inline closure in that
+ *  function) so each column's menu `anchorEl` open/closed state is real
+ *  React state that survives independently across re-renders, rather than
+ *  being re-created from scratch on every `groupedColumns` recomputation.
+ *  Mirrors MUI X Premium's own grouped-grid screenshots: the column's label
+ *  stays on its own line, a small muted line under it names the active
+ *  function (omitted entirely while unset, same as Premium shows nothing
+ *  there for an unaggregated column), and a vertical-ellipsis icon button
+ *  opens a menu to set/change/clear it — Premium's own version is a
+ *  dropdown embedded in a larger "Sort/Pin/Filter/Aggregation/…" column
+ *  menu; this is just the one section that's actually new behavior here
+ *  (sort is always off — `disableColumnSorting` — and pin/filter/manage
+ *  columns are already reachable through the grid's own default column
+ *  menu, left untouched). */
+function GroupedDataTableAggregationHeader({
+  headerName,
+  headerContent,
+  currentFn,
+  availableFunctions,
+  onSelect,
+}: GroupedDataTableAggregationHeaderProps) {
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
+
+  return (
+    <span className="grouped-data-table__aggregation-header">
+      <span className="grouped-data-table__aggregation-header-main">
+        <span className="grouped-data-table__aggregation-header-label">
+          {headerContent}
+        </span>
+        {currentFn && (
+          <span className="grouped-data-table__aggregation-header-fn">
+            {currentFn}
+          </span>
+        )}
+      </span>
+      <IconButton
+        size="small"
+        className="grouped-data-table__aggregation-header-trigger"
+        // `'inherit'`, not the unset default (`'default'`) — same pitfall
+        // `GroupedDataTableToolbar`'s own filter trigger already documents:
+        // this project's theme (src/theme/index.ts) adds a literal
+        // `palette.default` entry with `main: '#ffffff'`, and MUI's
+        // `IconButton` resolves any colour prop (the unset default
+        // included) straight off `theme.palette[color].main` — rendering
+        // this icon fully white-on-white against the header background
+        // otherwise, present and clickable but invisible. `'inherit'` picks
+        // up the header's own text colour instead.
+        color="inherit"
+        // The grid's own header cell listens for clicks to drive sorting —
+        // always off here (`disableColumnSorting`), but stopping
+        // propagation keeps this button inert to that regardless, the same
+        // defensive guard a menu trigger nested in a clickable header needs
+        // in any grid that *does* still sort.
+        onClick={(event) => {
+          event.stopPropagation()
+          setAnchorEl(event.currentTarget)
+        }}
+        aria-label={`Opciones de agregación de "${headerName}"`}
+      >
+        <MoreVertIcon fontSize="small" />
+      </IconButton>
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={() => setAnchorEl(null)}
+      >
+        <MenuItem
+          selected={!currentFn}
+          onClick={() => {
+            onSelect(null)
+            setAnchorEl(null)
+          }}
+        >
+          Sin agregación
+        </MenuItem>
+        {availableFunctions.map((fn) => (
+          <MenuItem
+            key={fn}
+            selected={fn === currentFn}
+            onClick={() => {
+              onSelect(fn)
+              setAnchorEl(null)
+            }}
+          >
+            {fn}
+          </MenuItem>
+        ))}
+      </Menu>
+    </span>
+  )
+}
+
+/** Wraps a numeric, non-`groupBy` column's header with the aggregation menu
+ *  above — reachable for *every* eligible column regardless of whether
+ *  it's currently aggregated (same as Premium, where every aggregable
+ *  column's header offers the control, empty/`"…"` until one is picked),
+ *  not just the ones already listed in `aggregations`. Picking a function
+ *  is what adds (or changes, or — `"Sin agregación"` — removes) that
+ *  field's entry in `GroupedDataTable`'s own aggregation model (see
+ *  `handleColumnAggregationChange`), not just a display toggle. Chains onto
+ *  whatever `renderHeader` the column already has (including one
+ *  `toFilterAwareColumn`/`toGroupAwareColumn` leave untouched) rather than
+ *  replacing it, the same "wrap, don't clobber" precedent those functions'
+ *  own doc comments explain. */
+function toAggregationAwareColumn<TRow extends GridValidRowModel>(
+  column: GridColDef<GroupedRow<TRow>>,
+  isEligible: boolean,
+  currentFn: string | undefined,
+  availableFunctions: ReadonlyArray<string>,
+  onSelect: (field: string, fn: string | null) => void,
+): GridColDef<GroupedRow<TRow>> {
+  if (!isEligible) {
+    return column
+  }
+
+  const originalRenderHeader = column.renderHeader
+  const headerName = column.headerName ?? column.field
+
+  return {
+    ...column,
+    renderHeader: (params: GridColumnHeaderParams<GroupedRow<TRow>>) => (
+      <GroupedDataTableAggregationHeader
+        headerName={headerName}
+        headerContent={
+          originalRenderHeader ? originalRenderHeader(params) : headerName
+        }
+        currentFn={currentFn}
+        availableFunctions={availableFunctions}
+        onSelect={(fn) => onSelect(column.field, fn)}
+      />
+    ),
+  }
+}
+
 const GROUP_ROW_CLASS_NAME = 'grouped-data-table__group-row'
 const GROUP_FOOTER_ROW_CLASS_NAME = 'grouped-data-table__group-footer-row'
 
@@ -1438,9 +1611,18 @@ function GroupedDataTableFooter({
 const GroupedDataTable = <TRow extends GridValidRowModel>({
   className,
   groupBy,
-  aggregations = [],
+  aggregations: aggregationsProp,
+  onAggregationsChange: onAggregationsChangeProp,
   aggregationFunctions: aggregationFunctionsProp,
   aggregationPosition = 'inline',
+  // Bumped only while at least one column is actually aggregated (see
+  // `columnHeaderHeight` below) — the extra few pixels a second header line
+  // (the active-function label, `GroupedDataTableAggregationHeader`) needs
+  // that `DataGrid`'s own default `columnHeaderHeight` (56) doesn't budget
+  // for. Pulled out of `props` so a consumer's own explicit value always
+  // wins over that default, the same escape hatch `paginationModel`/
+  // `filterModel` below already use for their own props.
+  columnHeaderHeight: columnHeaderHeightProp,
   // `DataGridProps['rows']` is publicly optional (MUI defaults it to `[]`
   // internally) even though this app always passes it explicitly.
   rows = [],
@@ -1487,6 +1669,79 @@ const GroupedDataTable = <TRow extends GridValidRowModel>({
     () => ({ ...DEFAULT_AGGREGATION_FUNCTIONS, ...aggregationFunctionsProp }),
     [aggregationFunctionsProp],
   )
+
+  // Deliberately *not* the same controlled/uncontrolled split as
+  // `paginationModel`/`filterModel` below (which treat the prop itself,
+  // whenever it's given, as authoritative — see the `filterModel` comment
+  // on the underlying `<DataTable>` in the JSX for why that pattern exists
+  // there). `aggregations` had no change-reporting counterpart at all
+  // before this header menu existed, and every call site in this codebase
+  // (every story, most real usage) already passes it as a plain literal
+  // with no handler — if presence of the prop alone made it controlled,
+  // picking a function from the menu would silently do nothing for all of
+  // them, re-deriving the exact same array from the frozen prop on every
+  // render. So control instead hinges on `onAggregationsChange`: without
+  // it, `aggregations` only *seeds* this internal state (read once, like
+  // `initialState`) and every menu selection updates it directly — a
+  // consumer passing `aggregations` alone still gets a fully working menu.
+  // Passing `onAggregationsChange` *is* the opt-in to own/persist the
+  // model: once given, the live `aggregationsProp` value wins every render
+  // and a selection only ever reaches this component's own rendering by
+  // round-tripping back through that callback into a new `aggregations`
+  // prop value, same as any other controlled React input.
+  const isAggregationsControlled = onAggregationsChangeProp !== undefined
+  const [uncontrolledAggregations, setUncontrolledAggregations] = useState<
+    Array<ColumnAggregation<TRow>>
+  >(() => aggregationsProp ?? [])
+  const aggregations = isAggregationsControlled
+    ? (aggregationsProp ?? [])
+    : uncontrolledAggregations
+  const handleAggregationsChange = useCallback(
+    (next: Array<ColumnAggregation<TRow>>) => {
+      if (!isAggregationsControlled) {
+        setUncontrolledAggregations(next)
+      }
+      onAggregationsChangeProp?.(next)
+    },
+    [isAggregationsControlled, onAggregationsChangeProp],
+  )
+
+  // Called by `GroupedDataTableAggregationHeader`'s own menu (via
+  // `toAggregationAwareColumn`) — `fn: null` ("Sin agregación") removes
+  // `field`'s entry entirely rather than setting it to some sentinel
+  // function, so an unaggregated column goes back to rendering blank on
+  // group rows exactly like one that was never in `aggregations` to begin
+  // with (`toGroupAwareColumn`'s `isAggregatedField` check).
+  const handleColumnAggregationChange = useCallback(
+    (field: string, fn: string | null) => {
+      const withoutField = aggregations.filter(
+        (aggregation) => aggregation.field !== field,
+      )
+      handleAggregationsChange(
+        fn === null ? withoutField : [...withoutField, { field, fn }],
+      )
+    },
+    [aggregations, handleAggregationsChange],
+  )
+
+  // Built-in names first, in their natural order, then any custom names a
+  // consumer's own `aggregationFunctions` adds — offered, in this order, in
+  // every eligible column header's aggregation menu.
+  const availableAggregationFunctionNames = useMemo(() => {
+    const builtinOrder: ReadonlyArray<AggregationFn> = [
+      'sum',
+      'count',
+      'avg',
+      'min',
+      'max',
+    ]
+    const names = Object.keys(aggregationFunctions)
+    const builtinNames = builtinOrder.filter((name) => names.includes(name))
+    const customNames = names.filter(
+      (name) => !(builtinOrder as ReadonlyArray<string>).includes(name),
+    )
+    return [...builtinNames, ...customNames]
+  }, [aggregationFunctions])
 
   // `DataTable`'s own default page size (10), used only to seed state when
   // neither `paginationModel` nor `initialState.pagination.paginationModel`
@@ -1698,20 +1953,45 @@ const GroupedDataTable = <TRow extends GridValidRowModel>({
     )
   }, [filterModel, filterableColumns])
 
+  // The field to its *active* `fn`, for `toAggregationAwareColumn`'s header
+  // sub-label/menu selection — `undefined` (not just absent) for a field
+  // with no entry, so the header component can tell "unaggregated" apart
+  // from a theoretical falsy function name.
+  const aggregationFnByField = useMemo(
+    () =>
+      new Map(
+        aggregations.map((aggregation) => [aggregation.field, aggregation.fn]),
+      ),
+    [aggregations],
+  )
+
   const groupedColumns = useMemo(
     () =>
-      columns.map((column) =>
-        toFilterAwareColumn(
-          toGroupAwareColumn(
-            column,
-            groupByFields,
-            aggregatedFields,
-            collapsedPaths,
-            toggleGroup,
+      columns.map((column) => {
+        // Mirrors MUI X Premium's own default aggregable-column resolution
+        // closely enough for this component's needs: a numeric column can
+        // be aggregated, a `groupBy` field (already carrying the
+        // expand/collapse chevron) can't — regardless of its own `type`.
+        const isAggregationEligible =
+          column.type === 'number' && !groupByFields.includes(column.field)
+
+        return toAggregationAwareColumn(
+          toFilterAwareColumn(
+            toGroupAwareColumn(
+              column,
+              groupByFields,
+              aggregatedFields,
+              collapsedPaths,
+              toggleGroup,
+            ),
+            activeFilterFields.has(column.field),
           ),
-          activeFilterFields.has(column.field),
-        ),
-      ),
+          isAggregationEligible,
+          aggregationFnByField.get(column.field),
+          availableAggregationFunctionNames,
+          handleColumnAggregationChange,
+        )
+      }),
     [
       columns,
       groupByFields,
@@ -1719,6 +1999,9 @@ const GroupedDataTable = <TRow extends GridValidRowModel>({
       collapsedPaths,
       toggleGroup,
       activeFilterFields,
+      aggregationFnByField,
+      availableAggregationFunctionNames,
+      handleColumnAggregationChange,
     ],
   )
 
@@ -1731,6 +2014,13 @@ const GroupedDataTable = <TRow extends GridValidRowModel>({
     () => toGroupAwareIsRowSelectable(isRowSelectable),
     [isRowSelectable],
   )
+
+  // See the `columnHeaderHeightProp` destructure above for why this isn't
+  // just always bumped — a consumer's own explicit value always wins, and
+  // the default (`DataGrid`'s own 56) is left alone while nothing is
+  // actually aggregated, since the single-line header still fits it fine.
+  const columnHeaderHeight =
+    columnHeaderHeightProp ?? (aggregations.length > 0 ? 64 : undefined)
 
   // See `GroupedDataTableFilterContext`'s own doc comment for why this has
   // to be Context rather than `slotProps.filterPanel`.
@@ -1754,6 +2044,7 @@ const GroupedDataTable = <TRow extends GridValidRowModel>({
         isRowSelectable={groupAwareIsRowSelectable}
         checkboxSelection={checkboxSelection}
         showToolbar={showToolbar}
+        columnHeaderHeight={columnHeaderHeight}
         paginationModel={paginationModel}
         onPaginationModelChange={handlePaginationModelChange}
         // No `filterModel`/`onFilterModelChange` here, deliberately — the

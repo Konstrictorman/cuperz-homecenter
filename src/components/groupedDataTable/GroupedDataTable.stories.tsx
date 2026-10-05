@@ -173,8 +173,11 @@ computed over the whole dataset (not just expanded rows). \`groupBy\` can be
 an array for nested groups (outer to inner), each level indented under its
 parent. \`aggregationPosition\` controls whether a group's aggregate shows
 inline on its own row (the default) or on a dedicated subtotal row appended
-after it. Grouping fields and aggregations are fixed by the consumer —
-there's no runtime UI to change them — and column sorting is disabled while
+after it. \`groupBy\` itself is fixed by the consumer, but \`aggregations\`
+isn't: every numeric, non-\`groupBy\` column's header carries a
+vertical-ellipsis menu (mirroring MUI X Premium's own column-header
+"Aggregation" control) to set, change, or clear that column's function at
+runtime — see \`WithAggregationMenu\` below. Column sorting is disabled while
 grouped (it would scramble the group/child row pairing).
 
 The demo rows below reuse the real store→product shape and numbers from
@@ -212,6 +215,37 @@ export const WithMultipleAggregations: Story = {
       description: {
         story:
           'Any number of columns can carry their own aggregation — here both `valorTotalOrden` and `cantidadOrden` show a `sum` on every group row and in the grand-total bar.',
+      },
+    },
+  },
+}
+
+export const WithAggregationMenu: Story = {
+  args: {
+    rows,
+    columns,
+    groupBy: 'tienda',
+    aggregations: [{ field: 'valorTotalOrden', fn: 'sum' }],
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: `
+"Valor Total Orden" starts with a \`sum\` — shown as a small muted label
+under its name, matching MUI X Premium's own column-header screenshot for
+an aggregated column. Click the vertical-ellipsis icon at the right of
+either numeric column's header ("Valor Total Orden" or "Cantidad Orden") to
+open its menu: pick a different function to change it (every group row and
+the grand-total bar update immediately), or "Sin agregación" to clear it.
+"Cantidad Orden" starts unaggregated — its menu still opens, with no active
+selection, letting you turn aggregation on for it the same way.
+
+\`aggregations\` is left uncontrolled here (no \`onAggregationsChange\`), so
+every selection just updates this story's own copy of the model — passing
+\`onAggregationsChange\` instead opts into the same controlled pattern
+\`paginationModel\`/\`filterModel\` already use elsewhere in this component,
+for a consumer that wants to own or persist the choice.
+        `,
       },
     },
   },

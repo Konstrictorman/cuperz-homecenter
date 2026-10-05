@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { fireEvent, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { GridActionsCellItem } from '@mui/x-data-grid'
@@ -1938,6 +1939,250 @@ describe('GroupedDataTable — custom aggregationFunctions', () => {
 
     expect(
       screen.getByText('Total Valor Total Orden: 135000'),
+    ).toBeInTheDocument()
+  })
+})
+
+describe('GroupedDataTable — aggregation header menu', () => {
+  interface AggregationMenuRow {
+    id: string
+    tienda: string
+    producto: string
+    valorTotalOrden: number
+    cantidadOrden: number
+  }
+
+  const aggregationMenuColumns: GridColDef[] = [
+    { field: 'tienda', headerName: 'Tienda', flex: 1 },
+    { field: 'producto', headerName: 'Producto', flex: 1 },
+    {
+      field: 'valorTotalOrden',
+      headerName: 'Valor Total Orden',
+      type: 'number',
+    },
+    { field: 'cantidadOrden', headerName: 'Cantidad Orden', type: 'number' },
+  ]
+
+  const aggregationMenuRows: AggregationMenuRow[] = [
+    {
+      id: '1',
+      tienda: 'SOD SUBA',
+      producto: 'Tapete A',
+      valorTotalOrden: 100,
+      cantidadOrden: 4,
+    },
+    {
+      id: '2',
+      tienda: 'SOD SUBA',
+      producto: 'Tapete B',
+      valorTotalOrden: 200,
+      cantidadOrden: 6,
+    },
+  ]
+
+  it("shows the active function as a small label under the column name, matching MUI X Premium's own screenshot", () => {
+    render(
+      <GroupedDataTable
+        rows={aggregationMenuRows}
+        columns={aggregationMenuColumns}
+        groupBy="tienda"
+        aggregations={[{ field: 'valorTotalOrden', fn: 'sum' }]}
+      />,
+    )
+
+    const header = screen.getByRole('columnheader', {
+      name: /Valor Total Orden/,
+    })
+    expect(within(header).getByText('sum')).toBeInTheDocument()
+
+    // An unaggregated numeric column gets no such label.
+    expect(
+      within(
+        screen.getByRole('columnheader', { name: /Cantidad Orden/ }),
+      ).queryByText('sum'),
+    ).not.toBeInTheDocument()
+  })
+
+  it('only offers the aggregation menu trigger on numeric, non-groupBy columns', () => {
+    render(
+      <GroupedDataTable
+        rows={aggregationMenuRows}
+        columns={aggregationMenuColumns}
+        groupBy="tienda"
+      />,
+    )
+
+    expect(
+      screen.getByRole('button', {
+        name: 'Opciones de agregación de "Valor Total Orden"',
+      }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', {
+        name: 'Opciones de agregación de "Cantidad Orden"',
+      }),
+    ).toBeInTheDocument()
+
+    // "Tienda" (the groupBy field) and "Producto" (not numeric) get none.
+    expect(
+      screen.queryByRole('button', {
+        name: 'Opciones de agregación de "Tienda"',
+      }),
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', {
+        name: 'Opciones de agregación de "Producto"',
+      }),
+    ).not.toBeInTheDocument()
+  })
+
+  it("lets the user change a column's aggregation function from its header menu, live-updating group rows and the grand total", async () => {
+    const user = userEvent.setup()
+    render(
+      <GroupedDataTable
+        rows={aggregationMenuRows}
+        columns={aggregationMenuColumns}
+        groupBy="tienda"
+        aggregations={[{ field: 'valorTotalOrden', fn: 'sum' }]}
+      />,
+    )
+
+    const subaRow = screen
+      .getByText('SOD SUBA (2)')
+      .closest('.MuiDataGrid-row') as HTMLElement
+    expect(within(subaRow).getByText('300')).toBeInTheDocument()
+
+    await user.click(
+      screen.getByRole('button', {
+        name: 'Opciones de agregación de "Valor Total Orden"',
+      }),
+    )
+    await user.click(screen.getByRole('menuitem', { name: 'avg' }))
+
+    expect(
+      within(
+        screen.getByRole('columnheader', { name: /Valor Total Orden/ }),
+      ).getByText('avg'),
+    ).toBeInTheDocument()
+    expect(within(subaRow).getByText('150')).toBeInTheDocument()
+    expect(screen.getByText('Total Valor Total Orden: 150')).toBeInTheDocument()
+  })
+
+  it('lets the user turn aggregation on for a previously unaggregated column, and off again via "Sin agregación"', async () => {
+    const user = userEvent.setup()
+    render(
+      <GroupedDataTable
+        rows={aggregationMenuRows}
+        columns={aggregationMenuColumns}
+        groupBy="tienda"
+      />,
+    )
+
+    await user.click(
+      screen.getByRole('button', {
+        name: 'Opciones de agregación de "Cantidad Orden"',
+      }),
+    )
+    await user.click(screen.getByRole('menuitem', { name: 'sum' }))
+
+    const subaRow = screen
+      .getByText('SOD SUBA (2)')
+      .closest('.MuiDataGrid-row') as HTMLElement
+    expect(within(subaRow).getByText('10')).toBeInTheDocument()
+    expect(screen.getByText('Total Cantidad Orden: 10')).toBeInTheDocument()
+
+    await user.click(
+      screen.getByRole('button', {
+        name: 'Opciones de agregación de "Cantidad Orden"',
+      }),
+    )
+    await user.click(screen.getByRole('menuitem', { name: 'Sin agregación' }))
+
+    expect(
+      within(
+        screen.getByRole('columnheader', { name: /Cantidad Orden/ }),
+      ).queryByText('sum'),
+    ).not.toBeInTheDocument()
+    expect(
+      subaRow.querySelector('[data-field="cantidadOrden"]'),
+    ).toHaveTextContent('')
+    expect(screen.queryByText(/Total Cantidad Orden/)).not.toBeInTheDocument()
+  })
+
+  it('becomes a real controlled component once onAggregationsChange is passed — it reports a selection but does not apply it on its own', async () => {
+    const user = userEvent.setup()
+    const handleAggregationsChange = jest.fn()
+
+    render(
+      <GroupedDataTable
+        rows={aggregationMenuRows}
+        columns={aggregationMenuColumns}
+        groupBy="tienda"
+        onAggregationsChange={handleAggregationsChange}
+      />,
+    )
+
+    await user.click(
+      screen.getByRole('button', {
+        name: 'Opciones de agregación de "Valor Total Orden"',
+      }),
+    )
+    await user.click(screen.getByRole('menuitem', { name: 'max' }))
+
+    expect(handleAggregationsChange).toHaveBeenCalledWith([
+      { field: 'valorTotalOrden', fn: 'max' },
+    ])
+    // Nothing fed that reported model back in as the `aggregations` prop,
+    // so — same as any other controlled React input — the header doesn't
+    // show it on its own.
+    expect(
+      within(
+        screen.getByRole('columnheader', { name: /Valor Total Orden/ }),
+      ).queryByText('max'),
+    ).not.toBeInTheDocument()
+  })
+
+  function ControlledAggregationsHarness({
+    rows: harnessRows,
+    columns: harnessColumns,
+  }: {
+    rows: ReadonlyArray<AggregationMenuRow>
+    columns: ReadonlyArray<GridColDef>
+  }) {
+    const [aggregations, setAggregations] = useState<
+      Array<{ field: string; fn: string }>
+    >([])
+    return (
+      <GroupedDataTable
+        rows={harnessRows as Array<AggregationMenuRow>}
+        columns={harnessColumns as Array<GridColDef>}
+        groupBy="tienda"
+        aggregations={aggregations}
+        onAggregationsChange={setAggregations}
+      />
+    )
+  }
+
+  it('round-trips through a consumer-owned aggregations state once wired up as a controlled prop', async () => {
+    const user = userEvent.setup()
+    render(
+      <ControlledAggregationsHarness
+        rows={aggregationMenuRows}
+        columns={aggregationMenuColumns}
+      />,
+    )
+
+    await user.click(
+      screen.getByRole('button', {
+        name: 'Opciones de agregación de "Valor Total Orden"',
+      }),
+    )
+    await user.click(screen.getByRole('menuitem', { name: 'max' }))
+
+    expect(
+      within(
+        screen.getByRole('columnheader', { name: /Valor Total Orden/ }),
+      ).getByText('max'),
     ).toBeInTheDocument()
   })
 })
