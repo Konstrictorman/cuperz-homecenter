@@ -22,15 +22,15 @@ const columns: GridColDef[] = [
   { field: 'producto', headerName: 'Producto', flex: 1.5, minWidth: 220 },
   {
     field: 'cantidadOrden',
-    headerName: 'Cantidad Orden',
+    headerName: 'Cantidad',
     type: 'number',
-    width: 130,
+    flex: 1,
   },
   {
     field: 'valorTotalOrden',
-    headerName: 'Valor Total Orden',
+    headerName: 'Valor',
     type: 'number',
-    width: 160,
+    flex: 1,
   },
 ]
 
@@ -133,19 +133,19 @@ const realOrderColumns: GridColDef[] = [
     field: 'cantidad',
     headerName: 'Cantidad',
     type: 'number',
-    width: 110,
+    flex: 1,
   },
   {
     field: 'costoUnitario',
     headerName: 'Costo Unitario',
     type: 'number',
-    width: 130,
+    flex: 1,
   },
   {
     field: 'valorLinea',
     headerName: 'Valor Línea',
     type: 'number',
-    width: 140,
+    flex: 1,
   },
 ]
 
@@ -177,8 +177,13 @@ after it. \`groupBy\` itself is fixed by the consumer, but \`aggregations\`
 isn't: every numeric, non-\`groupBy\` column's header carries a
 vertical-ellipsis menu (mirroring MUI X Premium's own column-header
 "Aggregation" control) to set, change, or clear that column's function at
-runtime — see \`WithAggregationMenu\` below. Column sorting is disabled while
-grouped (it would scramble the group/child row pairing).
+runtime — see \`WithAggregationMenu\` below. Click a column's header to sort
+by it — cycling ascending, descending, then back to unsorted, with the same
+arrow icon and highlighted header MUI's own DataGrid shows for a sorted
+column. Sorting reorders group nodes (by their own \`groupBy\` value, or by
+the column's aggregate if it has one) and leaf rows within each group,
+without disturbing which rows belong to which group — see
+\`WithSorting\` below.
 
 The demo rows below reuse the real store→product shape and numbers from
 \`docs/Copy of pedidoxtiendas.xlsx\` (SOD SUBA / SOD CEDRITOS).
@@ -231,20 +236,45 @@ export const WithAggregationMenu: Story = {
     docs: {
       description: {
         story: `
-"Valor Total Orden" starts with a \`sum\` — shown as a small muted label
-under its name, matching MUI X Premium's own column-header screenshot for
-an aggregated column. Click the vertical-ellipsis icon at the right of
-either numeric column's header ("Valor Total Orden" or "Cantidad Orden") to
-open its menu: pick a different function to change it (every group row and
-the grand-total bar update immediately), or "Sin agregación" to clear it.
-"Cantidad Orden" starts unaggregated — its menu still opens, with no active
-selection, letting you turn aggregation on for it the same way.
+"Valor" starts with a \`sum\` — shown as a small muted label under its name,
+matching MUI X Premium's own column-header screenshot for an aggregated
+column. Click the vertical-ellipsis icon at the right of either numeric
+column's header ("Valor" or "Cantidad") to open its menu: pick a different
+function to change it (every group row and the grand-total bar update
+immediately), or "Sin agregación" to clear it. "Cantidad" starts
+unaggregated — its menu still opens, with no active selection, letting you
+turn aggregation on for it the same way.
 
 \`aggregations\` is left uncontrolled here (no \`onAggregationsChange\`), so
 every selection just updates this story's own copy of the model — passing
 \`onAggregationsChange\` instead opts into the same controlled pattern
 \`paginationModel\`/\`filterModel\` already use elsewhere in this component,
 for a consumer that wants to own or persist the choice.
+        `,
+      },
+    },
+  },
+}
+
+export const WithSorting: Story = {
+  args: {
+    rows,
+    columns,
+    groupBy: 'tienda',
+    aggregations: [{ field: 'valorTotalOrden', fn: 'sum' }],
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: `
+Click "Tienda" to sort the two groups alphabetically by their own group
+value — ascending first, then descending, then a third click clears it back
+to the original (first-appearance) order. Click "Valor" instead to sort the
+groups by their \`sum\` aggregate rather than alphabetically. Expand a group
+afterward and its own rows are sorted too, by their raw (unaggregated) value
+for whichever column is active — try "Cantidad" while it's unaggregated: the
+groups stay in their original order (there's no group-level aggregate to
+sort them by), but each group's own rows, once expanded, are sorted by it.
         `,
       },
     },

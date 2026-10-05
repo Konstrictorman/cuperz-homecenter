@@ -201,3 +201,30 @@
   margin-left: auto;
   flex-shrink: 0;
 }
+
+/* `DataTable.css` hides the grid's own native sort affordance outright
+ * (`.data-table .MuiDataGrid-iconButtonContainer`/`.MuiDataGrid-sortIcon`,
+ * `display: none`) — added back when no `DataTable` consumer actually
+ * sorted a column, so a stray hover-only icon had nothing to show for
+ * itself. `GroupedDataTable` is the first to turn sorting on (see
+ * `sortingMode="server"`/`sortModel` in GroupedDataTable.tsx), so it needs
+ * that icon back — restored to MUI's own base values
+ * (`GridIconButtonContainer`'s `display: flex`, `SvgIcon`'s own
+ * `display: inline-block`), leaving MUI's own `visibility`/`width` rules
+ * (hover-reveal while unsorted, always shown once sorted — see
+ * `.columnHeader--sorted .iconButtonContainer` in its own root styles) to
+ * keep deciding when it's actually visible, same as any other DataGrid.
+ * `!important` to beat `.data-table`'s own rule regardless of CSS source
+ * order — both are single-class ancestor selectors on the same root
+ * element (`DataTable.tsx`'s own `clsx('data-table', className)`), so
+ * specificity alone doesn't settle it. Scoped to `.grouped-data-table`
+ * only, not promoted into `DataTable.css` itself: a plain `DataTable`
+ * consumer (e.g. `PurchaseOrdersTable`) hasn't been checked against a
+ * visible sort icon and keeps today's hidden-icon behavior. */
+.grouped-data-table .MuiDataGrid-iconButtonContainer {
+  display: flex !important;
+}
+
+.grouped-data-table .MuiDataGrid-sortIcon {
+  display: inline-block !important;
+}

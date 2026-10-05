@@ -183,9 +183,12 @@ describe('GroupedDataTable', () => {
     expect(within(childRow).getByRole('checkbox')).not.toBeDisabled()
   })
 
-  it('does not sort rows when a column header is clicked while grouped', () => {
-    // Non-alphabetical on purpose: alphabetical order would hide a sort
-    // actually happening.
+  describe('column header sort', () => {
+    // Deliberately not already alphabetical in either direction, and not a
+    // 2-item set either — with only 2 distinct values, the original
+    // (first-appearance) order is indistinguishable from one of the two
+    // sorted directions, which would hide a "third click doesn't actually
+    // clear the sort" bug.
     const unsortedRows: DemoRow[] = [
       {
         id: '1',
@@ -198,26 +201,160 @@ describe('GroupedDataTable', () => {
         id: '2',
         tienda: 'A Tienda',
         producto: 'Y',
-        cantidadOrden: 1,
-        valorTotalOrden: 1,
+        cantidadOrden: 2,
+        valorTotalOrden: 2,
+      },
+      {
+        id: '3',
+        tienda: 'C Tienda',
+        producto: 'X',
+        cantidadOrden: 3,
+        valorTotalOrden: 3,
       },
     ]
-    render(
-      <GroupedDataTable
-        rows={unsortedRows}
-        columns={columns}
-        groupBy="tienda"
-      />,
-    )
 
-    const header = screen.getByRole('columnheader', { name: 'Tienda' })
-    fireEvent.click(header)
-    fireEvent.click(header)
+    function tiendaGroupLabels() {
+      return screen.getAllByText(/Tienda \(\d\)/).map((el) => el.textContent)
+    }
 
-    const groupLabels = screen
-      .getAllByText(/Tienda \(\d\)/)
-      .map((el) => el.textContent)
-    expect(groupLabels).toEqual(['B Tienda (1)', 'A Tienda (1)'])
+    it('cycles ascending, descending, then back to the original order on repeated clicks, sorting groups by their own groupBy value', () => {
+      render(
+        <GroupedDataTable
+          rows={unsortedRows}
+          columns={columns}
+          groupBy="tienda"
+        />,
+      )
+
+      expect(tiendaGroupLabels()).toEqual([
+        'B Tienda (1)',
+        'A Tienda (1)',
+        'C Tienda (1)',
+      ])
+
+      const header = screen.getByRole('columnheader', { name: 'Tienda' })
+
+      fireEvent.click(header)
+      expect(tiendaGroupLabels()).toEqual([
+        'A Tienda (1)',
+        'B Tienda (1)',
+        'C Tienda (1)',
+      ])
+
+      fireEvent.click(header)
+      expect(tiendaGroupLabels()).toEqual([
+        'C Tienda (1)',
+        'B Tienda (1)',
+        'A Tienda (1)',
+      ])
+
+      fireEvent.click(header)
+      expect(tiendaGroupLabels()).toEqual([
+        'B Tienda (1)',
+        'A Tienda (1)',
+        'C Tienda (1)',
+      ])
+    })
+
+    it('sorts groups by their aggregate when sorting an aggregated column, not alphabetically by the groupBy field', () => {
+      render(
+        <GroupedDataTable
+          rows={rows}
+          columns={columns}
+          groupBy="tienda"
+          aggregations={[{ field: 'valorTotalOrden', fn: 'sum' }]}
+        />,
+      )
+
+      function sodGroupLabels() {
+        return screen.getAllByText(/SOD \w+ \(\d\)/).map((el) => el.textContent)
+      }
+
+      const header = screen.getByRole('columnheader', {
+        name: /Valor Total Orden/,
+      })
+
+      // SOD CEDRITOS' sum (135000) is lower than SOD SUBA's
+      // (119600 + 135000 = 254600) — alphabetically it would be the other
+      // way around, which is how this tells "sorted by aggregate" apart from
+      // "sorted alphabetically by groupBy value" (the previous test).
+      fireEvent.click(header)
+      expect(sodGroupLabels()).toEqual(['SOD CEDRITOS (1)', 'SOD SUBA (2)'])
+
+      fireEvent.click(header)
+      expect(sodGroupLabels()).toEqual(['SOD SUBA (2)', 'SOD CEDRITOS (1)'])
+    })
+
+    it("sorts a group's own leaf rows by a plain column once expanded, without reordering the groups themselves (no aggregate to sort them by)", () => {
+      const leafSortRows: DemoRow[] = [
+        {
+          id: '1',
+          tienda: 'SOD SUBA',
+          producto: 'Tapete Z',
+          cantidadOrden: 4,
+          valorTotalOrden: 1,
+        },
+        {
+          id: '2',
+          tienda: 'SOD SUBA',
+          producto: 'Tapete A',
+          cantidadOrden: 6,
+          valorTotalOrden: 2,
+        },
+      ]
+      render(
+        <GroupedDataTable
+          rows={leafSortRows}
+          columns={columns}
+          groupBy="tienda"
+        />,
+      )
+
+      fireEvent.click(screen.getByRole('columnheader', { name: 'Producto' }))
+      fireEvent.click(screen.getByLabelText('Expandir grupo'))
+
+      expect(
+        screen.getAllByText(/^Tapete /).map((el) => el.textContent),
+      ).toEqual(['Tapete A', 'Tapete Z'])
+    })
+
+    it("shows the grid's own sort direction arrow on a sorted header, in a colour that's actually visible", () => {
+      // Regression test: this project's theme (src/theme/index.ts) gives
+      // MUI `IconButton`'s default `color="default"` a literal
+      // `main: '#ffffff'` (`palette.default`, added for
+      // `<Button color="default">`, not icon buttons) — the grid's own sort
+      // button doesn't set its own `color`, so without
+      // `slotProps.baseIconButton` forcing `color="inherit"` (see the JSX
+      // below `<DataTable>`), the arrow icon renders fully white-on-white:
+      // present in the DOM, but invisible. The same pitfall this
+      // component's own toolbar filter trigger and aggregation-menu trigger
+      // already had to work around, just not reachable at either of those
+      // call sites since this one's rendered entirely inside the underlying
+      // grid.
+      render(
+        <GroupedDataTable
+          rows={unsortedRows}
+          columns={columns}
+          groupBy="tienda"
+        />,
+      )
+
+      const header = screen.getByRole('columnheader', { name: 'Tienda' })
+      fireEvent.click(header)
+
+      const sortButton = header.querySelector('.MuiDataGrid-sortButton')
+      expect(sortButton).toBeInTheDocument()
+      expect(sortButton).toHaveClass('MuiIconButton-colorInherit')
+      expect(sortButton).not.toHaveClass('MuiIconButton-colorDefault')
+      expect(
+        within(sortButton as HTMLElement).getByTestId('ArrowUpwardIcon'),
+      ).toBeInTheDocument()
+
+      fireEvent.click(header)
+      expect(
+        within(sortButton as HTMLElement).getByTestId('ArrowDownwardIcon'),
+      ).toBeInTheDocument()
+    })
   })
 
   describe('real Homecenter fixture (docs/Copy of pedidoxtiendas.xlsx, rows 39+)', () => {

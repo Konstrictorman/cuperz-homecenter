@@ -27,6 +27,7 @@ import type {
   GridRenderCellParams,
   GridRowClassNameParams,
   GridRowParams,
+  GridSortModel,
   GridValidRowModel,
   ToolbarPropsOverrides,
 } from '@mui/x-data-grid'
@@ -101,6 +102,17 @@ export interface ColumnAggregation<TRow> {
  *    shown regardless of collapse state (same precedent as the dataset-wide
  *    grand-total footer always being visible). */
 export type AggregationPosition = 'inline' | 'footer'
+
+/** One active column sort — the single-field reduction of a `GridSortModel`
+ *  this component actually supports (multi-column sort via shift-click isn't
+ *  offered by this project's Community edition's own header UI to begin
+ *  with — that's Pro/Premium). `field` is whatever `GridColDef.field` the
+ *  user clicked the header of; `sortGroupTree` is what turns this into an
+ *  actual row order. */
+export interface SortModel {
+  field: string
+  sort: 'asc' | 'desc'
+}
 
 const GROUP_ROW_ID_PREFIX = '__group__'
 const GROUP_FOOTER_ROW_ID_PREFIX = '__group_footer__'
@@ -443,6 +455,100 @@ export function flattenGroupTree<TRow extends GridValidRowModel>(
   }
 
   return flattened
+}
+
+/** Compares two raw field/aggregate/group values for sorting: numeric when
+ *  both sides parse as finite numbers (`toFiniteNumber`), a case-insensitive
+ *  string compare (`toComparable`) otherwise — the same two-track approach
+ *  `matchesFilterItem` already takes per-operator, just without an operator
+ *  here to signal which track applies up front. */
+function compareSortValues(a: unknown, b: unknown): number {
+  const aNumber = toFiniteNumber(a)
+  const bNumber = toFiniteNumber(b)
+  if (aNumber !== null && bNumber !== null) {
+    return aNumber - bNumber
+  }
+  return toComparable(a).localeCompare(toComparable(b))
+}
+
+/** Reorders one node's real leaf rows by `sortModel.field`'s own raw value on
+ *  each row — reached from `sortGroupTree` regardless of whether that field
+ *  is also what reordered the group nodes above these rows, so expanding a
+ *  group always shows its children in the active sort order, not just
+ *  insertion order. */
+function sortLeafRows<TRow extends GridValidRowModel>(
+  rows: ReadonlyArray<TRow>,
+  sortModel: SortModel,
+): Array<TRow> {
+  const direction = sortModel.sort === 'asc' ? 1 : -1
+  return [...rows].sort(
+    (a, b) =>
+      direction * compareSortValues(a[sortModel.field], b[sortModel.field]),
+  )
+}
+
+/** Reorders a `buildGroupTree` tree by one field, recursively — the
+ *  group/child-counting-aware counterpart to the underlying grid's own
+ *  column sorting, which this component deliberately never lets touch the
+ *  already-flattened `pageRows` (`sortingMode="server"`, see the JSX below):
+ *  sorting that flat group+leaf row array as one undifferentiated list has
+ *  no way to keep a leaf row under its own group, which is exactly the
+ *  scrambling this sorts the *tree* to avoid.
+ *
+ *  At each node array, siblings are only reordered when `sortModel.field` is
+ *  something this level can actually compare without inventing data: either
+ *  the `groupBy` field this level's own nodes were grouped by (compare by
+ *  `node.value`, matching the chevron cell's own label — see
+ *  `toGroupAwareColumn`) or a field in `aggregatedFields` (compare by
+ *  `node.aggregates[field]`, matching what's actually shown on the group
+ *  row/footer for it). A field that's neither (e.g. a leaf-only column with
+ *  no aggregation configured for it) leaves this level's own order
+ *  untouched — there is no single group-level value to sort by — but every
+ *  node's children are still recursed into regardless, since a deeper level
+ *  might group by that same field, or bottom out at real rows carrying it
+ *  (handled by `sortLeafRows`). */
+export function sortGroupTree<TRow extends GridValidRowModel>(
+  nodes: ReadonlyArray<GroupTreeNode<TRow>>,
+  sortModel: SortModel | null,
+  aggregatedFields: ReadonlySet<string>,
+): Array<GroupTreeNode<TRow>> {
+  if (!sortModel) {
+    return [...nodes]
+  }
+
+  const recursed = nodes.map((node) => ({
+    ...node,
+    children:
+      node.children.kind === 'groups'
+        ? {
+            kind: 'groups' as const,
+            nodes: sortGroupTree(
+              node.children.nodes,
+              sortModel,
+              aggregatedFields,
+            ),
+          }
+        : {
+            kind: 'rows' as const,
+            rows: sortLeafRows(node.children.rows, sortModel),
+          },
+  }))
+
+  if (recursed.length === 0) {
+    return recursed
+  }
+  const sortsByGroupValue = recursed[0].field === sortModel.field
+  const sortsByAggregate = aggregatedFields.has(sortModel.field)
+  if (!sortsByGroupValue && !sortsByAggregate) {
+    return recursed
+  }
+
+  const direction = sortModel.sort === 'asc' ? 1 : -1
+  return [...recursed].sort((a, b) => {
+    const left = sortsByGroupValue ? a.value : a.aggregates[sortModel.field]
+    const right = sortsByGroupValue ? b.value : b.aggregates[sortModel.field]
+    return direction * compareSortValues(left, right)
+  })
 }
 
 function isTopLevelGroupRow(row: unknown): boolean {
@@ -875,10 +981,10 @@ interface GroupedDataTableAggregationHeaderProps {
  *  there for an unaggregated column), and a vertical-ellipsis icon button
  *  opens a menu to set/change/clear it — Premium's own version is a
  *  dropdown embedded in a larger "Sort/Pin/Filter/Aggregation/…" column
- *  menu; this is just the one section that's actually new behavior here
- *  (sort is always off — `disableColumnSorting` — and pin/filter/manage
- *  columns are already reachable through the grid's own default column
- *  menu, left untouched). */
+ *  menu; this is just the one section that's actually new behavior here —
+ *  sort/pin/filter/manage columns are all already reachable through the
+ *  grid's own default column menu (sorting also through a direct header
+ *  click — see `sortGroupTree`), left untouched. */
 function GroupedDataTableAggregationHeader({
   headerName,
   headerContent,
@@ -913,11 +1019,11 @@ function GroupedDataTableAggregationHeader({
         // otherwise, present and clickable but invisible. `'inherit'` picks
         // up the header's own text colour instead.
         color="inherit"
-        // The grid's own header cell listens for clicks to drive sorting —
-        // always off here (`disableColumnSorting`), but stopping
-        // propagation keeps this button inert to that regardless, the same
-        // defensive guard a menu trigger nested in a clickable header needs
-        // in any grid that *does* still sort.
+        // The grid's own header cell listens for clicks to drive sorting
+        // (see `sortGroupTree`/`sortingMode="server"` below) — stopping
+        // propagation keeps this button from also triggering that, the same
+        // defensive guard any menu trigger nested inside a sortable header
+        // needs.
         onClick={(event) => {
           event.stopPropagation()
           setAnchorEl(event.currentTarget)
@@ -1651,6 +1757,15 @@ const GroupedDataTable = <TRow extends GridValidRowModel>({
   // not filter the already-tree-flattened `rows` it receives itself.
   filterModel: filterModelProp,
   onFilterModelChange: onFilterModelChangeProp,
+  // Same reasoning again, for sorting (see `sortGroupTree`): the grid must
+  // not sort the already-flattened `pageRows` itself — that would scramble
+  // group/child pairing, since a plain flat sort has no concept of "stay
+  // under your own group". Unlike `filterModel`, these two *are* still
+  // passed straight through to the underlying `<DataTable>` below — see the
+  // `sortingMode="server"` comment in the JSX for why that's safe here
+  // where it wasn't for `filterModel`.
+  sortModel: sortModelProp,
+  onSortModelChange: onSortModelChangeProp,
   initialState,
   ...props
 }: GroupedDataTableProps<TRow>) => {
@@ -1814,6 +1929,56 @@ const GroupedDataTable = <TRow extends GridValidRowModel>({
     [filterModelProp, paginationModelProp, onFilterModelChangeProp],
   )
 
+  // Same controlled/uncontrolled split as pagination/filtering, defaulting
+  // to no active sort. Unlike `filterModel`, this one is also handed
+  // straight through to the underlying `<DataTable>` below (see the
+  // `sortModel`/`onSortModelChange` JSX props) — Community's `DataGrid` has
+  // no restriction on a single-item controlled `sortModel` the way it forces
+  // `disableMultipleColumnsFiltering` on `filterModel`, so there's no need
+  // for `GroupedDataTableFilterContext`'s own workaround here: the grid's
+  // click-to-cycle header UI, arrow icon, and `aria-sort` all keep working
+  // for free, they just drive this state instead of the grid's own (inert
+  // in `sortingMode="server"`) internal row order.
+  const [uncontrolledSortModel, setUncontrolledSortModel] =
+    useState<GridSortModel>(
+      () => sortModelProp ?? initialState?.sorting?.sortModel ?? [],
+    )
+  const sortModel = sortModelProp ?? uncontrolledSortModel
+  const handleSortModelChange = useCallback(
+    (
+      model: GridSortModel,
+      details: Parameters<
+        NonNullable<DataTableProps<TRow>['onSortModelChange']>
+      >[1],
+    ) => {
+      if (sortModelProp === undefined) {
+        setUncontrolledSortModel(model)
+      }
+      // Same page-reset reasoning as `handleFilterModelChange` — a new sort
+      // order doesn't change which top-level groups exist, but it can still
+      // move the one the user was looking at off the current page.
+      if (paginationModelProp === undefined) {
+        setUncontrolledPaginationModel((prev) => ({ ...prev, page: 0 }))
+      }
+      onSortModelChangeProp?.(model, details)
+    },
+    [sortModelProp, paginationModelProp, onSortModelChangeProp],
+  )
+  // This project's Community edition never offers multi-column sort through
+  // its own header UI (see `SortModel`'s own doc comment), so `sortModel`
+  // is at most one item in practice — reduced here to the single-field shape
+  // `sortGroupTree` actually takes, `null` once the user cycles a column
+  // back to unsorted (MUI drops the item from `sortModel` entirely at that
+  // point rather than keeping it with a null `sort`, but this guards the
+  // shape regardless).
+  const activeSortModel = useMemo<SortModel | null>(() => {
+    const item = sortModel.find(
+      (entry): entry is GridSortModel[number] & { sort: 'asc' | 'desc' } =>
+        entry.sort === 'asc' || entry.sort === 'desc',
+    )
+    return item ? { field: item.field, sort: item.sort } : null
+  }, [sortModel])
+
   // Filtered *before* grouping — see `filterRowsByModel` for why that's
   // enough to also be group-aware, unlike Premium's own tree-filtering.
   const filteredRows = useMemo(
@@ -1830,6 +1995,21 @@ const GroupedDataTable = <TRow extends GridValidRowModel>({
         aggregationFunctions,
       ),
     [filteredRows, groupByFields, aggregations, aggregationFunctions],
+  )
+
+  // Fields with an active `aggregations` entry — used both by `sortGroupTree`
+  // below (to know which fields it can sort group nodes by an aggregate
+  // rather than only by `groupBy` value or leaf row data) and, further down,
+  // by `toGroupAwareColumn`/`groupedColumns` (to know which columns render an
+  // aggregate at all). Declared this early so `sortedTree` can depend on it.
+  const aggregatedFields = useMemo(
+    () => new Set(aggregations.map((aggregation) => aggregation.field)),
+    [aggregations],
+  )
+
+  const sortedTree = useMemo(
+    () => sortGroupTree(tree, activeSortModel, aggregatedFields),
+    [tree, activeSortModel, aggregatedFields],
   )
 
   const allGroupPaths = useMemo(() => collectGroupPaths(tree), [tree])
@@ -1862,8 +2042,8 @@ const GroupedDataTable = <TRow extends GridValidRowModel>({
   )
 
   const flattenedRows = useMemo(
-    () => flattenGroupTree(tree, collapsedPaths, aggregationPosition),
-    [tree, collapsedPaths, aggregationPosition],
+    () => flattenGroupTree(sortedTree, collapsedPaths, aggregationPosition),
+    [sortedTree, collapsedPaths, aggregationPosition],
   )
 
   // Top-level (depth-0) group count — what `paginationModel.pageSize`
@@ -1910,11 +2090,6 @@ const GroupedDataTable = <TRow extends GridValidRowModel>({
         ]),
       ),
     [columns],
-  )
-
-  const aggregatedFields = useMemo(
-    () => new Set(aggregations.map((aggregation) => aggregation.field)),
-    [aggregations],
   )
 
   // For `GroupedDataTableFilterPanel`'s column select — excludes an
@@ -2066,10 +2241,7 @@ const GroupedDataTable = <TRow extends GridValidRowModel>({
         // `paginationModel.pageSize` actually paginates over (see
         // `computeTopLevelPaginationRange`).
         rowCount={topLevelRowCount}
-        // `groupBy` is always set on this component, so column sorting is
-        // always off — sorting the flattened rows would scramble group/child
-        // pairing (see specs/01-grouped-data-table.md's Risks). `rows` is
-        // already exactly one page (`pageRows`, sliced by
+        // `rows` is already exactly one page (`pageRows`, sliced by
         // `computeTopLevelPaginationRange` above) rather than the grid's own
         // row-count-based slicing — `paginationMode="server"` tells it to
         // trust that and not re-slice on top of it, the same mechanism MUI's
@@ -2078,12 +2250,30 @@ const GroupedDataTable = <TRow extends GridValidRowModel>({
         // never given a real `filterModel`, this guarantees it never attempts
         // to filter `pageRows` itself using whatever stray internal filter
         // state a column header's "Filter" menu item might otherwise
-        // populate. Both are hard requirements, not passed-through defaults:
-        // placed after the `...props` spread so a consumer can't override
-        // them. Column drag-reorder is untouched and keeps working.
-        disableColumnSorting
+        // populate. `sortingMode` mirrors this for sorting, for a stronger
+        // reason than mere defensiveness: `pageRows` already reflects
+        // `sortedTree` (group nodes reordered by their own `groupBy` value or
+        // aggregate, leaf rows by their raw field value — see
+        // `sortGroupTree`), and the grid's own *client* sort mode would
+        // re-sort that already-tree-aware order as one flat list, which has
+        // no concept of "stay under your own group" and would scramble
+        // group/child pairing. `sortModel` is naturally kept to the
+        // single-item shape `sortGroupTree` (and `activeSortModel` above)
+        // actually support without an explicit `disableMultipleColumnsSorting`
+        // — that prop doesn't even exist on this project's Community edition
+        // (it's Pro/Premium-only): multi-column sort via shift-click isn't
+        // something Community's own header UI offers to begin with.
+        // `sortModel`/`onSortModelChange` themselves *are* safe to pass
+        // straight through here, unlike `filterModel` above — see the
+        // `uncontrolledSortModel` comment for why. All of this is a hard
+        // requirement, not a passed-through default: placed after the
+        // `...props` spread so a consumer can't override it. Column
+        // drag-reorder is untouched and keeps working.
         paginationMode="server"
         filterMode="server"
+        sortingMode="server"
+        sortModel={sortModel}
+        onSortModelChange={handleSortModelChange}
         slots={{
           toolbar: GroupedDataTableToolbar,
           filterPanel: GroupedDataTableFilterPanel,
@@ -2092,6 +2282,27 @@ const GroupedDataTable = <TRow extends GridValidRowModel>({
         }}
         slotProps={{
           ...props.slotProps,
+          // Every native icon button the grid itself renders without an
+          // explicit `color` of its own — the sort arrow chief among them,
+          // now that sorting is live — resolves to MUI `IconButton`'s own
+          // default `color="default"`, which this project's theme
+          // (src/theme/index.ts) maps to a literal `main: '#ffffff'`
+          // (`palette.default`, added for `<Button color="default">`, not
+          // icon buttons). That renders the icon fully white-on-white
+          // against the header background: present in the DOM (confirmed:
+          // the `<svg data-testid="ArrowUpwardIcon">` is there once sorted)
+          // but invisible — the exact same pitfall already documented (and
+          // fixed the same way, `color="inherit"`) on this component's own
+          // toolbar filter trigger and aggregation-menu trigger, just not
+          // reachable there since this one's rendered entirely inside the
+          // underlying grid, not by this component's own JSX. Merged rather
+          // than replaced (`...props.slotProps` above already covers every
+          // other slot) so a consumer's own `slotProps.baseIconButton`
+          // still wins field-by-field, color included.
+          baseIconButton: {
+            color: 'inherit',
+            ...props.slotProps?.baseIconButton,
+          },
           toolbar: {
             filterCount: filterModel.items.length,
           },
