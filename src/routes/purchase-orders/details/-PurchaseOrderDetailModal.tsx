@@ -69,7 +69,7 @@ const PurchaseOrderDetailModal = ({
           </Typography>
 
           <Typography>
-            {`$${Math.round(detail?.costoTotalOc ?? 0).toLocaleString('en-US')}`}
+            {`$${Math.round(detail?.costoTotalOc ?? 0).toLocaleString('es-CO')}`}
           </Typography>
         </div>
         <div>

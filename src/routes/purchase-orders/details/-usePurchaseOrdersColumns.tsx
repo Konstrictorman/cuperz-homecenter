@@ -82,7 +82,7 @@ export const usePurchaseOrdersColumns = (
         headerAlign: 'center',
         align: 'center',
         valueFormatter: (value: PurchaseOrder['costoTotalOc']) =>
-          `$${Math.round(value).toLocaleString('en-US')}`,
+          `$${Math.round(value).toLocaleString('es-CO')}`,
       },
       {
         field: 'estado',
