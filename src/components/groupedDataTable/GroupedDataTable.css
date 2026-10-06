@@ -192,10 +192,19 @@
  * wrapper reorder is hand-built on top of, since Community `@mui/x-data-
  * grid`'s own `<DataGrid>` forces `disableColumnReorder: true` (see that
  * function's own doc comment). Fills the header cell so the whole header is
- * a drag source/target, not just its own text content's bounding box. */
+ * a drag source/target, not just its own text content's bounding box.
+ * `align-items: flex-start` (not MUI's own default `center`) so every
+ * column's label starts at the same y position regardless of its own
+ * content height — `columnHeaderHeight` is bumped to a uniform 64px for the
+ * whole header row the moment any column carries an aggregation (see
+ * `columnHeaderHeight` in `GroupedDataTable`), and a plain one-line label
+ * centered in that taller box no longer lines up with an aggregated
+ * column's two-line label (`.grouped-data-table__aggregation-header`)
+ * centered as its own, taller block — top-aligning both removes that
+ * stagger. */
 .grouped-data-table__header-drag-handle {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   width: 100%;
   height: 100%;
   cursor: grab;
