@@ -6,6 +6,7 @@ import type { PurchaseOrder } from './-PurchaseOrdersTable'
 import VisibilityIcon from '@mui/icons-material/Visibility'
 import DownloadIcon from '@mui/icons-material/Download'
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
+import { formatDate } from '#/common/util'
 
 export const usePurchaseOrdersColumns = (
   onViewDetail?: (order: PurchaseOrder) => void,
@@ -28,7 +29,7 @@ export const usePurchaseOrdersColumns = (
         align: 'center',
         headerAlign: 'center',
         valueFormatter: (value: PurchaseOrder['fechaTransmision']) =>
-          value ? value.slice(0, 10) : '',
+          formatDate(value),
       },
       {
         field: 'fechaMinEntrega',
@@ -38,7 +39,7 @@ export const usePurchaseOrdersColumns = (
         align: 'center',
         headerAlign: 'center',
         valueFormatter: (value: PurchaseOrder['fechaMinEntrega']) =>
-          value ? value.slice(0, 10) : '',
+          formatDate(value),
       },
       {
         field: 'fechaMaxEntrega',
@@ -48,7 +49,7 @@ export const usePurchaseOrdersColumns = (
         align: 'center',
         headerAlign: 'center',
         valueFormatter: (value: PurchaseOrder['fechaMaxEntrega']) =>
-          value ? value.slice(0, 10) : '',
+          formatDate(value),
       },
       {
         field: 'cliente',

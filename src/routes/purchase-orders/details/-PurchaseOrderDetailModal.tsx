@@ -6,6 +6,7 @@ import type { PurchaseOrder } from './-PurchaseOrdersTable'
 import PurchaseOrderStoresTable from './-PurchaseOrderStoresTable'
 import './PurchaseOrderDetailModal.css'
 import Typography from '@mui/material/Typography'
+import { formatDate } from '#/common/util'
 
 interface PurchaseOrderDetailModalProps {
   order: PurchaseOrder | null
@@ -49,7 +50,9 @@ const PurchaseOrderDetailModal = ({
           <Typography className="purchase-order-detail-modal__label">
             Fecha de pedido
           </Typography>
-          <Typography>{detail?.fechaTransmision ?? '—'}</Typography>
+          <Typography>
+            {formatDate(detail?.fechaTransmision ?? undefined)}
+          </Typography>
         </div>
         <div>
           <Typography className="purchase-order-detail-modal__label">
