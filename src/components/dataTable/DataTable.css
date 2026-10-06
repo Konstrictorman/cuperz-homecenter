@@ -19,6 +19,10 @@
   color: var(--body-text) !important;
 }
 
+.data-table .MuiDataGrid-actionsCell .MuiIconButton-root:hover {
+  background-color: var(--line) !important;
+}
+
 .data-table
   .MuiCheckbox-root:not(.Mui-checked):not(.MuiCheckbox-indeterminate)
   .MuiSvgIcon-root {
