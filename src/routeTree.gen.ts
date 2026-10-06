@@ -16,6 +16,7 @@ import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as PurchaseOrdersDetailsIndexRouteImport } from './routes/purchase-orders/details/index'
 import { Route as PurchaseOrdersDispatchIndexRouteImport } from './routes/purchase-orders/dispatch/index'
 import { Route as PurchaseOrdersReceiptNoticesIndexRouteImport } from './routes/purchase-orders/receipt-notices/index'
+import { Route as ApiPurchaseOrdersOrdenCompraPdfRouteImport } from './routes/api/purchase-orders/$ordenCompra/pdf'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -55,6 +56,12 @@ const PurchaseOrdersReceiptNoticesIndexRoute =
     path: '/receipt-notices/',
     getParentRoute: () => PurchaseOrdersRouteRoute,
   } as any)
+const ApiPurchaseOrdersOrdenCompraPdfRoute =
+  ApiPurchaseOrdersOrdenCompraPdfRouteImport.update({
+    id: '/api/purchase-orders/$ordenCompra/pdf',
+    path: '/api/purchase-orders/$ordenCompra/pdf',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -64,6 +71,7 @@ export interface FileRoutesByFullPath {
   '/purchase-orders/details/': typeof PurchaseOrdersDetailsIndexRoute
   '/purchase-orders/dispatch/': typeof PurchaseOrdersDispatchIndexRoute
   '/purchase-orders/receipt-notices/': typeof PurchaseOrdersReceiptNoticesIndexRoute
+  '/api/purchase-orders/$ordenCompra/pdf': typeof ApiPurchaseOrdersOrdenCompraPdfRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -72,6 +80,7 @@ export interface FileRoutesByTo {
   '/purchase-orders/details': typeof PurchaseOrdersDetailsIndexRoute
   '/purchase-orders/dispatch': typeof PurchaseOrdersDispatchIndexRoute
   '/purchase-orders/receipt-notices': typeof PurchaseOrdersReceiptNoticesIndexRoute
+  '/api/purchase-orders/$ordenCompra/pdf': typeof ApiPurchaseOrdersOrdenCompraPdfRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -82,6 +91,7 @@ export interface FileRoutesById {
   '/purchase-orders/details/': typeof PurchaseOrdersDetailsIndexRoute
   '/purchase-orders/dispatch/': typeof PurchaseOrdersDispatchIndexRoute
   '/purchase-orders/receipt-notices/': typeof PurchaseOrdersReceiptNoticesIndexRoute
+  '/api/purchase-orders/$ordenCompra/pdf': typeof ApiPurchaseOrdersOrdenCompraPdfRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -93,6 +103,7 @@ export interface FileRouteTypes {
     | '/purchase-orders/details/'
     | '/purchase-orders/dispatch/'
     | '/purchase-orders/receipt-notices/'
+    | '/api/purchase-orders/$ordenCompra/pdf'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -101,6 +112,7 @@ export interface FileRouteTypes {
     | '/purchase-orders/details'
     | '/purchase-orders/dispatch'
     | '/purchase-orders/receipt-notices'
+    | '/api/purchase-orders/$ordenCompra/pdf'
   id:
     | '__root__'
     | '/'
@@ -110,12 +122,14 @@ export interface FileRouteTypes {
     | '/purchase-orders/details/'
     | '/purchase-orders/dispatch/'
     | '/purchase-orders/receipt-notices/'
+    | '/api/purchase-orders/$ordenCompra/pdf'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   PurchaseOrdersRouteRoute: typeof PurchaseOrdersRouteRouteWithChildren
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiPurchaseOrdersOrdenCompraPdfRoute: typeof ApiPurchaseOrdersOrdenCompraPdfRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -169,6 +183,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PurchaseOrdersReceiptNoticesIndexRouteImport
       parentRoute: typeof PurchaseOrdersRouteRoute
     }
+    '/api/purchase-orders/$ordenCompra/pdf': {
+      id: '/api/purchase-orders/$ordenCompra/pdf'
+      path: '/api/purchase-orders/$ordenCompra/pdf'
+      fullPath: '/api/purchase-orders/$ordenCompra/pdf'
+      preLoaderRoute: typeof ApiPurchaseOrdersOrdenCompraPdfRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -194,6 +215,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   PurchaseOrdersRouteRoute: PurchaseOrdersRouteRouteWithChildren,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiPurchaseOrdersOrdenCompraPdfRoute: ApiPurchaseOrdersOrdenCompraPdfRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

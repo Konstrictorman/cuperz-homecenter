@@ -10,6 +10,8 @@ import { formatDate } from '#/common/util'
 
 export const usePurchaseOrdersColumns = (
   onViewDetail?: (order: PurchaseOrder) => void,
+  onDownloadPdf?: (order: PurchaseOrder) => void,
+  downloadingOrderId?: string | null,
 ): GridColDef<PurchaseOrder>[] =>
   useMemo(
     () => [
@@ -120,12 +122,13 @@ export const usePurchaseOrdersColumns = (
           <GridActionsCellItem
             icon={<PictureAsPdfIcon />}
             label="Descargar PDF"
-            onClick={() => onViewDetail?.(params.row)}
+            onClick={() => onDownloadPdf?.(params.row)}
+            disabled={downloadingOrderId === params.row.id}
           />,
         ],
         headerAlign: 'center',
         align: 'center',
       },
     ],
-    [onViewDetail],
+    [onViewDetail, onDownloadPdf, downloadingOrderId],
   )

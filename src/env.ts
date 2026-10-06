@@ -4,6 +4,11 @@ import { z } from 'zod'
 export const env = createEnv({
   server: {
     SERVER_URL: z.string().url().optional(),
+    /** Homecenter's `GenerarPdf` endpoint (server-only — proxied from
+     *  `src/routes/api/purchase-orders/$ordenCompra/pdf.ts`, never exposed to
+     *  the browser). */
+    HOMECENTER_PDF_API_URL: z.string().url(),
+    HOMECENTER_PDF_BEARER_TOKEN: z.string().min(1),
   },
 
   /**
@@ -19,10 +24,18 @@ export const env = createEnv({
   },
 
   /**
-   * What object holds the environment variables at runtime. This is usually
-   * `process.env` or `import.meta.env`.
+   * What object holds the environment variables at runtime.
+   *
+   * `import.meta.env` only carries `VITE_`-prefixed vars (Vite's client
+   * exposure rule applies even in SSR/server code) — server-only vars like
+   * `HOMECENTER_PDF_API_URL` live in `process.env` instead, which Vite's
+   * `loadEnv` populates from `.env*` files for every var regardless of
+   * prefix. `process` doesn't exist in the browser, so guard for that.
    */
-  runtimeEnv: import.meta.env,
+  runtimeEnv:
+    typeof process !== 'undefined'
+      ? { ...import.meta.env, ...process.env }
+      : import.meta.env,
 
   /**
    * By default, this library will feed the environment variables directly to

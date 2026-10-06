@@ -88,3 +88,42 @@ export function fetchPurchaseOrdersExport(
 ): Promise<string> {
   return apiFetch<string>(`/ordenes-compra/export${buildQuery({ ...query })}`)
 }
+
+/**
+ * Triggers a browser download of Homecenter's generated PDF for an order.
+ *
+ * Hits our own real server route — `/api/purchase-orders/{ordenCompra}/pdf`
+ * — which proxies Homecenter's `GenerarPdf` endpoint. This bypasses the
+ * `/api/v1` mock layer entirely (see `src/routes/api/purchase-orders/
+ * $ordenCompra/pdf.ts`), so it always makes a real call to Homecenter.
+ */
+export async function downloadPurchaseOrderPdf(
+  ordenCompra: string,
+): Promise<void> {
+  const response = await fetch(
+    `/api/purchase-orders/${encodeURIComponent(ordenCompra)}/pdf`,
+  )
+
+  if (!response.ok) {
+    let message = `No se pudo generar el PDF de la orden ${ordenCompra}.`
+    try {
+      const body = (await response.json()) as {
+        error?: { message?: string }
+      }
+      message = body.error?.message ?? message
+    } catch {
+      // response wasn't JSON — fall back to the generic message above
+    }
+    throw new Error(message)
+  }
+
+  const blob = await response.blob()
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `orden-${ordenCompra}.pdf`
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+  URL.revokeObjectURL(url)
+}
