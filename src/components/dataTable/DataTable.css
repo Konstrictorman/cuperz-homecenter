@@ -68,3 +68,29 @@
 .data-table .MuiDataGrid-sortIcon {
   display: none;
 }
+
+/* A right-aligned header (MUI's own default for `type: 'number'` columns —
+ * see `gridNumericColDef`) reverses `.MuiDataGrid-columnHeaderDraggableContainer`'s
+ * flex direction so the label can hug the same edge the column's
+ * right-aligned cell values do — but the column-menu ellipsis
+ * (`.MuiDataGrid-menuIcon`) is that same container's *other* child, so
+ * reversing it also flips the ellipsis onto the header's left edge, unlike
+ * every other (non-numeric) column's. Restoring this container's own
+ * direction here — leaving `.MuiDataGrid-columnHeaderTitleContainer`'s own
+ * reversal alone, which only reorders the sort/filter icon vs. the label
+ * *within* the title, not the ellipsis — keeps that right-aligned look
+ * while putting the ellipsis back on the right, consistent with every
+ * other column. `justify-content: flex-end` re-creates the flush-right
+ * text position the container's own reversal used to give it for free. */
+.data-table .MuiDataGrid-columnHeader--alignRight .MuiDataGrid-columnHeaderDraggableContainer {
+  flex-direction: row !important;
+}
+
+.data-table .MuiDataGrid-columnHeader--alignRight .MuiDataGrid-columnHeaderTitleContainer {
+  justify-content: flex-end !important;
+}
+
+.data-table .MuiDataGrid-columnHeader--alignRight .MuiDataGrid-menuIcon {
+  margin-left: auto !important;
+  margin-right: -5px !important;
+}

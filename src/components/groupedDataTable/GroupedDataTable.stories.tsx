@@ -180,10 +180,13 @@ an array for nested groups (outer to inner), each level indented under its
 parent. \`aggregationPosition\` controls whether a group's aggregate shows
 inline on its own row (the default) or on a dedicated subtotal row appended
 after it. \`groupBy\` itself is fixed by the consumer, but \`aggregations\`
-isn't: every numeric, non-\`groupBy\` column's header carries a
-vertical-ellipsis menu (mirroring MUI X Premium's own column-header
-"Aggregation" control) to set, change, or clear that column's function at
-runtime — see \`WithAggregationMenu\` below. Click a column's header to sort
+isn't: every numeric, non-\`groupBy\` column's own vertical-ellipsis column
+menu — always at the header's right edge, the same one its "Sort"/"Filter"
+entries live in, not a second icon next to it — carries an "Agregación"
+dropdown (mirroring MUI X Premium's own column-header "Aggregation"
+control almost exactly, down to the embedded \`Select\` rather than a flat
+list) to set, change, or clear that column's function at runtime — see
+\`WithAggregationMenu\` below. Click a column's header to sort
 by it — cycling ascending, descending, then back to unsorted, with the same
 arrow icon and highlighted header MUI's own DataGrid shows for a sorted
 column. Sorting reorders group nodes (by their own \`groupBy\` value, or by
@@ -248,11 +251,12 @@ export const WithAggregationMenu: Story = {
 "Valor" starts with a \`sum\` — shown as a small muted label under its name,
 matching MUI X Premium's own column-header screenshot for an aggregated
 column. Click the vertical-ellipsis icon at the right of either numeric
-column's header ("Valor" or "Cantidad") to open its menu: pick a different
-function to change it (every group row and the grand-total bar update
-immediately), or "Sin agregación" to clear it. "Cantidad" starts
-unaggregated — its menu still opens, with no active selection, letting you
-turn aggregation on for it the same way.
+column's header ("Valor" or "Cantidad") to open the grid's own column menu,
+then open its "Agregación" dropdown: pick a different function to change
+it (every group row and the grand-total bar update immediately, and the
+menu closes), or "Sin agregación" to clear it. "Cantidad" starts
+unaggregated — its dropdown still offers every function, with nothing
+selected, letting you turn aggregation on for it the same way.
 
 \`aggregations\` is left uncontrolled here (no \`onAggregationsChange\`), so
 every selection just updates this story's own copy of the model — passing
@@ -285,6 +289,40 @@ afterward and its own rows are sorted too, by their raw (unaggregated) value
 for whichever column is active — try "Cantidad" while it's unaggregated: the
 groups stay in their original order (there's no group-level aggregate to
 sort them by), but each group's own rows, once expanded, are sorted by it.
+        `,
+      },
+    },
+  },
+}
+
+export const WithColumnDragReorder: Story = {
+  args: {
+    rows,
+    columns,
+    groupBy: 'tienda',
+    aggregations: [{ field: 'valorTotalOrden', fn: 'sum' }],
+    tableTitle: 'Órdenes de compra por tienda',
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: `
+Drag any column header and drop it onto another to move it there, matching
+MUI X Pro/Premium's own column drag-and-drop — rebuilt here since Community
+\`@mui/x-data-grid\`'s own \`<DataGrid>\` wrapper forces
+\`disableColumnReorder: true\` unconditionally (confirmed in its own
+\`useDataGridProps\`), turning off the native drag affordance a Pro/Premium
+grid would otherwise give every header. The dragged column dims while the
+drag is in progress, the same visual feedback Premium gives its own drag
+source.
+
+Uncontrolled here (no \`columnOrderModel\`/\`onColumnOrderModelChange\`), so
+every drop just updates this component's own internal order — pass
+\`columnOrderModel\` + \`onColumnOrderModelChange\` instead for the same
+controlled pattern \`onAggregationsChange\` above already uses, e.g. to
+persist a user's own column order. The reordered layout also drives the
+toolbar's CSV/Excel/PDF export and the filter panel's column list, not just
+what's rendered on screen.
         `,
       },
     },

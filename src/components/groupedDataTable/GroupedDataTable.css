@@ -157,24 +157,15 @@
 }
 
 /* GroupedDataTableAggregationHeader (toAggregationAwareColumn, in
- * GroupedDataTable.tsx) — the vertical-ellipsis aggregation menu MUI X
- * Premium's own column headers offer, rebuilt here for this Community-only
- * component. `-main` stacks the column's own label above the small active-
- * function label (`-fn`); `-trigger` (the ellipsis button) is pushed to the
- * row's far end by `margin-left: auto` below, matching the "label, then
- * icon" layout the Premium screenshot this was checked against shows.
- * `min-width: 0` on `-main` is what lets `-label`'s own `text-overflow:
- * ellipsis` actually engage inside a flex row instead of the flex item
- * refusing to shrink past its content's natural width. */
+ * GroupedDataTable.tsx) — the column's own label stacked above a small
+ * active-function label (`-fn`), matching MUI X Premium's own grouped-grid
+ * header layout. The picker itself lives in the grid's single native
+ * column menu now (`GridColumnMenuAggregationItem`, styled below), not a
+ * second trigger rendered here. `min-width: 0` is what lets `-label`'s own
+ * `text-overflow: ellipsis` actually engage inside the header's flex row
+ * instead of this flex item refusing to shrink past its content's natural
+ * width. */
 .grouped-data-table__aggregation-header {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  width: 100%;
-  min-width: 0;
-}
-
-.grouped-data-table__aggregation-header-main {
   display: flex;
   flex-direction: column;
   min-width: 0;
@@ -197,9 +188,27 @@
   color: var(--palette-action-active);
 }
 
-.grouped-data-table__aggregation-header-trigger {
-  margin-left: auto;
-  flex-shrink: 0;
+/* toColumnDragReorderAwareColumn (GroupedDataTable.tsx) — the `draggable`
+ * wrapper reorder is hand-built on top of, since Community `@mui/x-data-
+ * grid`'s own `<DataGrid>` forces `disableColumnReorder: true` (see that
+ * function's own doc comment). Fills the header cell so the whole header is
+ * a drag source/target, not just its own text content's bounding box. */
+.grouped-data-table__header-drag-handle {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+}
+
+/* While this column is the one currently picked up — mirrors MUI X
+ * Premium's own dimmed drag-source style (`columnHeader--dragging` in its
+ * own `GridRootStyles`), reused here as a plain opacity rather than that
+ * exact class: that class's selector targets the header *cell* itself
+ * (`.MuiDataGrid-columnHeader--dragging`), not an arbitrary element nested
+ * inside it the way this wrapper is. */
+.grouped-data-table__header-drag-handle--dragging {
+  opacity: 0.5;
 }
 
 /* `DataTable.css` hides the grid's own native sort affordance outright

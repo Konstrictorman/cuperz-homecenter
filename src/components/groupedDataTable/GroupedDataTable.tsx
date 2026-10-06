@@ -2,18 +2,22 @@ import {
   createContext,
   useCallback,
   useContext,
+  useId,
   useMemo,
+  useRef,
   useState,
 } from 'react'
 import type { ComponentProps, ReactNode, RefObject } from 'react'
 import {
   ColumnsPanelTrigger,
   FilterPanelTrigger,
+  GridColumnMenu,
   GridFooterContainer,
   GridLogicOperator,
   GridPagination,
   Toolbar,
   ToolbarButton,
+  useGridApiContext,
   useGridRootProps,
 } from '@mui/x-data-grid'
 import type {
@@ -48,9 +52,9 @@ import DeleteForeverIcon from '@mui/icons-material/DeleteForever'
 import DownloadIcon from '@mui/icons-material/Download'
 import FilterAltOutlinedIcon from '@mui/icons-material/FilterAltOutlined'
 import FilterListIcon from '@mui/icons-material/FilterList'
+import FunctionsIcon from '@mui/icons-material/Functions'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight'
-import MoreVertIcon from '@mui/icons-material/MoreVert'
 import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore'
 import UnfoldLessIcon from '@mui/icons-material/UnfoldLess'
 import ViewColumnIcon from '@mui/icons-material/ViewColumn'
@@ -245,6 +249,51 @@ export type GroupedDataTableProps<TRow extends GridValidRowModel> =
     aggregationFunctions?: Record<string, AggregationFunction>
     /** @default 'inline' */
     aggregationPosition?: AggregationPosition
+    /** Every column's `field`, left to right, in the order headers should
+     *  render — drag a header onto another one to reorder them, matching
+     *  MUI X Pro/Premium's own column drag-and-drop (its own
+     *  `useGridColumnReorder`, rebuilt here — see
+     *  `toColumnDragReorderAwareColumn` below for why this is hand-built
+     *  from scratch rather than reusing the grid's own drag machinery:
+     *  Community `@mui/x-data-grid`'s own `<DataGrid>` wrapper forces
+     *  `disableColumnReorder: true` unconditionally — confirmed in its own
+     *  `useDataGridProps`'s `DATA_GRID_FORCED_PROPS`, no prop overrides it —
+     *  which turns off the native `draggable` attribute
+     *  `GridColumnHeaderItem` would otherwise put on every header, so there
+     *  is no native drag affordance here to begin with, not just a missing
+     *  listener on top of one).
+     *
+     *  Named `columnOrderModel`, not `columnOrder`/`onColumnOrderChange`
+     *  (this component's usual `xModel`/`onXModelChange` pairing, mirroring
+     *  `paginationModel`/`filterModel`/`sortModel` below rather than
+     *  `aggregations`' own unprefixed naming) because `onColumnOrderChange`
+     *  is already a real `DataGridProps` field — Pro/Premium's own
+     *  per-drag-event callback (`GridEventLookup['columnOrderChange']`),
+     *  typed straight through on this project's Community edition too even
+     *  though nothing ever fires it there. Reusing that name for this
+     *  unrelated "full model" callback would collide in the type system
+     *  (confirmed: `tsc` rejects the two incompatible signatures merged by
+     *  `GroupedDataTableProps`'s own intersection with `DataTableProps`)
+     *  even before considering how confusing the same name meaning two
+     *  different things would be.
+     *
+     *  Uncontrolled by default, the same "seed vs. controlled" split
+     *  `aggregations` above documents: passed alone, this only seeds the
+     *  internal order once and every drag updates a plain internal copy
+     *  from then on — pass `onColumnOrderModelChange` to own/persist it
+     *  instead. A field missing here (new column; first render with no prop
+     *  at all) is appended at the end, in `columns`' own order; a field no
+     *  longer in `columns` is dropped — so this never needs to be kept in
+     *  lockstep with `columns` by hand. Drives the toolbar's export order
+     *  too (`handleExportCsv`/`handleExportExcel`/`handlePrint`), not just
+     *  what the grid itself renders.
+     *  @default columns.map((column) => column.field) */
+    columnOrderModel?: ReadonlyArray<string>
+    /** Called whenever `columnOrderModel` changes — from a column header
+     *  drag, most of the time. Passing this is what opts `columnOrderModel`
+     *  into being a real controlled prop, same as `onAggregationsChange`
+     *  above. */
+    onColumnOrderModelChange?: (columnOrderModel: ReadonlyArray<string>) => void
     /** Base name (no extension) for the file the toolbar's download menu
      *  produces — "Descargar como CSV"/"Descargar como Excel" append
      *  `.csv`/`.xlsx`, "Imprimir" appends `.pdf`. See
@@ -1033,115 +1082,54 @@ function toFilterAwareColumn<TRow extends GridValidRowModel>(
 }
 
 interface GroupedDataTableAggregationHeaderProps {
-  headerName: string
   headerContent: ReactNode
   currentFn: string | undefined
-  availableFunctions: ReadonlyArray<string>
-  onSelect: (fn: string | null) => void
 }
 
 /** The actual header content `toAggregationAwareColumn` renders for one
- *  eligible column — a component of its own (not an inline closure in that
- *  function) so each column's menu `anchorEl` open/closed state is real
- *  React state that survives independently across re-renders, rather than
- *  being re-created from scratch on every `groupedColumns` recomputation.
- *  Mirrors MUI X Premium's own grouped-grid screenshots: the column's label
- *  stays on its own line, a small muted line under it names the active
- *  function (omitted entirely while unset, same as Premium shows nothing
- *  there for an unaggregated column), and a vertical-ellipsis icon button
- *  opens a menu to set/change/clear it — Premium's own version is a
- *  dropdown embedded in a larger "Sort/Pin/Filter/Aggregation/…" column
- *  menu; this is just the one section that's actually new behavior here —
- *  sort/pin/filter/manage columns are all already reachable through the
- *  grid's own default column menu (sorting also through a direct header
- *  click — see `sortGroupTree`), left untouched. */
+ *  eligible column. Mirrors MUI X Premium's own grouped-grid screenshots:
+ *  the column's label stays on its own line, with a small muted line under
+ *  it naming the active function (omitted entirely while unset, same as
+ *  Premium shows nothing there for an unaggregated column). Picking/
+ *  changing/clearing the function itself happens through the grid's own
+ *  native column menu now (see `GroupedDataTableColumnMenu` /
+ *  `GridColumnMenuAggregationItem` below) rather than a trigger rendered
+ *  here — this component used to also render its own dedicated vertical-
+ *  ellipsis `IconButton` + `Menu` for that, which left every aggregable
+ *  column with *two* vertical-ellipsis affordances side by side (this
+ *  one, plus the grid's own always-present column-menu trigger). Premium's
+ *  own column headers only ever show the one native menu, with Aggregation
+ *  as just another section inside it — `GridColumnMenuAggregationItem` is
+ *  that section, injected into the same menu instead of duplicating it. */
 function GroupedDataTableAggregationHeader({
-  headerName,
   headerContent,
   currentFn,
-  availableFunctions,
-  onSelect,
 }: GroupedDataTableAggregationHeaderProps) {
-  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
-
   return (
     <span className="grouped-data-table__aggregation-header">
-      <span className="grouped-data-table__aggregation-header-main">
-        <span className="grouped-data-table__aggregation-header-label">
-          {headerContent}
-        </span>
-        {currentFn && (
-          <span className="grouped-data-table__aggregation-header-fn">
-            {currentFn}
-          </span>
-        )}
+      <span className="grouped-data-table__aggregation-header-label">
+        {headerContent}
       </span>
-      <IconButton
-        size="small"
-        className="grouped-data-table__aggregation-header-trigger"
-        // `'inherit'`, not the unset default (`'default'`) — same pitfall
-        // `GroupedDataTableToolbar`'s own filter trigger already documents:
-        // this project's theme (src/theme/index.ts) adds a literal
-        // `palette.default` entry with `main: '#ffffff'`, and MUI's
-        // `IconButton` resolves any colour prop (the unset default
-        // included) straight off `theme.palette[color].main` — rendering
-        // this icon fully white-on-white against the header background
-        // otherwise, present and clickable but invisible. `'inherit'` picks
-        // up the header's own text colour instead.
-        color="inherit"
-        // The grid's own header cell listens for clicks to drive sorting
-        // (see `sortGroupTree`/`sortingMode="server"` below) — stopping
-        // propagation keeps this button from also triggering that, the same
-        // defensive guard any menu trigger nested inside a sortable header
-        // needs.
-        onClick={(event) => {
-          event.stopPropagation()
-          setAnchorEl(event.currentTarget)
-        }}
-        aria-label={`Opciones de agregación de "${headerName}"`}
-      >
-        <MoreVertIcon fontSize="small" />
-      </IconButton>
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={() => setAnchorEl(null)}
-      >
-        <MenuItem
-          selected={!currentFn}
-          onClick={() => {
-            onSelect(null)
-            setAnchorEl(null)
-          }}
-        >
-          Sin agregación
-        </MenuItem>
-        {availableFunctions.map((fn) => (
-          <MenuItem
-            key={fn}
-            selected={fn === currentFn}
-            onClick={() => {
-              onSelect(fn)
-              setAnchorEl(null)
-            }}
-          >
-            {fn}
-          </MenuItem>
-        ))}
-      </Menu>
+      {currentFn && (
+        <span className="grouped-data-table__aggregation-header-fn">
+          {currentFn}
+        </span>
+      )}
     </span>
   )
 }
 
-/** Wraps a numeric, non-`groupBy` column's header with the aggregation menu
- *  above — reachable for *every* eligible column regardless of whether
- *  it's currently aggregated (same as Premium, where every aggregable
- *  column's header offers the control, empty/`"…"` until one is picked),
- *  not just the ones already listed in `aggregations`. Picking a function
- *  is what adds (or changes, or — `"Sin agregación"` — removes) that
- *  field's entry in `GroupedDataTable`'s own aggregation model (see
- *  `handleColumnAggregationChange`), not just a display toggle. Chains onto
- *  whatever `renderHeader` the column already has (including one
+/** Wraps a numeric, non-`groupBy` column's header with the small active-
+ *  function label above — shown for *every* eligible column regardless of
+ *  whether it's currently aggregated (same as Premium, where every
+ *  aggregable column's header reserves the line, empty until a function is
+ *  picked), not just the ones already listed in `aggregations`. The actual
+ *  picker lives in the grid's own column menu (wired up separately via
+ *  `GroupedDataTableAggregationMenuContext`, keyed by `column.field` — see
+ *  that context's own doc comment) rather than through any prop here, so
+ *  this only needs to know *whether* a column is eligible and *what* its
+ *  current function is, not how to change it. Chains onto whatever
+ *  `renderHeader` the column already has (including one
  *  `toFilterAwareColumn`/`toGroupAwareColumn` leave untouched) rather than
  *  replacing it, the same "wrap, don't clobber" precedent those functions'
  *  own doc comments explain. */
@@ -1149,30 +1137,174 @@ function toAggregationAwareColumn<TRow extends GridValidRowModel>(
   column: GridColDef<GroupedRow<TRow>>,
   isEligible: boolean,
   currentFn: string | undefined,
-  availableFunctions: ReadonlyArray<string>,
-  onSelect: (field: string, fn: string | null) => void,
 ): GridColDef<GroupedRow<TRow>> {
   if (!isEligible) {
     return column
   }
 
   const originalRenderHeader = column.renderHeader
-  const headerName = column.headerName ?? column.field
 
   return {
     ...column,
     renderHeader: (params: GridColumnHeaderParams<GroupedRow<TRow>>) => (
       <GroupedDataTableAggregationHeader
-        headerName={headerName}
         headerContent={
-          originalRenderHeader ? originalRenderHeader(params) : headerName
+          originalRenderHeader
+            ? originalRenderHeader(params)
+            : (column.headerName ?? column.field)
         }
         currentFn={currentFn}
-        availableFunctions={availableFunctions}
-        onSelect={(fn) => onSelect(column.field, fn)}
       />
     ),
   }
+}
+
+interface GroupedDataTableAggregationMenuEntry {
+  currentFn: string | undefined
+  onSelect: (fn: string | null) => void
+}
+
+interface GroupedDataTableAggregationMenuContextValue {
+  availableFunctions: ReadonlyArray<string>
+  entries: ReadonlyMap<string, GroupedDataTableAggregationMenuEntry>
+}
+
+/** Carries, per aggregable column field, that field's current function and
+ *  the setter to call when the grid's own column menu picks a new one —
+ *  read by `GridColumnMenuAggregationItem` below via `colDef.field`, the
+ *  same "data via Context, not `slotProps`" precedent
+ *  `GroupedDataTableFilterContext`'s own doc comment already explains for
+ *  `slots.filterPanel`: a column's menu is only actually mounted once it's
+ *  opened, so a stale closure baked into `slotProps.columnMenu` at that
+ *  moment would never see a later selection change for a *different*
+ *  column reflected without the user closing and reopening the menu.
+ *  Reading live state through Context instead sidesteps that entirely. */
+const GroupedDataTableAggregationMenuContext =
+  createContext<GroupedDataTableAggregationMenuContextValue | null>(null)
+
+/** `slots.columnMenu` override — keeps every column down to the grid's one
+ *  native vertical-ellipsis trigger by injecting the aggregation picker as
+ *  one more section *inside* that menu (via the "custom column menu items"
+ *  mechanism MUI X's own `GridColumnMenu` already supports: an extra
+ *  `slots`/`slotProps` key, sorted into the existing Sort/Filter/Manage
+ *  columns list by `displayOrder`) instead of rendering it as this
+ *  component's own separate trigger next to it — see
+ *  `GroupedDataTableAggregationHeader`'s own doc comment for the duplicate-
+ *  ellipsis problem this replaces. Only added for a column whose field has
+ *  an entry in `GroupedDataTableAggregationMenuContext` (set from the same
+ *  `type === 'number' && !groupByFields.includes(...)` eligibility check
+ *  `groupedColumns` uses), so every other column's menu is untouched. */
+function GroupedDataTableColumnMenu(
+  props: ComponentProps<typeof GridColumnMenu>,
+) {
+  const context = useContext(GroupedDataTableAggregationMenuContext)
+
+  if (!context?.entries.has(props.colDef.field)) {
+    return <GridColumnMenu {...props} />
+  }
+
+  return (
+    <GridColumnMenu
+      {...props}
+      slots={{
+        groupedDataTableAggregationItem: GridColumnMenuAggregationItem,
+      }}
+      slotProps={{
+        groupedDataTableAggregationItem: { displayOrder: 25 },
+      }}
+    />
+  )
+}
+
+/** The injected "Aggregation" section itself — one `inert` `baseMenuItem`
+ *  (so the row itself never behaves like a clickable item) wrapping a
+ *  `baseSelect` dropdown, mirroring `@mui/x-data-grid-premium`'s own
+ *  `GridColumnMenuAggregationItem` almost line for line (this project ships
+ *  that package — see `package.json` — even though the rest of this
+ *  component is hand-built against the Community edition; its source was
+ *  read directly, there being no public docs page for one menu item): a
+ *  labeled `Select` ("Agregación"), the empty option clearing it, one
+ *  option per available function. `baseSelect`/`baseSelectOption` are
+ *  ordinary Community slots (`@mui/x-data-grid/material`), not a
+ *  Premium-only API — only the surrounding aggregation *feature* is
+ *  Premium-gated, not this particular building block. `onKeyDown` stops
+ *  Arrow/Space from bubbling to the outer `MenuList` (which would
+ *  otherwise move the *menu's* selection instead of the dropdown's own),
+ *  and `onChange` both applies the new value and closes the whole column
+ *  menu on pick (`apiRef.current.hideColumnMenu()` — see the comment next
+ *  to that call for why, unlike every built-in item, this doesn't go
+ *  through the `onClick` prop every column-menu item otherwise gets). */
+function GridColumnMenuAggregationItem({ colDef }: { colDef: GridColDef }) {
+  const rootProps = useGridRootProps()
+  // Not `onClick` (`hideMenu`, passed to every column-menu item — see
+  // `useGridColumnMenuSlots`): MUI X Premium's own version of this exact
+  // component closes the menu this same way, straight through `apiRef`,
+  // rather than that prop — because `hideMenu` reads a plain DOM event's
+  // `event.target` to check whether the click landed back on the menu's own
+  // trigger button (`target?.contains(event.target)` in
+  // `GridColumnHeaderMenu`), and a `Select`'s own `onChange` hands back a
+  // synthetic `{ target: { value, name } }` object instead of one, which
+  // `Node.contains` throws on (confirmed: `TypeError: Failed to execute
+  // 'contains' on 'Node': parameter 1 is not of type 'Node'`, reproduced by
+  // wiring `hideMenu` to this `Select`'s `onChange` directly).
+  const apiRef = useGridApiContext()
+  const context = useContext(GroupedDataTableAggregationMenuContext)
+  const entry = context?.entries.get(colDef.field)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const selectId = useId()
+
+  if (!context || !entry) {
+    return null
+  }
+
+  const { currentFn, onSelect } = entry
+
+  return (
+    <rootProps.slots.baseMenuItem
+      inert
+      iconStart={<FunctionsIcon fontSize="small" />}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          inputRef.current?.focus()
+        }
+      }}
+    >
+      <rootProps.slots.baseSelect
+        labelId={`${selectId}-label`}
+        id={`${selectId}-input`}
+        value={currentFn ?? ''}
+        label="Agregación"
+        fullWidth
+        size="small"
+        style={{ minWidth: 150 }}
+        slotProps={{ htmlInput: { ref: inputRef } }}
+        onChange={(event) => {
+          const value = (event.target as HTMLInputElement).value
+          onSelect(value === '' ? null : value)
+          apiRef.current.hideColumnMenu()
+        }}
+        onKeyDown={(event) => {
+          if (
+            event.key === 'ArrowDown' ||
+            event.key === 'ArrowUp' ||
+            event.key === ' '
+          ) {
+            event.stopPropagation()
+          }
+        }}
+        onBlur={(event) => event.stopPropagation()}
+      >
+        <rootProps.slots.baseSelectOption native={false} value="">
+          Sin agregación
+        </rootProps.slots.baseSelectOption>
+        {context.availableFunctions.map((fn) => (
+          <rootProps.slots.baseSelectOption key={fn} native={false} value={fn}>
+            {fn}
+          </rootProps.slots.baseSelectOption>
+        ))}
+      </rootProps.slots.baseSelect>
+    </rootProps.slots.baseMenuItem>
+  )
 }
 
 const GROUP_ROW_CLASS_NAME = 'grouped-data-table__group-row'
@@ -1207,6 +1339,103 @@ function toGroupAwareIsRowSelectable<TRow extends GridValidRowModel>(
       return false
     }
     return original ? original(params as GridRowParams<TRow>) : true
+  }
+}
+
+/** Moves `field` to `toIndex` within `order`, preserving everyone else's
+ *  relative order — e.g. `moveColumnOrderField(['a', 'b', 'c'], 'a', 1)` is
+ *  `['b', 'a', 'c']`. Returns `order` itself (same identity) when `field` is
+ *  already at `toIndex` (or missing), so a drop back onto the column that
+ *  was already there doesn't produce a new array identity — and,
+ *  downstream, a new `groupedColumns` render — for nothing. */
+function moveColumnOrderField(
+  order: ReadonlyArray<string>,
+  field: string,
+  toIndex: number,
+): ReadonlyArray<string> {
+  const fromIndex = order.indexOf(field)
+  if (fromIndex === -1 || fromIndex === toIndex) {
+    return order
+  }
+  const next = order.slice()
+  next.splice(fromIndex, 1)
+  next.splice(toIndex, 0, field)
+  return next
+}
+
+/** Wraps a column's header in a `draggable` element so the user can drag it
+ *  onto another column's header to reorder them — see `columnOrderModel`'s
+ *  own doc comment on `GroupedDataTableProps` for why this has to be hand-built
+ *  at all. The short version: `@mui/x-data-grid-pro`'s own
+ *  `useGridColumnReorder` is the real feature this mirrors, but it isn't
+ *  just *missing* in Community — Community's own `<DataGrid>` wrapper
+ *  actively forces `disableColumnReorder: true` (confirmed in
+ *  `useDataGridProps`'s own `DATA_GRID_FORCED_PROPS`; no prop overrides it),
+ *  which turns off the `draggable` attribute `GridColumnHeaderItem` would
+ *  otherwise put on every header. So there's no native drag affordance, and
+ *  no `columnHeaderDragStart`/`columnHeaderDragOver`/… events, to hook into
+ *  at all here — unlike `toFilterAwareColumn`/`toAggregationAwareColumn`
+ *  above, which only had to add UI on top of behavior the grid already
+ *  drives, this renders its own `draggable` wrapper from scratch around the
+ *  header's own content.
+ *
+ *  Reorders on an actual successful `drop`, not continuously during the
+ *  drag the way Pro's own version does — simpler, and nothing here needs a
+ *  "snap back to where the drag started" case, since nothing changes until
+ *  a valid drop actually happens (dropping outside any header, or pressing
+ *  Escape mid-drag, just ends the drag with no `drop` event at all).
+ *  `isDragging` (true only for the one column currently being dragged, from
+ *  `draggedColumnField` state in `GroupedDataTable`) drives the dimmed
+ *  `--dragging` style in GroupedDataTable.css, the same visual Premium's own
+ *  drag gives the source column. Chains onto whatever `renderHeader` the
+ *  column already has, the same "wrap, don't clobber" precedent
+ *  `toFilterAwareColumn`'s own doc comment explains — applied outermost
+ *  (last) of the three header wraps in `groupedColumns` below, since
+ *  dragging is orthogonal to what any of the others render. */
+function toColumnDragReorderAwareColumn<TRow extends GridValidRowModel>(
+  column: GridColDef<TRow>,
+  isDragging: boolean,
+  onDragStart: () => void,
+  onDrop: () => void,
+  onDragEnd: () => void,
+): GridColDef<TRow> {
+  const originalRenderHeader = column.renderHeader
+  const headerName = column.headerName ?? column.field
+
+  return {
+    ...column,
+    renderHeader: (params: GridColumnHeaderParams<TRow>) => (
+      <span
+        className={clsx(
+          'grouped-data-table__header-drag-handle',
+          isDragging && 'grouped-data-table__header-drag-handle--dragging',
+        )}
+        draggable
+        onDragStart={(event) => {
+          event.dataTransfer.effectAllowed = 'move'
+          // Firefox won't start a drag at all unless `setData` is called —
+          // the value itself is never read back; which column is being
+          // dragged is tracked via `isDragging`/`onDragStart` instead, since
+          // the *target* header's own `onDrop` needs that field's identity
+          // either way, not just a yes/no "something is being dragged".
+          event.dataTransfer.setData('text/plain', column.field)
+          onDragStart()
+        }}
+        // Both required for a `drop` to be allowed to fire at all here, per
+        // the native HTML5 drag-and-drop spec — a target element rejects a
+        // drop by default unless its own `dragenter`/`dragover` call
+        // `preventDefault()`.
+        onDragEnter={(event) => event.preventDefault()}
+        onDragOver={(event) => event.preventDefault()}
+        onDrop={(event) => {
+          event.preventDefault()
+          onDrop()
+        }}
+        onDragEnd={onDragEnd}
+      >
+        {originalRenderHeader ? originalRenderHeader(params) : headerName}
+      </span>
+    ),
   }
 }
 
@@ -1854,6 +2083,8 @@ const GroupedDataTable = <TRow extends GridValidRowModel>({
   onAggregationsChange: onAggregationsChangeProp,
   aggregationFunctions: aggregationFunctionsProp,
   aggregationPosition = 'inline',
+  columnOrderModel: columnOrderProp,
+  onColumnOrderModelChange: onColumnOrderChangeProp,
   exportFileName = 'datos',
   tableTitle,
   // Bumped only while at least one column is actually aggregated (see
@@ -1918,6 +2149,87 @@ const GroupedDataTable = <TRow extends GridValidRowModel>({
   const aggregationFunctions = useMemo(
     () => ({ ...DEFAULT_AGGREGATION_FUNCTIONS, ...aggregationFunctionsProp }),
     [aggregationFunctionsProp],
+  )
+
+  // Same "seed vs. controlled" split as `aggregations` below — presence of
+  // `columnOrderModel` alone only seeds this internal copy once (read via
+  // `useState`'s lazy initializer, same as `initialState` elsewhere in this
+  // component); every drag-reorder (`handleColumnHeaderDrop` below) updates
+  // it directly from then on. `onColumnOrderModelChange` is the opt-in to
+  // own/persist the model instead, same as `onAggregationsChange`.
+  const isColumnOrderControlled = onColumnOrderChangeProp !== undefined
+  const [uncontrolledColumnOrder, setUncontrolledColumnOrder] = useState<
+    ReadonlyArray<string>
+  >(() => columnOrderProp ?? columns.map((column) => column.field))
+  const columnOrder = isColumnOrderControlled
+    ? (columnOrderProp ?? columns.map((column) => column.field))
+    : uncontrolledColumnOrder
+  const handleColumnOrderChange = useCallback(
+    (next: ReadonlyArray<string>) => {
+      if (!isColumnOrderControlled) {
+        setUncontrolledColumnOrder(next)
+      }
+      onColumnOrderChangeProp?.(next)
+    },
+    [isColumnOrderControlled, onColumnOrderChangeProp],
+  )
+
+  // Reconciles `columnOrder` against the `columns` actually given right
+  // now: a field no longer present is dropped, and any field not yet in
+  // `columnOrder` (a new column; or simply every field, on an uncontrolled
+  // first render seeded from `columns` itself) is appended at the end, in
+  // `columns`' own order — see `columnOrderModel`'s own doc comment on
+  // `GroupedDataTableProps`. This, not raw `columnOrder`, is what actually
+  // drives display/export order below, so dragging always has a complete
+  // list of every current field to reorder within.
+  const effectiveColumnOrder = useMemo(() => {
+    const knownFields = new Set(columns.map((column) => column.field))
+    const kept = columnOrder.filter((field) => knownFields.has(field))
+    const keptFields = new Set(kept)
+    const appended = columns
+      .map((column) => column.field)
+      .filter((field) => !keptFields.has(field))
+    return [...kept, ...appended]
+  }, [columns, columnOrder])
+
+  // Which column, if any, a header drag currently has picked up — drives
+  // `toColumnDragReorderAwareColumn`'s dimmed `--dragging` style below and
+  // is read (not just reset) by `handleColumnHeaderDrop` itself, since a
+  // drop needs to know the field it's reordering relative to.
+  const [draggedColumnField, setDraggedColumnField] = useState<string | null>(
+    null,
+  )
+  const handleColumnHeaderDragStart = useCallback(
+    (field: string) => setDraggedColumnField(field),
+    [],
+  )
+  const handleColumnHeaderDragEnd = useCallback(
+    () => setDraggedColumnField(null),
+    [],
+  )
+  // Fires on the target header's own `onDrop` — see
+  // `toColumnDragReorderAwareColumn`. A drop onto the same column that's
+  // being dragged, or with nothing actually picked up (shouldn't happen —
+  // `toColumnDragReorderAwareColumn` only wires `onDrop` once `onDragStart`
+  // has already fired for *some* column — but cheap to guard anyway), is a
+  // no-op.
+  const handleColumnHeaderDrop = useCallback(
+    (targetField: string) => {
+      if (draggedColumnField && draggedColumnField !== targetField) {
+        const targetIndex = effectiveColumnOrder.indexOf(targetField)
+        if (targetIndex !== -1) {
+          handleColumnOrderChange(
+            moveColumnOrderField(
+              effectiveColumnOrder,
+              draggedColumnField,
+              targetIndex,
+            ),
+          )
+        }
+      }
+      setDraggedColumnField(null)
+    },
+    [draggedColumnField, effectiveColumnOrder, handleColumnOrderChange],
   )
 
   // Deliberately *not* the same controlled/uncontrolled split as
@@ -2200,22 +2512,42 @@ const GroupedDataTable = <TRow extends GridValidRowModel>({
     [filteredRows, activeSortModel],
   )
 
+  const columnByField = useMemo(
+    () => new Map(columns.map((column) => [column.field, column])),
+    [columns],
+  )
+
+  // `columns`, reordered per `effectiveColumnOrder` — what every
+  // column-order-sensitive thing below actually uses instead of raw
+  // `columns`: the grid's own rendered columns (`groupedColumns`), the
+  // filter panel's column select (`filterableColumns`), and every export
+  // (`handleExportCsv`/`handleExportExcel`/`handlePrint`) — so a drag
+  // reorder is reflected consistently everywhere a column's position
+  // matters, not just on screen.
+  const orderedColumns = useMemo(
+    () =>
+      effectiveColumnOrder.map(
+        (field) => columnByField.get(field) as GridColDef<TRow>,
+      ),
+    [effectiveColumnOrder, columnByField],
+  )
+
   // Built fresh on each call rather than memoized: these only run from a
   // menu click, not on every render, so there's nothing to save by caching a
   // matrix between clicks that may never happen.
   const handleExportCsv = useCallback(() => {
     exportMatrixToCsv(
-      buildExportMatrix(exportRows, columns),
+      buildExportMatrix(exportRows, orderedColumns),
       `${exportFileName}.csv`,
     )
-  }, [exportRows, columns, exportFileName])
+  }, [exportRows, orderedColumns, exportFileName])
 
   const handleExportExcel = useCallback(() => {
     void exportMatrixToExcel(
-      buildExportMatrix(exportRows, columns),
+      buildExportMatrix(exportRows, orderedColumns),
       `${exportFileName}.xlsx`,
     )
-  }, [exportRows, columns, exportFileName])
+  }, [exportRows, orderedColumns, exportFileName])
 
   // Top-level (depth-0) group count — what `paginationModel.pageSize`
   // actually paginates over, regardless of how many descendant rows any of
@@ -2252,11 +2584,6 @@ const GroupedDataTable = <TRow extends GridValidRowModel>({
     [filteredRows, aggregations, aggregationFunctions],
   )
 
-  const columnByField = useMemo(
-    () => new Map(columns.map((column) => [column.field, column])),
-    [columns],
-  )
-
   // Built fresh on each call rather than memoized, same as
   // `handleExportCsv`/`handleExportExcel` above — only runs from a menu
   // click. `tableTitle` falls back to `exportFileName` (see its own doc
@@ -2267,18 +2594,18 @@ const GroupedDataTable = <TRow extends GridValidRowModel>({
   // (collapse-independent, but still just the flat records) totals.
   const handlePrint = useCallback(() => {
     exportMatrixToPdf(
-      buildExportMatrix(exportRows, columns),
+      buildExportMatrix(exportRows, orderedColumns),
       `${exportFileName}.pdf`,
       tableTitle ?? exportFileName,
       // No `aggregations` configured means nothing to summarize — an
       // all-blank foot row would just add empty vertical space to the PDF.
       aggregations.length > 0
-        ? buildPdfSummaryRow(columns, aggregations, grandTotals)
+        ? buildPdfSummaryRow(orderedColumns, aggregations, grandTotals)
         : undefined,
     )
   }, [
     exportRows,
-    columns,
+    orderedColumns,
     exportFileName,
     tableTitle,
     aggregations,
@@ -2291,7 +2618,7 @@ const GroupedDataTable = <TRow extends GridValidRowModel>({
   // plain grid would.
   const filterableColumns = useMemo(
     () =>
-      columns
+      orderedColumns
         .filter(
           (column) => column.type !== 'actions' && column.filterable !== false,
         )
@@ -2300,7 +2627,7 @@ const GroupedDataTable = <TRow extends GridValidRowModel>({
           headerName: column.headerName ?? column.field,
           kind: filterColumnKind(column),
         })),
-    [columns],
+    [orderedColumns],
   )
 
   // Which fields have at least one *active* filter item right now — drives
@@ -2333,9 +2660,12 @@ const GroupedDataTable = <TRow extends GridValidRowModel>({
     [aggregations],
   )
 
+  // Over `orderedColumns`, not raw `columns` — see `orderedColumns`'s own
+  // comment: this is what makes a drag reorder (`handleColumnHeaderDrop`
+  // above) actually show up in what the grid renders.
   const groupedColumns = useMemo(
     () =>
-      columns.map((column) => {
+      orderedColumns.map((column) => {
         // Mirrors MUI X Premium's own default aggregable-column resolution
         // closely enough for this component's needs: a numeric column can
         // be aggregated, a `groupBy` field (already carrying the
@@ -2343,35 +2673,68 @@ const GroupedDataTable = <TRow extends GridValidRowModel>({
         const isAggregationEligible =
           column.type === 'number' && !groupByFields.includes(column.field)
 
-        return toAggregationAwareColumn(
-          toFilterAwareColumn(
-            toGroupAwareColumn(
-              column,
-              groupByFields,
-              aggregatedFields,
-              collapsedPaths,
-              toggleGroup,
+        return toColumnDragReorderAwareColumn(
+          toAggregationAwareColumn(
+            toFilterAwareColumn(
+              toGroupAwareColumn(
+                column,
+                groupByFields,
+                aggregatedFields,
+                collapsedPaths,
+                toggleGroup,
+              ),
+              activeFilterFields.has(column.field),
             ),
-            activeFilterFields.has(column.field),
+            isAggregationEligible,
+            aggregationFnByField.get(column.field),
           ),
-          isAggregationEligible,
-          aggregationFnByField.get(column.field),
-          availableAggregationFunctionNames,
-          handleColumnAggregationChange,
+          column.field === draggedColumnField,
+          () => handleColumnHeaderDragStart(column.field),
+          () => handleColumnHeaderDrop(column.field),
+          handleColumnHeaderDragEnd,
         )
       }),
     [
-      columns,
+      orderedColumns,
       groupByFields,
       aggregatedFields,
       collapsedPaths,
       toggleGroup,
       activeFilterFields,
       aggregationFnByField,
-      availableAggregationFunctionNames,
-      handleColumnAggregationChange,
+      draggedColumnField,
+      handleColumnHeaderDragStart,
+      handleColumnHeaderDrop,
+      handleColumnHeaderDragEnd,
     ],
   )
+
+  // Feeds `GroupedDataTableAggregationMenuContext` — one entry per numeric,
+  // non-`groupBy` column (the same eligibility check `groupedColumns` just
+  // made above, recomputed here since this runs over `orderedColumns`
+  // directly rather than threading a value out of that memo), so the
+  // grid's own column menu (`GroupedDataTableColumnMenu`) knows which
+  // fields' menus should gain the injected "Aggregation" section at all.
+  const aggregationMenuContextValue =
+    useMemo<GroupedDataTableAggregationMenuContextValue>(() => {
+      const entries = new Map<string, GroupedDataTableAggregationMenuEntry>()
+      for (const column of orderedColumns) {
+        if (column.type !== 'number' || groupByFields.includes(column.field)) {
+          continue
+        }
+        entries.set(column.field, {
+          currentFn: aggregationFnByField.get(column.field),
+          onSelect: (fn) => handleColumnAggregationChange(column.field, fn),
+        })
+      }
+      return { availableFunctions: availableAggregationFunctionNames, entries }
+    }, [
+      orderedColumns,
+      groupByFields,
+      aggregationFnByField,
+      availableAggregationFunctionNames,
+      handleColumnAggregationChange,
+    ])
 
   const groupAwareGetRowClassName = useMemo(
     () => toGroupAwareRowClassName(getRowClassName),
@@ -2420,118 +2783,125 @@ const GroupedDataTable = <TRow extends GridValidRowModel>({
   }, [initialState])
 
   return (
-    <GroupedDataTableFilterContext.Provider value={filterContextValue}>
-      <DataTable<GroupedRow<TRow>>
-        {...(props as DataTableProps<GroupedRow<TRow>>)}
-        initialState={gridInitialState}
-        rows={pageRows}
-        columns={groupedColumns}
-        getRowClassName={groupAwareGetRowClassName}
-        isRowSelectable={groupAwareIsRowSelectable}
-        checkboxSelection={checkboxSelection}
-        showToolbar={showToolbar}
-        columnHeaderHeight={columnHeaderHeight}
-        paginationModel={paginationModel}
-        onPaginationModelChange={handlePaginationModelChange}
-        // No `filterModel`/`onFilterModelChange` here, deliberately — the
-        // underlying Community `<DataGrid>` forces
-        // `disableMultipleColumnsFiltering: true` unconditionally (confirmed
-        // in its own `DATA_GRID_FORCED_PROPS`, no prop overrides it), and
-        // every `setFilterModel` call — including the one its own controlled-
-        // prop sync effect makes whenever the `filterModel` prop changes —
-        // truncates `items` down to one and logs a console error once a
-        // second item exists. `GroupedDataTableFilterPanel` reads and writes
-        // `filterModel` through `GroupedDataTableFilterContext` instead (see
-        // its own doc comment for why `slotProps` alone isn't enough here),
-        // bypassing the grid entirely — `filterRowsByModel` already uses that
-        // same state, not whatever the grid's own internal copy ends up
-        // holding, so none of this affects what's actually filtered.
-        // `rowCount` is the top-level group count, not `pageRows.length` or
-        // `flattenedRows.length` — it's what `GridPagination`'s "X–Y of
-        // rowCount" and page-count math are based on, and it must match what
-        // `paginationModel.pageSize` actually paginates over (see
-        // `computeTopLevelPaginationRange`).
-        rowCount={topLevelRowCount}
-        // `rows` is already exactly one page (`pageRows`, sliced by
-        // `computeTopLevelPaginationRange` above) rather than the grid's own
-        // row-count-based slicing — `paginationMode="server"` tells it to
-        // trust that and not re-slice on top of it, the same mechanism MUI's
-        // own docs use for externally-computed pagination. `filterMode`
-        // mirrors this defensively for filtering: even though the grid is
-        // never given a real `filterModel`, this guarantees it never attempts
-        // to filter `pageRows` itself using whatever stray internal filter
-        // state a column header's "Filter" menu item might otherwise
-        // populate. `sortingMode` mirrors this for sorting, for a stronger
-        // reason than mere defensiveness: `pageRows` already reflects
-        // `sortedTree` (group nodes reordered by their own `groupBy` value or
-        // aggregate, leaf rows by their raw field value — see
-        // `sortGroupTree`), and the grid's own *client* sort mode would
-        // re-sort that already-tree-aware order as one flat list, which has
-        // no concept of "stay under your own group" and would scramble
-        // group/child pairing. `sortModel` is naturally kept to the
-        // single-item shape `sortGroupTree` (and `activeSortModel` above)
-        // actually support without an explicit `disableMultipleColumnsSorting`
-        // — that prop doesn't even exist on this project's Community edition
-        // (it's Pro/Premium-only): multi-column sort via shift-click isn't
-        // something Community's own header UI offers to begin with.
-        // `sortModel`/`onSortModelChange` themselves *are* safe to pass
-        // straight through here, unlike `filterModel` above — see the
-        // `uncontrolledSortModel` comment for why. All of this is a hard
-        // requirement, not a passed-through default: placed after the
-        // `...props` spread so a consumer can't override it. Column
-        // drag-reorder is untouched and keeps working.
-        paginationMode="server"
-        filterMode="server"
-        sortingMode="server"
-        sortModel={sortModel}
-        onSortModelChange={handleSortModelChange}
-        slots={{
-          toolbar: GroupedDataTableToolbar,
-          filterPanel: GroupedDataTableFilterPanel,
-          ...props.slots,
-          footer: GroupedDataTableFooter,
-        }}
-        slotProps={{
-          ...props.slotProps,
-          // Every native icon button the grid itself renders without an
-          // explicit `color` of its own — the sort arrow chief among them,
-          // now that sorting is live — resolves to MUI `IconButton`'s own
-          // default `color="default"`, which this project's theme
-          // (src/theme/index.ts) maps to a literal `main: '#ffffff'`
-          // (`palette.default`, added for `<Button color="default">`, not
-          // icon buttons). That renders the icon fully white-on-white
-          // against the header background: present in the DOM (confirmed:
-          // the `<svg data-testid="ArrowUpwardIcon">` is there once sorted)
-          // but invisible — the exact same pitfall already documented (and
-          // fixed the same way, `color="inherit"`) on this component's own
-          // toolbar filter trigger and aggregation-menu trigger, just not
-          // reachable there since this one's rendered entirely inside the
-          // underlying grid, not by this component's own JSX. Merged rather
-          // than replaced (`...props.slotProps` above already covers every
-          // other slot) so a consumer's own `slotProps.baseIconButton`
-          // still wins field-by-field, color included.
-          baseIconButton: {
-            color: 'inherit',
-            ...props.slotProps?.baseIconButton,
-          },
-          toolbar: {
-            filterCount: filterModel.items.length,
-            onPrint: handlePrint,
-            onExportCsv: handleExportCsv,
-            onExportExcel: handleExportExcel,
-          },
-          footer: {
-            groupCount: topLevelRowCount,
-            grandTotals,
-            aggregations,
-            columnByField,
-            onExpandAll: expandAll,
-            onCollapseAll: collapseAll,
-          },
-        }}
-        className={clsx('grouped-data-table', className)}
-      />
-    </GroupedDataTableFilterContext.Provider>
+    <GroupedDataTableAggregationMenuContext.Provider
+      value={aggregationMenuContextValue}
+    >
+      <GroupedDataTableFilterContext.Provider value={filterContextValue}>
+        <DataTable<GroupedRow<TRow>>
+          {...(props as DataTableProps<GroupedRow<TRow>>)}
+          initialState={gridInitialState}
+          rows={pageRows}
+          columns={groupedColumns}
+          getRowClassName={groupAwareGetRowClassName}
+          isRowSelectable={groupAwareIsRowSelectable}
+          checkboxSelection={checkboxSelection}
+          showToolbar={showToolbar}
+          columnHeaderHeight={columnHeaderHeight}
+          paginationModel={paginationModel}
+          onPaginationModelChange={handlePaginationModelChange}
+          // No `filterModel`/`onFilterModelChange` here, deliberately — the
+          // underlying Community `<DataGrid>` forces
+          // `disableMultipleColumnsFiltering: true` unconditionally (confirmed
+          // in its own `DATA_GRID_FORCED_PROPS`, no prop overrides it), and
+          // every `setFilterModel` call — including the one its own controlled-
+          // prop sync effect makes whenever the `filterModel` prop changes —
+          // truncates `items` down to one and logs a console error once a
+          // second item exists. `GroupedDataTableFilterPanel` reads and writes
+          // `filterModel` through `GroupedDataTableFilterContext` instead (see
+          // its own doc comment for why `slotProps` alone isn't enough here),
+          // bypassing the grid entirely — `filterRowsByModel` already uses that
+          // same state, not whatever the grid's own internal copy ends up
+          // holding, so none of this affects what's actually filtered.
+          // `rowCount` is the top-level group count, not `pageRows.length` or
+          // `flattenedRows.length` — it's what `GridPagination`'s "X–Y of
+          // rowCount" and page-count math are based on, and it must match what
+          // `paginationModel.pageSize` actually paginates over (see
+          // `computeTopLevelPaginationRange`).
+          rowCount={topLevelRowCount}
+          // `rows` is already exactly one page (`pageRows`, sliced by
+          // `computeTopLevelPaginationRange` above) rather than the grid's own
+          // row-count-based slicing — `paginationMode="server"` tells it to
+          // trust that and not re-slice on top of it, the same mechanism MUI's
+          // own docs use for externally-computed pagination. `filterMode`
+          // mirrors this defensively for filtering: even though the grid is
+          // never given a real `filterModel`, this guarantees it never attempts
+          // to filter `pageRows` itself using whatever stray internal filter
+          // state a column header's "Filter" menu item might otherwise
+          // populate. `sortingMode` mirrors this for sorting, for a stronger
+          // reason than mere defensiveness: `pageRows` already reflects
+          // `sortedTree` (group nodes reordered by their own `groupBy` value or
+          // aggregate, leaf rows by their raw field value — see
+          // `sortGroupTree`), and the grid's own *client* sort mode would
+          // re-sort that already-tree-aware order as one flat list, which has
+          // no concept of "stay under your own group" and would scramble
+          // group/child pairing. `sortModel` is naturally kept to the
+          // single-item shape `sortGroupTree` (and `activeSortModel` above)
+          // actually support without an explicit `disableMultipleColumnsSorting`
+          // — that prop doesn't even exist on this project's Community edition
+          // (it's Pro/Premium-only): multi-column sort via shift-click isn't
+          // something Community's own header UI offers to begin with.
+          // `sortModel`/`onSortModelChange` themselves *are* safe to pass
+          // straight through here, unlike `filterModel` above — see the
+          // `uncontrolledSortModel` comment for why. All of this is a hard
+          // requirement, not a passed-through default: placed after the
+          // `...props` spread so a consumer can't override it. Column
+          // drag-reorder (`toColumnDragReorderAwareColumn`, above) is
+          // unaffected by any of this — it reorders `columnOrder`, a
+          // dimension `paginationMode`/`filterMode`/`sortingMode` don't touch.
+          paginationMode="server"
+          filterMode="server"
+          sortingMode="server"
+          sortModel={sortModel}
+          onSortModelChange={handleSortModelChange}
+          slots={{
+            toolbar: GroupedDataTableToolbar,
+            filterPanel: GroupedDataTableFilterPanel,
+            columnMenu: GroupedDataTableColumnMenu,
+            ...props.slots,
+            footer: GroupedDataTableFooter,
+          }}
+          slotProps={{
+            ...props.slotProps,
+            // Every native icon button the grid itself renders without an
+            // explicit `color` of its own — the sort arrow chief among them,
+            // now that sorting is live — resolves to MUI `IconButton`'s own
+            // default `color="default"`, which this project's theme
+            // (src/theme/index.ts) maps to a literal `main: '#ffffff'`
+            // (`palette.default`, added for `<Button color="default">`, not
+            // icon buttons). That renders the icon fully white-on-white
+            // against the header background: present in the DOM (confirmed:
+            // the `<svg data-testid="ArrowUpwardIcon">` is there once sorted)
+            // but invisible — the exact same pitfall already documented (and
+            // fixed the same way, `color="inherit"`) on this component's own
+            // toolbar filter trigger, just not reachable there since this
+            // one's rendered entirely inside the underlying grid, not by this
+            // component's own JSX. Merged rather than replaced
+            // (`...props.slotProps` above already covers every other slot)
+            // so a consumer's own `slotProps.baseIconButton` still wins
+            // field-by-field, color included.
+            baseIconButton: {
+              color: 'inherit',
+              ...props.slotProps?.baseIconButton,
+            },
+            toolbar: {
+              filterCount: filterModel.items.length,
+              onPrint: handlePrint,
+              onExportCsv: handleExportCsv,
+              onExportExcel: handleExportExcel,
+            },
+            footer: {
+              groupCount: topLevelRowCount,
+              grandTotals,
+              aggregations,
+              columnByField,
+              onExpandAll: expandAll,
+              onCollapseAll: collapseAll,
+            },
+          }}
+          className={clsx('grouped-data-table', className)}
+        />
+      </GroupedDataTableFilterContext.Provider>
+    </GroupedDataTableAggregationMenuContext.Provider>
   )
 }
 

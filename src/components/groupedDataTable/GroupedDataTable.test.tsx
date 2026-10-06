@@ -327,10 +327,9 @@ describe('GroupedDataTable', () => {
       // `slotProps.baseIconButton` forcing `color="inherit"` (see the JSX
       // below `<DataTable>`), the arrow icon renders fully white-on-white:
       // present in the DOM, but invisible. The same pitfall this
-      // component's own toolbar filter trigger and aggregation-menu trigger
-      // already had to work around, just not reachable at either of those
-      // call sites since this one's rendered entirely inside the underlying
-      // grid.
+      // component's own toolbar filter trigger already had to work around,
+      // just not reachable at that call site since this one's rendered
+      // entirely inside the underlying grid.
       render(
         <GroupedDataTable
           rows={unsortedRows}
@@ -2117,6 +2116,21 @@ describe('GroupedDataTable — aggregation header menu', () => {
     },
   ]
 
+  // Opens `columnName`'s own native column menu and picks `fn` ("Sin
+  // agregación" included) from the embedded "Agregación" dropdown — see
+  // `GridColumnMenuAggregationItem`'s own doc comment for why this is a
+  // `Select`, not a flat list of `menuitem`s, mirroring MUI X Premium's own
+  // version of this exact column-menu section.
+  async function selectAggregation(
+    user: ReturnType<typeof userEvent.setup>,
+    columnName: string,
+    fn: string,
+  ) {
+    await user.click(screen.getByLabelText(`${columnName} column menu`))
+    await user.click(screen.getByRole('combobox', { name: 'Agregación' }))
+    await user.click(screen.getByRole('option', { name: fn }))
+  }
+
   it("shows the active function as a small label under the column name, matching MUI X Premium's own screenshot", () => {
     render(
       <GroupedDataTable
@@ -2140,7 +2154,8 @@ describe('GroupedDataTable — aggregation header menu', () => {
     ).not.toBeInTheDocument()
   })
 
-  it('only offers the aggregation menu trigger on numeric, non-groupBy columns', () => {
+  it("only folds an \"Agregación\" dropdown into the numeric, non-groupBy columns' own menu", async () => {
+    const user = userEvent.setup()
     render(
       <GroupedDataTable
         rows={aggregationMenuRows}
@@ -2149,27 +2164,34 @@ describe('GroupedDataTable — aggregation header menu', () => {
       />,
     )
 
+    // Every column gets the grid's one native column menu — that's not
+    // special to aggregable columns (see `GroupedDataTableColumnMenu`'s own
+    // doc comment on why this used to also render a second, dedicated
+    // ellipsis for just this).
+    await user.click(screen.getByLabelText('Valor Total Orden column menu'))
     expect(
-      screen.getByRole('button', {
-        name: 'Opciones de agregación de "Valor Total Orden"',
-      }),
+      screen.getByRole('combobox', { name: 'Agregación' }),
     ).toBeInTheDocument()
-    expect(
-      screen.getByRole('button', {
-        name: 'Opciones de agregación de "Cantidad Orden"',
-      }),
-    ).toBeInTheDocument()
+    await user.keyboard('{Escape}')
 
-    // "Tienda" (the groupBy field) and "Producto" (not numeric) get none.
+    await user.click(screen.getByLabelText('Cantidad Orden column menu'))
     expect(
-      screen.queryByRole('button', {
-        name: 'Opciones de agregación de "Tienda"',
-      }),
+      screen.getByRole('combobox', { name: 'Agregación' }),
+    ).toBeInTheDocument()
+    await user.keyboard('{Escape}')
+
+    // "Tienda" (the groupBy field) and "Producto" (not numeric) still get
+    // the native menu itself (Sort/Filter/Manage columns), just no
+    // "Agregación" dropdown in it.
+    await user.click(screen.getByLabelText('Tienda column menu'))
+    expect(
+      screen.queryByRole('combobox', { name: 'Agregación' }),
     ).not.toBeInTheDocument()
+    await user.keyboard('{Escape}')
+
+    await user.click(screen.getByLabelText('Producto column menu'))
     expect(
-      screen.queryByRole('button', {
-        name: 'Opciones de agregación de "Producto"',
-      }),
+      screen.queryByRole('combobox', { name: 'Agregación' }),
     ).not.toBeInTheDocument()
   })
 
@@ -2189,12 +2211,7 @@ describe('GroupedDataTable — aggregation header menu', () => {
       .closest('.MuiDataGrid-row') as HTMLElement
     expect(within(subaRow).getByText('300')).toBeInTheDocument()
 
-    await user.click(
-      screen.getByRole('button', {
-        name: 'Opciones de agregación de "Valor Total Orden"',
-      }),
-    )
-    await user.click(screen.getByRole('menuitem', { name: 'avg' }))
+    await selectAggregation(user, 'Valor Total Orden', 'avg')
 
     expect(
       within(
@@ -2215,12 +2232,7 @@ describe('GroupedDataTable — aggregation header menu', () => {
       />,
     )
 
-    await user.click(
-      screen.getByRole('button', {
-        name: 'Opciones de agregación de "Cantidad Orden"',
-      }),
-    )
-    await user.click(screen.getByRole('menuitem', { name: 'sum' }))
+    await selectAggregation(user, 'Cantidad Orden', 'sum')
 
     const subaRow = screen
       .getByText('SOD SUBA (2)')
@@ -2228,12 +2240,7 @@ describe('GroupedDataTable — aggregation header menu', () => {
     expect(within(subaRow).getByText('10')).toBeInTheDocument()
     expect(screen.getByText('Total Cantidad Orden: 10')).toBeInTheDocument()
 
-    await user.click(
-      screen.getByRole('button', {
-        name: 'Opciones de agregación de "Cantidad Orden"',
-      }),
-    )
-    await user.click(screen.getByRole('menuitem', { name: 'Sin agregación' }))
+    await selectAggregation(user, 'Cantidad Orden', 'Sin agregación')
 
     expect(
       within(
@@ -2259,12 +2266,7 @@ describe('GroupedDataTable — aggregation header menu', () => {
       />,
     )
 
-    await user.click(
-      screen.getByRole('button', {
-        name: 'Opciones de agregación de "Valor Total Orden"',
-      }),
-    )
-    await user.click(screen.getByRole('menuitem', { name: 'max' }))
+    await selectAggregation(user, 'Valor Total Orden', 'max')
 
     expect(handleAggregationsChange).toHaveBeenCalledWith([
       { field: 'valorTotalOrden', fn: 'max' },
@@ -2309,12 +2311,7 @@ describe('GroupedDataTable — aggregation header menu', () => {
       />,
     )
 
-    await user.click(
-      screen.getByRole('button', {
-        name: 'Opciones de agregación de "Valor Total Orden"',
-      }),
-    )
-    await user.click(screen.getByRole('menuitem', { name: 'max' }))
+    await selectAggregation(user, 'Valor Total Orden', 'max')
 
     expect(
       within(
@@ -3097,5 +3094,227 @@ describe('GroupedDataTable — column visibility', () => {
     await user.click(screen.getByRole('menuitem', { name: 'Manage columns' }))
 
     expect(screen.getByRole('checkbox', { name: 'Tienda' })).toBeDisabled()
+  })
+})
+
+describe('GroupedDataTable — column drag reorder', () => {
+  // A plain object stands in for the real `DataTransfer` jsdom doesn't
+  // implement (confirmed in `@testing-library/dom`'s own `createEvent` —
+  // see https://github.com/jsdom/jsdom/issues/1568) — `setData` is called
+  // (Firefox requires it for a real drag to start at all) but never read
+  // back here, same as `toColumnDragReorderAwareColumn` itself never reads
+  // it; `effectAllowed` is only ever written, never asserted on.
+  function fireColumnDrag(
+    sourceField: string,
+    targetField: string,
+    { dropOutside = false }: { dropOutside?: boolean } = {},
+  ) {
+    const dataTransfer = { setData: jest.fn(), effectAllowed: '' }
+    const source = screen
+      .getByRole('columnheader', { name: sourceField })
+      .querySelector('.grouped-data-table__header-drag-handle') as HTMLElement
+    const target = screen
+      .getByRole('columnheader', { name: targetField })
+      .querySelector('.grouped-data-table__header-drag-handle') as HTMLElement
+
+    fireEvent.dragStart(source, { dataTransfer })
+    if (!dropOutside) {
+      fireEvent.dragEnter(target, { dataTransfer })
+      fireEvent.dragOver(target, { dataTransfer })
+      fireEvent.drop(target, { dataTransfer })
+    }
+    fireEvent.dragEnd(source, { dataTransfer })
+  }
+
+  function headerFields(): Array<string | null> {
+    return screen
+      .getAllByRole('columnheader')
+      .map((header) => header.getAttribute('data-field'))
+  }
+
+  it("drops one column header onto another to move it there, matching MUI X Premium/Pro's own column drag-and-drop", () => {
+    render(<GroupedDataTable rows={rows} columns={columns} groupBy="tienda" />)
+    expect(headerFields()).toEqual([
+      'tienda',
+      'producto',
+      'cantidadOrden',
+      'valorTotalOrden',
+    ])
+
+    fireColumnDrag('Tienda', 'Producto')
+
+    expect(headerFields()).toEqual([
+      'producto',
+      'tienda',
+      'cantidadOrden',
+      'valorTotalOrden',
+    ])
+  })
+
+  it('reorders the data cells along with the headers, not just the header labels', () => {
+    render(<GroupedDataTable rows={rows} columns={columns} groupBy="tienda" />)
+    fireEvent.click(screen.getAllByLabelText('Expandir grupo')[0])
+
+    fireColumnDrag('Tienda', 'Producto')
+
+    const tapeteARow = screen
+      .getByText('Tapete A')
+      .closest('.MuiDataGrid-row') as HTMLElement
+    expect(
+      Array.from(tapeteARow.querySelectorAll('[data-field]')).map((cell) =>
+        cell.getAttribute('data-field'),
+      ),
+    ).toEqual(['producto', 'tienda', 'cantidadOrden', 'valorTotalOrden'])
+  })
+
+  it('is a no-op when a column is dropped back onto itself', () => {
+    render(<GroupedDataTable rows={rows} columns={columns} groupBy="tienda" />)
+
+    fireColumnDrag('Tienda', 'Tienda')
+
+    expect(headerFields()).toEqual([
+      'tienda',
+      'producto',
+      'cantidadOrden',
+      'valorTotalOrden',
+    ])
+  })
+
+  it('leaves the order untouched when the drag ends without a drop (e.g. dropped outside any header)', () => {
+    render(<GroupedDataTable rows={rows} columns={columns} groupBy="tienda" />)
+
+    fireColumnDrag('Tienda', 'Producto', { dropOutside: true })
+
+    expect(headerFields()).toEqual([
+      'tienda',
+      'producto',
+      'cantidadOrden',
+      'valorTotalOrden',
+    ])
+  })
+
+  it('dims the dragged column while the drag is in progress, and un-dims it once the drag ends', () => {
+    render(<GroupedDataTable rows={rows} columns={columns} groupBy="tienda" />)
+    const tiendaHandle = screen
+      .getByRole('columnheader', { name: 'Tienda' })
+      .querySelector('.grouped-data-table__header-drag-handle') as HTMLElement
+    const dataTransfer = { setData: jest.fn(), effectAllowed: '' }
+
+    expect(tiendaHandle).not.toHaveClass(
+      'grouped-data-table__header-drag-handle--dragging',
+    )
+
+    fireEvent.dragStart(tiendaHandle, { dataTransfer })
+    expect(tiendaHandle).toHaveClass(
+      'grouped-data-table__header-drag-handle--dragging',
+    )
+
+    fireEvent.dragEnd(tiendaHandle, { dataTransfer })
+    expect(tiendaHandle).not.toHaveClass(
+      'grouped-data-table__header-drag-handle--dragging',
+    )
+  })
+
+  it('appends a newly-added column at the end and drops a removed one, instead of needing `columnOrderModel` kept in lockstep by hand', () => {
+    const { rerender } = render(
+      <GroupedDataTable rows={rows} columns={columns} groupBy="tienda" />,
+    )
+    fireColumnDrag('Tienda', 'Producto')
+    expect(headerFields()).toEqual([
+      'producto',
+      'tienda',
+      'cantidadOrden',
+      'valorTotalOrden',
+    ])
+
+    // `cantidadOrden` dropped, a new `descuento` column added.
+    const nextColumns: GridColDef[] = [
+      columns[0],
+      columns[1],
+      columns[3],
+      { field: 'descuento', headerName: 'Descuento' },
+    ]
+    rerender(
+      <GroupedDataTable rows={rows} columns={nextColumns} groupBy="tienda" />,
+    )
+
+    // The drag-reordered relative position of `producto`/`tienda` survives;
+    // `cantidadOrden` is gone, and `descuento` — never seen before — is
+    // appended at the end rather than inserted anywhere else.
+    expect(headerFields()).toEqual([
+      'producto',
+      'tienda',
+      'valorTotalOrden',
+      'descuento',
+    ])
+  })
+
+  function ControlledColumnOrderHarness({
+    rows: harnessRows,
+    columns: harnessColumns,
+  }: {
+    rows: ReadonlyArray<DemoRow>
+    columns: ReadonlyArray<GridColDef>
+  }) {
+    const [columnOrderModel, setColumnOrderModel] = useState<
+      ReadonlyArray<string>
+    >(harnessColumns.map((column) => column.field))
+    return (
+      <GroupedDataTable
+        rows={harnessRows as Array<DemoRow>}
+        columns={harnessColumns as Array<GridColDef>}
+        groupBy="tienda"
+        columnOrderModel={columnOrderModel}
+        onColumnOrderModelChange={setColumnOrderModel}
+      />
+    )
+  }
+
+  it('round-trips through a consumer-owned columnOrderModel state once wired up as a controlled prop', () => {
+    render(<ControlledColumnOrderHarness rows={rows} columns={columns} />)
+
+    fireColumnDrag('Tienda', 'Producto')
+
+    // Only actually re-renders with the new order because the harness feeds
+    // `onColumnOrderModelChange`'s reported model straight back in as
+    // `columnOrderModel` — same controlled-prop contract
+    // `onAggregationsChange` already documents elsewhere in this component.
+    expect(headerFields()).toEqual([
+      'producto',
+      'tienda',
+      'cantidadOrden',
+      'valorTotalOrden',
+    ])
+  })
+
+  it('still drags and reorders when columnOrderModel is given without onColumnOrderModelChange — it only seeds the internal order once, same as every other seed-only prop here', () => {
+    render(
+      <GroupedDataTable
+        rows={rows}
+        columns={columns}
+        groupBy="tienda"
+        columnOrderModel={[
+          'valorTotalOrden',
+          'cantidadOrden',
+          'producto',
+          'tienda',
+        ]}
+      />,
+    )
+    expect(headerFields()).toEqual([
+      'valorTotalOrden',
+      'cantidadOrden',
+      'producto',
+      'tienda',
+    ])
+
+    fireColumnDrag('Tienda', 'Cantidad Orden')
+
+    expect(headerFields()).toEqual([
+      'valorTotalOrden',
+      'tienda',
+      'cantidadOrden',
+      'producto',
+    ])
   })
 })
