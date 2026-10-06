@@ -30,6 +30,8 @@ const columns: GridColDef[] = [
     field: 'valorTotalOrden',
     headerName: 'Valor',
     type: 'number',
+    valueFormatter: (value: number) =>
+      `$${Math.round(value).toLocaleString('en-US')}`,
     flex: 1,
   },
 ]
@@ -139,12 +141,16 @@ const realOrderColumns: GridColDef[] = [
     field: 'costoUnitario',
     headerName: 'Costo Unitario',
     type: 'number',
+    valueFormatter: (value: number) =>
+      `$${Math.round(value).toLocaleString('en-US')}`,
     flex: 1,
   },
   {
     field: 'valorLinea',
     headerName: 'Valor Línea',
     type: 'number',
+    valueFormatter: (value: number) =>
+      `$${Math.round(value).toLocaleString('en-US')}`,
     flex: 1,
   },
 ]
@@ -202,6 +208,7 @@ export const Default: Story = {
     columns,
     groupBy: 'tienda',
     aggregations: [{ field: 'valorTotalOrden', fn: 'sum' }],
+    tableTitle: 'Órdenes de compra por tienda',
   },
 }
 
@@ -214,6 +221,7 @@ export const WithMultipleAggregations: Story = {
       { field: 'valorTotalOrden', fn: 'sum' },
       { field: 'cantidadOrden', fn: 'sum' },
     ],
+    tableTitle: 'Órdenes de compra por tienda',
   },
   parameters: {
     docs: {
@@ -231,6 +239,7 @@ export const WithAggregationMenu: Story = {
     columns,
     groupBy: 'tienda',
     aggregations: [{ field: 'valorTotalOrden', fn: 'sum' }],
+    tableTitle: 'Órdenes de compra por tienda',
   },
   parameters: {
     docs: {
@@ -262,6 +271,7 @@ export const WithSorting: Story = {
     columns,
     groupBy: 'tienda',
     aggregations: [{ field: 'valorTotalOrden', fn: 'sum' }],
+    tableTitle: 'Órdenes de compra por tienda',
   },
   parameters: {
     docs: {
@@ -287,6 +297,7 @@ export const Empty: Story = {
     columns,
     groupBy: 'tienda',
     aggregations: [{ field: 'valorTotalOrden', fn: 'sum' }],
+    tableTitle: 'Órdenes de compra por tienda',
   },
 }
 
@@ -299,6 +310,7 @@ export const WithPagination: Story = {
       { field: 'cantidad', fn: 'sum' },
       { field: 'valorLinea', fn: 'sum' },
     ],
+    tableTitle: 'Órdenes de compra por tienda',
   },
   parameters: {
     docs: {
@@ -348,6 +360,7 @@ export const WithFiltering: Story = {
         },
       },
     },
+    tableTitle: 'Órdenes de compra por tienda',
   },
   parameters: {
     docs: {
@@ -388,6 +401,7 @@ export const WithColumnVisibility: Story = {
     columns: realOrderColumns,
     groupBy: 'tienda',
     aggregations: [{ field: 'valorLinea', fn: 'sum' }],
+    tableTitle: 'Órdenes de compra por tienda',
   },
   parameters: {
     docs: {
@@ -472,6 +486,7 @@ export const MultiLevelGrouping: Story = {
     columns: dispatchColumns,
     groupBy: ['tienda', 'contenedor'],
     aggregations: [{ field: 'cantidad', fn: 'sum' }],
+    tableTitle: 'Órdenes de compra por tienda',
   },
   parameters: {
     docs: {
@@ -490,6 +505,7 @@ export const WithFooterAggregationPosition: Story = {
     groupBy: 'tienda',
     aggregations: [{ field: 'valorTotalOrden', fn: 'sum' }],
     aggregationPosition: 'footer',
+    tableTitle: 'Órdenes de compra por tienda',
   },
   parameters: {
     docs: {
@@ -551,6 +567,7 @@ export const WithActionsColumn: Story = {
     columns: columnsWithActions,
     groupBy: 'tienda',
     aggregations: [{ field: 'valorTotalOrden', fn: 'sum' }],
+    tableTitle: 'Órdenes de compra por tienda',
   },
   parameters: {
     docs: {

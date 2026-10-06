@@ -5,7 +5,7 @@ import {
   useMemo,
   useState,
 } from 'react'
-import type { ComponentProps, ReactNode } from 'react'
+import type { ComponentProps, ReactNode, RefObject } from 'react'
 import {
   ColumnsPanelTrigger,
   FilterPanelTrigger,
@@ -18,6 +18,7 @@ import {
 } from '@mui/x-data-grid'
 import type {
   FooterPropsOverrides,
+  GridApi,
   GridColDef,
   GridColumnHeaderParams,
   GridFilterItem,
@@ -44,6 +45,7 @@ import Typography from '@mui/material/Typography'
 import AddIcon from '@mui/icons-material/Add'
 import CloseIcon from '@mui/icons-material/Close'
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever'
+import DownloadIcon from '@mui/icons-material/Download'
 import FilterAltOutlinedIcon from '@mui/icons-material/FilterAltOutlined'
 import FilterListIcon from '@mui/icons-material/FilterList'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
@@ -54,6 +56,13 @@ import UnfoldLessIcon from '@mui/icons-material/UnfoldLess'
 import ViewColumnIcon from '@mui/icons-material/ViewColumn'
 import DataTable from '#/components/dataTable/DataTable'
 import type { DataTableProps } from '#/components/dataTable/DataTable'
+import {
+  buildExportMatrix,
+  buildPdfSummaryRow,
+  exportMatrixToCsv,
+  exportMatrixToExcel,
+  exportMatrixToPdf,
+} from './GroupedDataTable.export'
 import './GroupedDataTable.css'
 
 // `FooterPropsOverrides` is an empty interface MUI ships specifically for
@@ -64,12 +73,15 @@ declare module '@mui/x-data-grid' {
     groupCount: number
     grandTotals: Record<string, number>
     aggregations: Array<{ field: string }>
-    columnHeaderByField: Map<string, string>
+    columnByField: Map<string, GridColDef>
     onExpandAll: () => void
     onCollapseAll: () => void
   }
   interface ToolbarPropsOverrides {
     filterCount: number
+    onPrint: () => void
+    onExportCsv: () => void
+    onExportExcel: () => void
   }
 }
 
@@ -233,6 +245,21 @@ export type GroupedDataTableProps<TRow extends GridValidRowModel> =
     aggregationFunctions?: Record<string, AggregationFunction>
     /** @default 'inline' */
     aggregationPosition?: AggregationPosition
+    /** Base name (no extension) for the file the toolbar's download menu
+     *  produces — "Descargar como CSV"/"Descargar como Excel" append
+     *  `.csv`/`.xlsx`, "Imprimir" appends `.pdf`. See
+     *  GroupedDataTable.export.ts.
+     *  @default 'datos' */
+    exportFileName?: string
+    /** Heading printed above the table in the "Descargar como PDF" export
+     *  (`exportMatrixToPdf`'s own `title` — GroupedDataTable.export.ts).
+     *  Previously `exportFileName` did double duty as this heading too,
+     *  which meant every PDF literally read "datos" at the top unless a
+     *  consumer renamed the downloaded file itself just to get a different
+     *  heading. Falls back to `exportFileName` when unset, so existing call
+     *  sites keep their current (if accidental) heading unchanged.
+     *  @default exportFileName */
+    tableTitle?: string
   }
 
 /** Built-in aggregation functions, keyed by the `AggregationFn` names
@@ -799,6 +826,34 @@ export function filterRowsByModel<TRow extends GridValidRowModel>(
   return rows.filter((row) => rowMatchesFilterModel(row, filterModel))
 }
 
+/** Stands in for the live grid `row`/`apiRef` a `GridColDef['valueFormatter']`
+ *  signature requires as its 2nd/4th arguments — same precedent as
+ *  `EXPORT_API_REF` in GroupedDataTable.export.ts: an aggregate has no real
+ *  `TRow` behind it (it's a computed sum/avg/etc. over a whole group), and
+ *  every formatter in this codebase only reads its first ("value") argument
+ *  (see `usePurchaseOrdersColumns.tsx`), so these stubs are never actually
+ *  dereferenced. */
+const AGGREGATE_API_REF = { current: null } as unknown as RefObject<GridApi>
+
+/** Runs a column's own `valueFormatter` (if any) over one computed aggregate
+ *  — without this, a group row's/footer's aggregated cell showed the raw
+ *  number even when the same column's leaf rows were formatted (leaf cells
+ *  go through `params.formattedValue`, which already applies it; the
+ *  aggregate branches below previously returned `aggregates[field]`
+ *  directly). */
+function formatAggregateValue<TRow extends GridValidRowModel>(
+  column: GridColDef<TRow>,
+  row: unknown,
+  value: number | undefined,
+): number | string {
+  if (value === undefined) {
+    return ''
+  }
+  return column.valueFormatter
+    ? column.valueFormatter(value as never, row as never, column, AGGREGATE_API_REF)
+    : value
+}
+
 /** Wraps one consumer-provided column so the `groupBy` field(s) and any
  *  `aggregations` column know how to render a synthetic group row or
  *  group-footer row: at the field matching a group row's own level, it
@@ -833,19 +888,34 @@ function toGroupAwareColumn<TRow extends GridValidRowModel>(
   const isAggregatedField = aggregatedFields.has(column.field)
 
   // A column that's neither a `groupBy` field nor aggregated has nothing
-  // group-specific to show — pass it through completely untouched instead
-  // of wrapping `renderCell`, so its own rendering (an `actions` column's
-  // `getActions`, `type: 'boolean'`'s checkbox icon, a custom `renderCell`,
-  // or anything else that isn't just `valueFormatter`-driven text) keeps
-  // working exactly as configured, for every row kind — including group
-  // and group-footer rows. A consumer wanting an action (or any other
-  // per-row-kind behavior) available only on group rows checks
-  // `isGroupRow`/`isGroupFooterRow` on `params.row` inside their own
-  // `getActions`/`renderCell`, the same mechanism MUI X Premium's own
-  // `params.rowNode.type` provides. See
+  // group-specific to show. A column with its own `getActions` (`type:
+  // 'actions'`) or a custom `renderCell` (`type: 'boolean'`'s checkbox icon
+  // included) is passed through completely untouched, for every row kind —
+  // its own rendering already decides what to do with whatever `params.row`
+  // it gets, the same `isGroupRow`/`isGroupFooterRow`-on-`params.row` escape
+  // hatch MUI X Premium's own `params.rowNode.type` provides. See
   // specs/03-grouped-data-table-actions-column.md.
+  //
+  // A plain column with nothing but a `valueFormatter` (the common case —
+  // every *_usePurchaseOrdersColumns.tsx-style column, e.g.) has no such
+  // escape hatch: left untouched, MUI's own default cell rendering would run
+  // `valueFormatter`/`valueGetter` straight against a synthetic
+  // `GroupRow`/`GroupFooterRow`, which doesn't carry this field at all —
+  // e.g. a `Math.round(value)`-based currency formatter renders the literal
+  // text "$NaN" instead of blank. So it's blanked here on synthetic rows
+  // instead, the same way an aggregated/grouped field already blanks itself
+  // on the row kind it doesn't apply to.
   if (!isGroupedField && !isAggregatedField) {
-    return original
+    if (column.type === 'actions' || column.renderCell) {
+      return original
+    }
+    return {
+      ...original,
+      renderCell: (params: GridRenderCellParams<GroupedRow<TRow>>) =>
+        isGroupRow(params.row) || isGroupFooterRow(params.row)
+          ? ''
+          : params.formattedValue,
+    }
   }
 
   return {
@@ -873,7 +943,7 @@ function toGroupAwareColumn<TRow extends GridValidRowModel>(
           )
         }
         if (isAggregatedField) {
-          return row.aggregates[column.field] ?? ''
+          return formatAggregateValue(column, row, row.aggregates[column.field])
         }
         return ''
       }
@@ -905,7 +975,7 @@ function toGroupAwareColumn<TRow extends GridValidRowModel>(
           )
         }
         if (isAggregatedField) {
-          return group.aggregates[column.field] ?? ''
+          return formatAggregateValue(column, group, group.aggregates[column.field])
         }
         return ''
       }
@@ -1165,8 +1235,22 @@ function toGroupAwareIsRowSelectable<TRow extends GridValidRowModel>(
  *  `hideable: false` in `toGroupAwareColumn`, which disables (rather than
  *  removes) its row in the panel, same as MUI X Premium's own screenshots
  *  show for a non-hideable column. `showToolbar` must also be `true` for any
- *  `slots.toolbar` to render at all — defaulted alongside this below. */
-function GroupedDataTableToolbar({ filterCount }: ToolbarPropsOverrides) {
+ *  `slots.toolbar` to render at all — defaulted alongside this below.
+ *
+ *  The download button (`onPrint`/`onExportCsv`/`onExportExcel`, from
+ *  `GroupedDataTable`'s own export handlers via `slotProps.toolbar`) mirrors
+ *  MUI X Premium's own toolbar export menu — "Print"/"Download as CSV"/
+ *  "Download as Excel" — rebuilt here the same reason the rest of this
+ *  toolbar is: row-grouping/aggregation-aware export isn't available in
+ *  Community `@mui/x-data-grid` either. See GroupedDataTable.export.ts. */
+function GroupedDataTableToolbar({
+  filterCount,
+  onPrint,
+  onExportCsv,
+  onExportExcel,
+}: ToolbarPropsOverrides) {
+  const [exportAnchorEl, setExportAnchorEl] = useState<HTMLElement | null>(null)
+
   return (
     <Toolbar>
       <Tooltip title="Columnas">
@@ -1228,6 +1312,46 @@ function GroupedDataTableToolbar({ filterCount }: ToolbarPropsOverrides) {
           )}
         />
       </Tooltip>
+      <Tooltip title="Descargar">
+        <ToolbarButton
+          color="inherit"
+          onClick={(event) => setExportAnchorEl(event.currentTarget)}
+          aria-haspopup="menu"
+          aria-expanded={Boolean(exportAnchorEl)}
+        >
+          <DownloadIcon fontSize="small" />
+        </ToolbarButton>
+      </Tooltip>
+      <Menu
+        anchorEl={exportAnchorEl}
+        open={Boolean(exportAnchorEl)}
+        onClose={() => setExportAnchorEl(null)}
+      >
+        <MenuItem
+          onClick={() => {
+            setExportAnchorEl(null)
+            onPrint()
+          }}
+        >
+          Descargar como PDF
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            setExportAnchorEl(null)
+            onExportCsv()
+          }}
+        >
+          Descargar como CSV
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            setExportAnchorEl(null)
+            onExportExcel()
+          }}
+        >
+          Descargar como Excel
+        </MenuItem>
+      </Menu>
     </Toolbar>
   )
 }
@@ -1648,7 +1772,7 @@ function GroupedDataTableFooter({
   groupCount,
   grandTotals,
   aggregations,
-  columnHeaderByField,
+  columnByField,
   onExpandAll,
   onCollapseAll,
   ...containerProps
@@ -1683,17 +1807,26 @@ function GroupedDataTableFooter({
         >
           Total de grupos: {groupCount}
         </Typography>
-        {aggregations.map((aggregation) => (
-          <Typography
-            key={aggregation.field}
-            variant="body2"
-            component="span"
-            className="grouped-data-table__totals-item"
-          >
-            Total {columnHeaderByField.get(aggregation.field)}:{' '}
-            {grandTotals[aggregation.field]}
-          </Typography>
-        ))}
+        {aggregations.map((aggregation) => {
+          const column = columnByField.get(aggregation.field)
+          return (
+            <Typography
+              key={aggregation.field}
+              variant="body2"
+              component="span"
+              className="grouped-data-table__totals-item"
+            >
+              Total {column?.headerName ?? aggregation.field}:{' '}
+              {column
+                ? formatAggregateValue(
+                    column,
+                    undefined,
+                    grandTotals[aggregation.field],
+                  )
+                : grandTotals[aggregation.field]}
+            </Typography>
+          )
+        })}
       </div>
       {rootProps.pagination && !rootProps.hideFooterPagination && (
         <GridPagination />
@@ -1721,6 +1854,8 @@ const GroupedDataTable = <TRow extends GridValidRowModel>({
   onAggregationsChange: onAggregationsChangeProp,
   aggregationFunctions: aggregationFunctionsProp,
   aggregationPosition = 'inline',
+  exportFileName = 'datos',
+  tableTitle,
   // Bumped only while at least one column is actually aggregated (see
   // `columnHeaderHeight` below) — the extra few pixels a second header line
   // (the active-function label, `GroupedDataTableAggregationHeader`) needs
@@ -2046,6 +2181,42 @@ const GroupedDataTable = <TRow extends GridValidRowModel>({
     [sortedTree, collapsedPaths, aggregationPosition],
   )
 
+  // The toolbar's download menu (`GroupedDataTableToolbar`) exports every
+  // filtered record, flat — `filteredRows` (sorted the same way the grid
+  // is), never `flattenedRows`/`pageRows`. Confirmed against MUI X
+  // Premium's own CSV export source: its default `getRowsToExport` reads
+  // the full filtered+sorted row list regardless of which groups are
+  // currently collapsed, not the collapse-aware "visible rows" selector —
+  // see `buildExportMatrix`'s own doc comment (GroupedDataTable.export.ts)
+  // for the exact selectors and why `flattenedRows` (collapse-aware, and
+  // every group starts collapsed by default) was the wrong source. Ignores
+  // pagination, same as Premium's own default and matching what
+  // `GroupedDataTableFooter`'s own totals already summarize.
+  const exportRows = useMemo(
+    () =>
+      activeSortModel
+        ? sortLeafRows(filteredRows, activeSortModel)
+        : filteredRows,
+    [filteredRows, activeSortModel],
+  )
+
+  // Built fresh on each call rather than memoized: these only run from a
+  // menu click, not on every render, so there's nothing to save by caching a
+  // matrix between clicks that may never happen.
+  const handleExportCsv = useCallback(() => {
+    exportMatrixToCsv(
+      buildExportMatrix(exportRows, columns),
+      `${exportFileName}.csv`,
+    )
+  }, [exportRows, columns, exportFileName])
+
+  const handleExportExcel = useCallback(() => {
+    void exportMatrixToExcel(
+      buildExportMatrix(exportRows, columns),
+      `${exportFileName}.xlsx`,
+    )
+  }, [exportRows, columns, exportFileName])
+
   // Top-level (depth-0) group count — what `paginationModel.pageSize`
   // actually paginates over, regardless of how many descendant rows any of
   // those groups currently have expanded. See `computeTopLevelPaginationRange`.
@@ -2081,16 +2252,38 @@ const GroupedDataTable = <TRow extends GridValidRowModel>({
     [filteredRows, aggregations, aggregationFunctions],
   )
 
-  const columnHeaderByField = useMemo(
-    () =>
-      new Map(
-        columns.map((column) => [
-          column.field,
-          column.headerName ?? column.field,
-        ]),
-      ),
+  const columnByField = useMemo(
+    () => new Map(columns.map((column) => [column.field, column])),
     [columns],
   )
+
+  // Built fresh on each call rather than memoized, same as
+  // `handleExportCsv`/`handleExportExcel` above — only runs from a menu
+  // click. `tableTitle` falls back to `exportFileName` (see its own doc
+  // comment on `GroupedDataTableProps`) so existing call sites keep their
+  // current heading. `grandTotals`/`columnByField` are the same ones
+  // `GroupedDataTableFooter` already renders on screen — the PDF's bottom
+  // summary row (`buildPdfSummaryRow`) mirrors that, not `exportRows`' own
+  // (collapse-independent, but still just the flat records) totals.
+  const handlePrint = useCallback(() => {
+    exportMatrixToPdf(
+      buildExportMatrix(exportRows, columns),
+      `${exportFileName}.pdf`,
+      tableTitle ?? exportFileName,
+      // No `aggregations` configured means nothing to summarize — an
+      // all-blank foot row would just add empty vertical space to the PDF.
+      aggregations.length > 0
+        ? buildPdfSummaryRow(columns, aggregations, grandTotals)
+        : undefined,
+    )
+  }, [
+    exportRows,
+    columns,
+    exportFileName,
+    tableTitle,
+    aggregations,
+    grandTotals,
+  ])
 
   // For `GroupedDataTableFilterPanel`'s column select — excludes an
   // `actions` column (nothing meaningful to filter by) and anything the
@@ -2208,11 +2401,29 @@ const GroupedDataTable = <TRow extends GridValidRowModel>({
     [filterableColumns, filterModel, handleFilterModelChange],
   )
 
+  // `initialState.filter.filterModel` already seeded `uncontrolledFilterModel`
+  // above — it must not also reach the real underlying `<DataTable>`/
+  // `<DataGrid>` here. Passing it straight through (as `initialState` alone)
+  // seeds the grid's *own*, separate internal filter state with the same
+  // item, and MUI renders its native per-column filter funnel icon off of
+  // that internal state regardless of `filterMode="server"` — producing a
+  // second, duplicate funnel next to this component's own
+  // `toFilterAwareColumn` icon on whichever column the seeded item named
+  // (e.g. "Tienda"). Same reasoning as never passing the `filterModel` *prop*
+  // to the grid below — `filter` is stripped out here for the same reason.
+  const gridInitialState = useMemo(() => {
+    if (!initialState?.filter) {
+      return initialState
+    }
+    const { filter: _filter, ...rest } = initialState
+    return rest
+  }, [initialState])
+
   return (
     <GroupedDataTableFilterContext.Provider value={filterContextValue}>
       <DataTable<GroupedRow<TRow>>
         {...(props as DataTableProps<GroupedRow<TRow>>)}
-        initialState={initialState}
+        initialState={gridInitialState}
         rows={pageRows}
         columns={groupedColumns}
         getRowClassName={groupAwareGetRowClassName}
@@ -2305,12 +2516,15 @@ const GroupedDataTable = <TRow extends GridValidRowModel>({
           },
           toolbar: {
             filterCount: filterModel.items.length,
+            onPrint: handlePrint,
+            onExportCsv: handleExportCsv,
+            onExportExcel: handleExportExcel,
           },
           footer: {
             groupCount: topLevelRowCount,
             grandTotals,
             aggregations,
-            columnHeaderByField,
+            columnByField,
             onExpandAll: expandAll,
             onCollapseAll: collapseAll,
           },
