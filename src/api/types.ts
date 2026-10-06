@@ -151,7 +151,9 @@ export interface PurchaseOrderDetail {
   tiendas: Array<PurchaseOrderStore>
   /** Raw `COSTO_TOT_OC`. */
   costoTotalOc: number
+  cantidadTotalSolicitada: number
   transportadora: string
+  fechaTransmision: IsoDateTime | null
   fechaMinEntrega: IsoDateTime | null
   fechaMaxEntrega: IsoDateTime | null
   fechaCancelacion: IsoDateTime | null
@@ -160,6 +162,7 @@ export interface PurchaseOrderDetail {
   /** Raw `TIPO_OC`, e.g. `"4-Venta Empresa"` — opaque, not parsed here. */
   tipoOc: string
   /** Raw `TIPO_DOCUMENTO`; Homecenter's `-1` sentinel is translated to null. */
+  numPedido: string | null
   tipoDocumento: string | null
   notaPedido: string
   cedulaComprador: string

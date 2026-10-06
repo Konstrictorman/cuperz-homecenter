@@ -18,6 +18,6 @@
 
 @media (min-width: 640px) {
   .purchase-order-detail-modal__summary {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
   }
 }

@@ -34,33 +34,60 @@ const PurchaseOrderDetailModal = ({
     >
       <div className="purchase-order-detail-modal__summary">
         <div>
-          <div className="purchase-order-detail-modal__label">
-            <Typography>EAN punto de entrega</Typography>
-          </div>
+          <Typography className="purchase-order-detail-modal__label">
+            EAN punto de entrega
+          </Typography>
           <Typography>{detail?.eanPuntoEntrega ?? '—'}</Typography>
         </div>
         <div>
-          <div className="purchase-order-detail-modal__label">
-            <Typography>Estado OC</Typography>
-          </div>
+          <Typography className="purchase-order-detail-modal__label">
+            Número de pedido
+          </Typography>
+          <Typography>{detail?.numPedido ?? '—'}</Typography>
+        </div>
+        <div>
+          <Typography className="purchase-order-detail-modal__label">
+            Fecha de pedido
+          </Typography>
+          <Typography>{detail?.fechaTransmision ?? '—'}</Typography>
+        </div>
+        <div>
+          <Typography className="purchase-order-detail-modal__label">
+            Estado OC
+          </Typography>
           <StatusBadge label={order.estadoLabel} tone={order.estadoTone} />
         </div>
         <div>
-          <div className="purchase-order-detail-modal__label">
-            <Typography>Cliente / cadena</Typography>
-          </div>
+          <Typography className="purchase-order-detail-modal__label">
+            Cantidad Total
+          </Typography>
+          <Typography>{detail?.cantidadTotalSolicitada ?? '—'}</Typography>
+        </div>
+        <div>
+          <Typography className="purchase-order-detail-modal__label">
+            Costo Total
+          </Typography>
+
+          <Typography>
+            {`$${Math.round(detail?.costoTotalOc ?? 0).toLocaleString('en-US')}`}
+          </Typography>
+        </div>
+        <div>
+          <Typography className="purchase-order-detail-modal__label">
+            Cliente / cadena
+          </Typography>
           <Typography>{order.cliente}</Typography>
         </div>
         <div>
-          <div className="purchase-order-detail-modal__label">
-            <Typography>Dirección de entrega</Typography>
-          </div>
+          <Typography className="purchase-order-detail-modal__label">
+            Dirección de entrega
+          </Typography>
           <Typography>{detail?.direccionEntrega ?? '—'}</Typography>
         </div>
         <div>
-          <div className="purchase-order-detail-modal__label">
-            <Typography>Código sesión recibo</Typography>
-          </div>
+          <Typography className="purchase-order-detail-modal__label">
+            Código sesión recibo
+          </Typography>
           <Typography>{detail?.codigoSesionRecibo ?? '—'}</Typography>
         </div>
       </div>
@@ -69,6 +96,7 @@ const PurchaseOrderDetailModal = ({
         <PurchaseOrderStoresTable
           tiendas={detail?.tiendas ?? []}
           loading={isPending}
+          purchaseOrderNumber={order.ordenCompra}
         />
       </div>
     </Modal>
