@@ -19,7 +19,7 @@ Homecenter's real contract — no translation layer.
 | TanStack Query hooks / `queryOptions` | `src/api/purchase-orders.ts`, `dispatch-notices.ts`, `integration-log.ts` |
 | Query keys                            | `src/api/query-keys.ts`                                                   |
 | MSW request handlers                  | `src/mocks/handlers/` (combined in `registry.ts`)                         |
-| Seeded in-memory store                | `src/mocks/data/` (`catalog.ts`, `db.ts`)                                 |
+| Seeded in-memory store                | `src/mocks/data/` (`catalog.ts`, `db.ts`, `purchase-orders-seed.json`)    |
 | Worker / server bootstrap             | `src/mocks/browser.ts`, `server.ts`, `enable.ts`                          |
 | Service-worker script                 | `public/mockServiceWorker.js` (vendored, committed)                       |
 
@@ -61,8 +61,17 @@ the client fetches on hydration.
 
 `src/mocks/data/db.ts` seeds once per process with a fixed faker seed:
 
-- **45 purchase orders**, incl. the canonical `8467343` from the spec, spread
-  across `PENDIENTE / PROCESANDO / DESPACHADA / CON_ERROR`.
+- **68 purchase orders**: the canonical `8467343` from the spec, plus 67 real
+  Cross-Docking orders from a Homecenter "Reporte Ordenes de Compra" export
+  (`docs/Reporte Ordenes de Compra_*.xlsx`), pre-parsed into
+  `src/mocks/data/purchase-orders-seed.json` by
+  `scripts/generate-purchase-orders-seed.ts` — re-run that script if the
+  source `.xlsx` is replaced. The export's own 3-value `ESTADO` only
+  distinguishes pending / cancelled / "final"; `db.ts` splits the "final"
+  orders (seeded, so repeatable) across `PROCESANDO / DESPACHADA /
+CON_ERROR` so those screens still have variety to render — see
+  `buildPurchaseOrder`'s doc comment for exactly which fields are real vs.
+  synthetic.
 - **~12 dispatch notices** in `BORRADOR / ENVIADO / CON_NOVEDAD / ERROR_ENVIO`.
 - One `ORDEN_COMPRA_SYNC` integration-log entry per order + one `AVISO_DESPACHO`
   entry per sent notice, each with the raw Homecenter request/response payload.
