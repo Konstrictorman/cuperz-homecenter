@@ -4,7 +4,7 @@ import { useForm } from '@tanstack/react-form'
 import Button from '#/components/button/Button'
 import FilterAltIcon from '@mui/icons-material/FilterAlt'
 import FilterAltOffIcon from '@mui/icons-material/FilterAltOff'
-import './DispatchOrdersFilterBar.css'
+import '../FilterBar.css'
 
 /** Mirrors `PurchaseOrderDispatchStatus` (`#/api/types`) — this status set
  *  only has PENDIENTE/DESPACHADA/CON_ERROR, unlike the richer
@@ -55,7 +55,7 @@ const DispatchOrdersFilterBar = ({
 
   return (
     <form
-      className="orders-filter-bar"
+      className="filter-bar"
       onSubmit={(event) => {
         event.preventDefault()
         event.stopPropagation()
@@ -68,7 +68,7 @@ const DispatchOrdersFilterBar = ({
             label="Número de pedido"
             placeholder="Buscar pedido"
             size="small"
-            className="orders-filter-bar__field"
+            className="filter-bar__field"
             value={field.state.value}
             onChange={(event) => field.handleChange(event.target.value)}
             onBlur={field.handleBlur}
@@ -82,7 +82,7 @@ const DispatchOrdersFilterBar = ({
             label="Orden de compra"
             placeholder="Buscar OC"
             size="small"
-            className="orders-filter-bar__field"
+            className="filter-bar__field"
             value={field.state.value}
             onChange={(event) => field.handleChange(event.target.value)}
             onBlur={field.handleBlur}
@@ -96,7 +96,7 @@ const DispatchOrdersFilterBar = ({
             select
             label="Estado"
             size="small"
-            className="orders-filter-bar__field"
+            className="filter-bar__field"
             value={field.state.value}
             onChange={(event) =>
               field.handleChange(
@@ -120,7 +120,7 @@ const DispatchOrdersFilterBar = ({
             label="Fecha desde"
             type="date"
             size="small"
-            className="orders-filter-bar__field orders-filter-bar__field--narrow"
+            className="filter-bar__field filter-bar__field--narrow"
             slotProps={{ inputLabel: { shrink: true } }}
             value={field.state.value}
             onChange={(event) => field.handleChange(event.target.value)}
@@ -135,7 +135,7 @@ const DispatchOrdersFilterBar = ({
             label="Fecha hasta"
             type="date"
             size="small"
-            className="orders-filter-bar__field orders-filter-bar__field--narrow"
+            className="filter-bar__field filter-bar__field--narrow"
             slotProps={{ inputLabel: { shrink: true } }}
             value={field.state.value}
             onChange={(event) => field.handleChange(event.target.value)}
@@ -144,12 +144,12 @@ const DispatchOrdersFilterBar = ({
         )}
       </form.Field>
 
-      <div className="orders-filter-bar__actions">
+      <div className="filter-bar__actions">
         <Button
           type="submit"
           variant="contained"
           endIcon={<FilterAltIcon />}
-          className="orders-filter-bar__action"
+          className="filter-bar__action"
         >
           Filtrar
         </Button>
@@ -170,7 +170,7 @@ const DispatchOrdersFilterBar = ({
               type="button"
               variant="outlined"
               endIcon={<FilterAltOffIcon />}
-              className="orders-filter-bar__action"
+              className="filter-bar__action"
               disabled={!isFiltered}
               onClick={() => {
                 form.reset()

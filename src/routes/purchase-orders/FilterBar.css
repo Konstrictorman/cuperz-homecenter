@@ -1,0 +1,48 @@
+/*
+ * Shared by OrdersFilterBar (details) and DispatchOrdersFilterBar (dispatch).
+ * Layout only. The dark-mode input / menu overrides that used to live here are
+ * gone — the real MUI theme (src/theme/index.ts) now carries a proper `dark`
+ * colour scheme, so MUI's OutlinedInput, InputLabel, Select menu and the native
+ * date picker (via `color-scheme`) render correctly in dark mode on their own.
+ */
+.filter-bar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  align-self: center;
+}
+
+.filter-bar__field {
+  width: 100%;
+}
+
+.filter-bar__action {
+  width: 100%;
+  margin-top: var(--space-3xs);
+}
+
+.filter-bar__actions {
+  display: flex;
+  gap: var(--space-xs);
+}
+
+/* Container is `.purchase-orders` (container-type: inline-size). */
+@container (min-width: 32rem) {
+  .filter-bar {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-end;
+  }
+
+  .filter-bar__field {
+    width: 14rem;
+  }
+
+  .filter-bar__field--narrow {
+    width: 12rem;
+  }
+
+  .filter-bar__action {
+    width: auto;
+  }
+}

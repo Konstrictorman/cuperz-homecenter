@@ -5,7 +5,7 @@ import type { StatusBadgeTone } from '#/components/statusBadge/StatusBadge'
 import Button from '#/components/button/Button'
 import FilterAltIcon from '@mui/icons-material/FilterAlt'
 import FilterAltOffIcon from '@mui/icons-material/FilterAltOff'
-import './OrdersFilterBar.css'
+import '../FilterBar.css'
 
 export type OrdersFilterStatus = StatusBadgeTone | 'all'
 
@@ -45,7 +45,7 @@ const OrdersFilterBar = ({ onFilter }: OrdersFilterBarProps) => {
 
   return (
     <form
-      className="orders-filter-bar"
+      className="filter-bar"
       onSubmit={(event) => {
         event.preventDefault()
         event.stopPropagation()
@@ -58,7 +58,7 @@ const OrdersFilterBar = ({ onFilter }: OrdersFilterBarProps) => {
             label="Orden de compra"
             placeholder="Buscar OC"
             size="small"
-            className="orders-filter-bar__field"
+            className="filter-bar__field"
             value={field.state.value}
             onChange={(event) => field.handleChange(event.target.value)}
             onBlur={field.handleBlur}
@@ -72,7 +72,7 @@ const OrdersFilterBar = ({ onFilter }: OrdersFilterBarProps) => {
             select
             label="Estado"
             size="small"
-            className="orders-filter-bar__field"
+            className="filter-bar__field"
             value={field.state.value}
             onChange={(event) =>
               field.handleChange(event.target.value as OrdersFilterStatus)
@@ -94,7 +94,7 @@ const OrdersFilterBar = ({ onFilter }: OrdersFilterBarProps) => {
             label="Fecha desde"
             type="date"
             size="small"
-            className="orders-filter-bar__field orders-filter-bar__field--narrow"
+            className="filter-bar__field filter-bar__field--narrow"
             slotProps={{ inputLabel: { shrink: true } }}
             value={field.state.value}
             onChange={(event) => field.handleChange(event.target.value)}
@@ -109,7 +109,7 @@ const OrdersFilterBar = ({ onFilter }: OrdersFilterBarProps) => {
             label="Fecha hasta"
             type="date"
             size="small"
-            className="orders-filter-bar__field orders-filter-bar__field--narrow"
+            className="filter-bar__field filter-bar__field--narrow"
             slotProps={{ inputLabel: { shrink: true } }}
             value={field.state.value}
             onChange={(event) => field.handleChange(event.target.value)}
@@ -118,12 +118,12 @@ const OrdersFilterBar = ({ onFilter }: OrdersFilterBarProps) => {
         )}
       </form.Field>
 
-      <div className="orders-filter-bar__actions">
+      <div className="filter-bar__actions">
         <Button
           type="submit"
           variant="contained"
           endIcon={<FilterAltIcon />}
-          className="orders-filter-bar__action"
+          className="filter-bar__action"
         >
           Filtrar
         </Button>
@@ -142,7 +142,7 @@ const OrdersFilterBar = ({ onFilter }: OrdersFilterBarProps) => {
               type="button"
               variant="outlined"
               endIcon={<FilterAltOffIcon />}
-              className="orders-filter-bar__action"
+              className="filter-bar__action"
               disabled={!isFiltered}
               onClick={() => {
                 form.reset()
