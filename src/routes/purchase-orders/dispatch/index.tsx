@@ -20,9 +20,6 @@ const DispatchOrdersPage = () => {
     DEFAULT_DISPATCH_ORDERS_FILTER_VALUES,
   )
 
-  const [selectDispatchOrder, setSelectDispatchOrder] =
-    useState<DispatchOrder | null>(null)
-
   const { data, isError, error, isFetching } = useQuery({
     ...purchaseOrderDispatchListQueryOptions(toDispatchOrdersQuery(filters)),
     // keep the previous rows on screen (dimmed) while a new filter loads
@@ -49,7 +46,7 @@ const DispatchOrdersPage = () => {
         <DispatchOrdersTable
           rows={rows}
           loading={isFetching}
-          onViewDetail={setSelectDispatchOrder}
+          onViewDetail={(order) => console.log('Ver detalle', order)}
           onGenerateDispatchNotice={handleGenerateDispatchNotice}
         />
       )}

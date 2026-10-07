@@ -79,12 +79,12 @@ export const useDispatchOrdersColumns = (
             icon={<LocalShippingOutlinedIcon />}
             label="Generar aviso de despacho"
             onClick={() => onGenerateDispatchNotice?.(params.row)}
-            // disabled={params.row.estadoTone !== 'pending'}
+            disabled={params.row.estadoTone !== 'pending'}
           />,
         ],
         headerAlign: 'center',
         align: 'center',
       },
     ],
-    [onGenerateDispatchNotice],
+    [onViewDetail, onGenerateDispatchNotice],
   )
