@@ -360,6 +360,52 @@ export interface DispatchNoticeAttemptsResponse {
 }
 
 // ===========================================================================
+// Purchase Order Dispatch Status — confirmed directly with the user
+// (2026-10-07); not yet in docs/especificacion-endpoints-backend. A
+// numPedido-keyed pair, distinct from the avisoId-keyed Dispatch Notices
+// above: the master row answers "is this PO pending/dispatched/erroed",
+// the detail is the Orden→Tienda→Contenedor→Producto tree for one PO.
+// ===========================================================================
+
+export type PurchaseOrderDispatchStatus =
+  'PENDIENTE' | 'DESPACHADA' | 'CON_ERROR'
+
+/** Row shape for `GET /api/v1/ordenes-compra/despacho` (route unconfirmed —
+ *  no backend spec exists yet for this pair, see the api module's doc
+ *  comment). `fechaDespacho` is the date entered when the PO was dispatched;
+ *  `null` while `estado` is `PENDIENTE`. Only POs that already have a
+ *  `numPedido` assigned are expected to appear here. */
+export interface PurchaseOrderDispatchSummary {
+  eanPuntoEntrega: string
+  ordenCompra: string
+  numPedido: string
+  fechaDespacho: IsoDate | null
+  estado: PurchaseOrderDispatchStatus
+}
+
+/** Query params for `GET /api/v1/ordenes-compra/despacho`. */
+export interface PurchaseOrderDispatchQuery extends PaginationQuery {
+  ordenCompra?: string
+  numPedido?: string
+  estado?: PurchaseOrderDispatchStatus
+  fechaDespachoDesde?: IsoDate
+  fechaDespachoHasta?: IsoDate
+}
+
+/** Full shape for `GET /api/v1/ordenes-compra/despacho/{numPedido}` — reuses
+ *  the same per-store/container/product tree `avisos-despacho` (§ 2) takes
+ *  as input (`DispatchNoticeStoreInput`), since this is effectively the
+ *  prefilled suggestion the dispatch wizard starts from. */
+export interface PurchaseOrderDispatchDetail {
+  eanPuntoEntrega: string
+  ordenCompra: string
+  numPedido: string
+  fechaDespacho: IsoDate | null
+  estado: PurchaseOrderDispatchStatus
+  tiendas: Array<DispatchNoticeStoreInput>
+}
+
+// ===========================================================================
 // Integration Log (shared across all 3 processes) · § 3
 // ===========================================================================
 

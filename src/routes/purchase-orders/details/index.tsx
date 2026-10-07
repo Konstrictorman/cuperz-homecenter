@@ -6,7 +6,7 @@ import OrdersFilterBar, {
 } from './-OrdersFilterBar'
 import PurchaseOrdersTable from './-PurchaseOrdersTable'
 import PurchaseOrderDetailModal from './-PurchaseOrderDetailModal'
-import { toPurchaseOrderRow, toPurchaseOrdersQuery } from './orderPresentation'
+import { toPurchaseOrderRow, toPurchaseOrdersQuery } from './-orderPresentation'
 import type { OrdersFilterValues } from './-OrdersFilterBar'
 import type { PurchaseOrder } from './-PurchaseOrdersTable'
 import { purchaseOrdersListQueryOptions } from '#/api/purchase-orders'
@@ -32,8 +32,8 @@ const PurchaseOrdersPage = () => {
       <OrdersFilterBar onFilter={setFilters} />
 
       {isError ? (
-        <p role="alert" className="purchase-orders__error">
-          <Typography>
+        <p role="alert">
+          <Typography className="purchase-orders__error">
             No se pudieron cargar las órdenes: {error.message}
           </Typography>
         </p>

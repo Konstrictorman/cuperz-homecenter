@@ -3,6 +3,7 @@
 import type {
   DispatchNoticesQuery,
   IntegrationLogQuery,
+  PurchaseOrderDispatchQuery,
   PurchaseOrdersQuery,
 } from './types'
 
@@ -13,6 +14,13 @@ export const queryKeys = {
       ['purchase-orders', 'list', query] as const,
     detail: (ordenCompra: string) =>
       ['purchase-orders', 'detail', ordenCompra] as const,
+  },
+  purchaseOrderDispatch: {
+    all: () => ['purchase-order-dispatch'] as const,
+    list: (query: PurchaseOrderDispatchQuery) =>
+      ['purchase-order-dispatch', 'list', query] as const,
+    detail: (numPedido: string) =>
+      ['purchase-order-dispatch', 'detail', numPedido] as const,
   },
   dispatchNotices: {
     all: () => ['dispatch-notices'] as const,
