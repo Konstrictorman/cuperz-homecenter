@@ -4,12 +4,14 @@ import { GridActionsCellItem } from '@mui/x-data-grid'
 import type { GridColDef, GridRenderCellParams } from '@mui/x-data-grid'
 import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined'
 import VisibilityIcon from '@mui/icons-material/Visibility'
+import QrCodeIcon from '@mui/icons-material/QrCode'
 import type { DispatchOrder } from './-DispatchOrdersTable'
 import { formatDate } from '#/common/util'
 
 export const useDispatchOrdersColumns = (
   onViewDetail?: (order: DispatchOrder) => void,
   onGenerateDispatchNotice?: (order: DispatchOrder) => void,
+  onGenerateBarCode?: (order: DispatchOrder) => void,
 ): GridColDef<DispatchOrder>[] =>
   useMemo(
     () => [
@@ -65,7 +67,7 @@ export const useDispatchOrdersColumns = (
       {
         field: 'acciones',
         headerName: 'Acciones',
-        width: 90,
+        flex: 0.6,
         sortable: false,
         filterable: false,
         type: 'actions',
@@ -81,10 +83,16 @@ export const useDispatchOrdersColumns = (
             onClick={() => onGenerateDispatchNotice?.(params.row)}
             disabled={params.row.estadoTone !== 'pending'}
           />,
+          <GridActionsCellItem
+            icon={<QrCodeIcon />}
+            label="Generar código de barras"
+            onClick={() => onGenerateBarCode?.(params.row)}
+            disabled={params.row.estadoTone !== 'dispatched'}
+          />,
         ],
         headerAlign: 'center',
         align: 'center',
       },
     ],
-    [onViewDetail, onGenerateDispatchNotice],
+    [onViewDetail, onGenerateDispatchNotice, onGenerateBarCode],
   )

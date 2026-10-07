@@ -21,9 +21,7 @@ const DispatchOrdersPage = () => {
     DEFAULT_DISPATCH_ORDERS_FILTER_VALUES,
   )
 
-  const [selectedOrder, setSelectedOrder] = useState<DispatchOrder | null>(
-    null,
-  )
+  const [selectedOrder, setSelectedOrder] = useState<DispatchOrder | null>(null)
 
   const { data, isError, error, isFetching } = useQuery({
     ...purchaseOrderDispatchListQueryOptions(toDispatchOrdersQuery(filters)),
@@ -35,6 +33,10 @@ const DispatchOrdersPage = () => {
 
   const handleGenerateDispatchNotice = (order: DispatchOrder) => {
     alert(`Generando aviso de despacho para la orden ${order.ordenCompra}`)
+  }
+
+  const handleGenerateBarCode = (order: DispatchOrder) => {
+    alert(`Generando código de barras para la orden ${order.ordenCompra}`)
   }
 
   return (
@@ -53,6 +55,7 @@ const DispatchOrdersPage = () => {
           loading={isFetching}
           onViewDetail={setSelectedOrder}
           onGenerateDispatchNotice={handleGenerateDispatchNotice}
+          onGenerateBarCode={handleGenerateBarCode}
           detailOpen={selectedOrder !== null}
         />
       )}

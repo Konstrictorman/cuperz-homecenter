@@ -23,6 +23,7 @@ interface DispatchOrdersTableProps {
   onGenerateDispatchNotice?: (order: DispatchOrder) => void
   /** Whether a detail view is currently open, so the toolbar can hide and
    * the row selection can clear while it's up. */
+  onGenerateBarCode?: (order: DispatchOrder) => void
   detailOpen?: boolean
 }
 
@@ -40,6 +41,7 @@ const DispatchOrdersTable = ({
   loading,
   onViewDetail,
   onGenerateDispatchNotice,
+  onGenerateBarCode,
   detailOpen = false,
 }: DispatchOrdersTableProps) => {
   const [selection, setSelection] =
@@ -48,6 +50,7 @@ const DispatchOrdersTable = ({
   const columns = useDispatchOrdersColumns(
     onViewDetail,
     onGenerateDispatchNotice,
+    onGenerateBarCode,
   )
 
   const selected = selectionCount(selection, rows.length)
