@@ -1,20 +1,26 @@
 import MenuItem from '@mui/material/MenuItem'
 import TextField from '@mui/material/TextField'
 import { useForm } from '@tanstack/react-form'
-import type { StatusBadgeTone } from '#/components/statusBadge/StatusBadge'
 import Button from '#/components/button/Button'
 import FilterAltIcon from '@mui/icons-material/FilterAlt'
 import FilterAltOffIcon from '@mui/icons-material/FilterAltOff'
 import './OrdersFilterBar.css'
 
-export type OrdersFilterStatus = StatusBadgeTone | 'all'
+/** Mirrors `PurchaseOrderDispatchStatus` (`#/api/types`) — this status set
+ *  only has PENDIENTE/DESPACHADA/CON_ERROR, unlike the richer
+ *  `StatusBadgeTone` union the details-route filter bar uses. */
+export type DispatchOrdersFilterStatus =
+  | 'pending'
+  | 'dispatched'
+  | 'error'
+  | 'all'
 
 export interface DispatchOrdersFilterValues {
   ordenCompra: string
   numPedido: string
-  estado: OrdersFilterStatus
-  fechaTransmisionDesde: string
-  fechaTransmisionHasta: string
+  estado: DispatchOrdersFilterStatus
+  fechaDesde: string
+  fechaHasta: string
 }
 
 export const DEFAULT_DISPATCH_ORDERS_FILTER_VALUES: DispatchOrdersFilterValues =
@@ -22,16 +28,18 @@ export const DEFAULT_DISPATCH_ORDERS_FILTER_VALUES: DispatchOrdersFilterValues =
     ordenCompra: '',
     numPedido: '',
     estado: 'all',
-    fechaTransmisionDesde: '',
-    fechaTransmisionHasta: '',
+    fechaDesde: '',
+    fechaHasta: '',
   }
 
-const STATUS_OPTIONS: Array<{ value: OrdersFilterStatus; label: string }> = [
+const STATUS_OPTIONS: Array<{
+  value: DispatchOrdersFilterStatus
+  label: string
+}> = [
   { value: 'all', label: 'Todos' },
   { value: 'pending', label: 'Pendiente despacho' },
   { value: 'dispatched', label: 'Despachada' },
   { value: 'error', label: 'Error integración' },
-  { value: 'processing', label: 'Procesando' },
 ]
 
 interface DispatchOrdersFilterBarProps {
@@ -94,7 +102,9 @@ const DispatchOrdersFilterBar = ({
             className="orders-filter-bar__field"
             value={field.state.value}
             onChange={(event) =>
-              field.handleChange(event.target.value as OrdersFilterStatus)
+              field.handleChange(
+                event.target.value as DispatchOrdersFilterStatus,
+              )
             }
             onBlur={field.handleBlur}
           >
@@ -107,7 +117,7 @@ const DispatchOrdersFilterBar = ({
         )}
       </form.Field>
 
-      <form.Field name="fechaTransmisionDesde">
+      <form.Field name="fechaDesde">
         {(field) => (
           <TextField
             label="Fecha desde"
@@ -122,7 +132,7 @@ const DispatchOrdersFilterBar = ({
         )}
       </form.Field>
 
-      <form.Field name="fechaTransmisionHasta">
+      <form.Field name="fechaHasta">
         {(field) => (
           <TextField
             label="Fecha hasta"

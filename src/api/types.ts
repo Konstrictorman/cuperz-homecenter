@@ -220,7 +220,7 @@ export interface ReprocessOrderResponse {
 // ===========================================================================
 
 export type DispatchNoticeStatus =
-  'BORRADOR' | 'ENVIADO' | 'CON_NOVEDAD' | 'ERROR_ENVIO'
+  'PENDIENTE' | 'DESPACHADA' | 'CON_NOVEDAD' | 'ERROR_ENVIO' | 'CANCELADA'
 
 // --- Hierarchy Order → Store → Container → Product (request payload) ---
 
@@ -307,6 +307,7 @@ export interface DispatchNoticeDetail {
 /** Query params for `GET /api/v1/avisos-despacho` (§ 2.2). */
 export interface DispatchNoticesQuery extends PaginationQuery {
   ordenCompra?: string
+  numPedido?: string
   estado?: DispatchNoticeStatus
   fechaDesde?: IsoDate
   fechaHasta?: IsoDate
