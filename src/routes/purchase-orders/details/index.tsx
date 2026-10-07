@@ -10,7 +10,7 @@ import { toPurchaseOrderRow, toPurchaseOrdersQuery } from './-orderPresentation'
 import type { OrdersFilterValues } from './-OrdersFilterBar'
 import type { PurchaseOrder } from './-PurchaseOrdersTable'
 import { purchaseOrdersListQueryOptions } from '#/api/purchase-orders'
-import './index.css'
+import '../PurchaseOrdersPage.css'
 import Typography from '@mui/material/Typography'
 
 const PurchaseOrdersPage = () => {

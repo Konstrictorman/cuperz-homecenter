@@ -14,7 +14,7 @@ import {
 } from './-dispatchOrderPresentation'
 import type { DispatchOrdersFilterValues } from './-DispatchOrdersFilterBar'
 import { purchaseOrderDispatchListQueryOptions } from '#/api/purchase-order-dispatch'
-import './index.css'
+import '../PurchaseOrdersPage.css'
 
 const DispatchOrdersPage = () => {
   const [filters, setFilters] = useState<DispatchOrdersFilterValues>(

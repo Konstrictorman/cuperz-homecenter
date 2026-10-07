@@ -1,0 +1,29 @@
+/*
+ * Shared by the details and dispatch purchase-orders pages (both route
+ * `index.tsx` files render a `.purchase-orders` root container).
+ */
+.purchase-orders {
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  text-align: center;
+  font-weight: var(--font-weight-medium) !important;
+}
+
+@media (min-width: 640px) {
+  .purchase-orders {
+    padding: var(--space-lg);
+  }
+}
+
+.purchase-orders__error {
+  margin: 0;
+  padding: var(--space-md);
+  border-radius: var(--radius-sm, 6px);
+  background-color: var(--status-error-50);
+  color: var(--status-error-500);
+  border: 1px solid var(--status-error-300);
+  font-weight: var(--font-weight-medium) !important;
+}
