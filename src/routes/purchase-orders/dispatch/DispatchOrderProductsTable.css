@@ -1,0 +1,5 @@
+.dispatch-order-products-table__status {
+  display: flex;
+  justify-content: center;
+  padding: var(--space-lg);
+}

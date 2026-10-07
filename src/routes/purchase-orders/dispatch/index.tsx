@@ -7,6 +7,7 @@ import DispatchOrdersFilterBar, {
 } from './-DispatchOrdersFilterBar'
 import DispatchOrdersTable from './-DispatchOrdersTable'
 import type { DispatchOrder } from './-DispatchOrdersTable'
+import DispatchOrderDetailModal from './-DispatchOrderDetailModal'
 import {
   toDispatchOrderRow,
   toDispatchOrdersQuery,
@@ -18,6 +19,10 @@ import './index.css'
 const DispatchOrdersPage = () => {
   const [filters, setFilters] = useState<DispatchOrdersFilterValues>(
     DEFAULT_DISPATCH_ORDERS_FILTER_VALUES,
+  )
+
+  const [selectedOrder, setSelectedOrder] = useState<DispatchOrder | null>(
+    null,
   )
 
   const { data, isError, error, isFetching } = useQuery({
@@ -46,10 +51,17 @@ const DispatchOrdersPage = () => {
         <DispatchOrdersTable
           rows={rows}
           loading={isFetching}
-          onViewDetail={(order) => console.log('Ver detalle', order)}
+          onViewDetail={setSelectedOrder}
           onGenerateDispatchNotice={handleGenerateDispatchNotice}
+          detailOpen={selectedOrder !== null}
         />
       )}
+
+      <DispatchOrderDetailModal
+        order={selectedOrder}
+        open={selectedOrder !== null}
+        onClose={() => setSelectedOrder(null)}
+      />
     </div>
   )
 }

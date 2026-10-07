@@ -4,16 +4,13 @@ import { useForm } from '@tanstack/react-form'
 import Button from '#/components/button/Button'
 import FilterAltIcon from '@mui/icons-material/FilterAlt'
 import FilterAltOffIcon from '@mui/icons-material/FilterAltOff'
-import './OrdersFilterBar.css'
+import './DispatchOrdersFilterBar.css'
 
 /** Mirrors `PurchaseOrderDispatchStatus` (`#/api/types`) — this status set
  *  only has PENDIENTE/DESPACHADA/CON_ERROR, unlike the richer
  *  `StatusBadgeTone` union the details-route filter bar uses. */
 export type DispatchOrdersFilterStatus =
-  | 'pending'
-  | 'dispatched'
-  | 'error'
-  | 'all'
+  'pending' | 'dispatched' | 'error' | 'all'
 
 export interface DispatchOrdersFilterValues {
   ordenCompra: string

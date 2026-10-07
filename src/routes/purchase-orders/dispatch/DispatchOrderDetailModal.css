@@ -1,0 +1,23 @@
+.dispatch-order-detail-modal__summary {
+  display: grid;
+  grid-template-columns: 1fr;
+  column-gap: var(--space-xl);
+  row-gap: var(--space-sm);
+}
+
+.dispatch-order-detail-modal__label {
+  font-size: var(--font-size-12) !important;
+  color: var(--label-text) !important;
+  margin-bottom: var(--space-3xs) !important;
+  font-weight: var(--font-weight-medium) !important;
+}
+
+.dispatch-order-detail-modal__lines {
+  margin-top: var(--space-lg) !important;
+}
+
+@media (min-width: 640px) {
+  .dispatch-order-detail-modal__summary {
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+  }
+}
