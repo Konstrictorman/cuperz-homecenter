@@ -23,6 +23,10 @@
   background-color: var(--line) !important;
 }
 
+.data-table .MuiDataGrid-actionsCell .MuiIconButton-root.Mui-disabled .MuiSvgIcon-root {
+  opacity: 0.35;
+}
+
 .data-table
   .MuiCheckbox-root:not(.Mui-checked):not(.MuiCheckbox-indeterminate)
   .MuiSvgIcon-root {
