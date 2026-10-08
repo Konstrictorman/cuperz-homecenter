@@ -77,6 +77,14 @@
   display: none;
 }
 
+/* MUI hides the column-menu ellipsis (visibility: hidden; width: 0) until the
+ * header is hovered, so it's invisible on touch/no-hover and in static views.
+ * Keep it always visible like the rest of this table's chrome. */
+.data-table .MuiDataGrid-menuIcon {
+  visibility: visible !important;
+  width: auto !important;
+}
+
 /* A right-aligned header (MUI's own default for `type: 'number'` columns —
  * see `gridNumericColDef`) reverses `.MuiDataGrid-columnHeaderDraggableContainer`'s
  * flex direction so the label can hug the same edge the column's

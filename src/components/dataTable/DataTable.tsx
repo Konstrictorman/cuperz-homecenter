@@ -31,6 +31,19 @@ const DataTable = <TRow extends GridValidRowModel>({
           pagination: { paginationModel: { pageSize: 10 } },
           ...initialState,
         }}
+        slotProps={{
+          ...props.slotProps,
+          // Icon buttons the grid renders itself (the column-menu ellipsis
+          // chief among them) fall back to MuiIconButton's `color="default"`,
+          // which this project's theme maps to a literal white
+          // (`palette.default.main`, added for `<Button color="default">`,
+          // not icon buttons) — rendering white-on-white against the header.
+          // Same fix as GroupedDataTable's `baseIconButton` override.
+          baseIconButton: {
+            color: 'inherit',
+            ...props.slotProps?.baseIconButton,
+          },
+        }}
       />
     </div>
   )
