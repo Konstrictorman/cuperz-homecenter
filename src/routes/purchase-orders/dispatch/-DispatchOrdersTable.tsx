@@ -21,6 +21,9 @@ interface DispatchOrdersTableProps {
   loading?: boolean
   onViewDetail?: (order: DispatchOrder) => void
   onGenerateDispatchNotice?: (order: DispatchOrder) => void
+  /** Bulk/toolbar variant of the same action: fires with every selected
+   * row's `numPedido` so one payload's `ordenes[]` can cover them all. */
+  onGenerateDispatchNoticeBulk?: (numPedidos: string[]) => void
   /** Whether a detail view is currently open, so the toolbar can hide and
    * the row selection can clear while it's up. */
   onGenerateBarCode?: (order: DispatchOrder) => void
@@ -36,11 +39,22 @@ const EMPTY_SELECTION: GridRowSelectionModel = {
 const selectionCount = (model: GridRowSelectionModel, total: number): number =>
   model.type === 'include' ? model.ids.size : total - model.ids.size
 
+/** Row ids (== `numPedido`, see `toDispatchOrderRow`) the selection model
+ * covers, resolving the `exclude` case against the currently loaded rows. */
+const selectedIds = (
+  model: GridRowSelectionModel,
+  rows: DispatchOrder[],
+): string[] =>
+  model.type === 'include'
+    ? Array.from(model.ids, String)
+    : rows.map((row) => row.id).filter((id) => !model.ids.has(id))
+
 const DispatchOrdersTable = ({
   rows,
   loading,
   onViewDetail,
   onGenerateDispatchNotice,
+  onGenerateDispatchNoticeBulk,
   onGenerateBarCode,
   detailOpen = false,
 }: DispatchOrdersTableProps) => {
@@ -84,7 +98,8 @@ const DispatchOrdersTable = ({
             key: 'dispatch',
             label: 'Generar aviso de despacho',
             icon: <LocalShippingOutlinedIcon fontSize="small" />,
-            onClick: () => console.log('Generar aviso de despacho', selection),
+            onClick: () =>
+              onGenerateDispatchNoticeBulk?.(selectedIds(selection, rows)),
           },
         ]}
       />

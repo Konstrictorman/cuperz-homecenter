@@ -1,0 +1,26 @@
+.dispatch-notice-payload-modal__status {
+  display: flex;
+  justify-content: center;
+  padding: var(--space-xl) 0;
+}
+
+.dispatch-notice-payload-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: var(--space-sm);
+}
+
+.dispatch-notice-payload-modal__json {
+  margin: 0;
+  padding: var(--space-md);
+  background: var(--palette-background-default);
+  border: 1px solid var(--palette-divider);
+  border-radius: var(--radius-8);
+  color: var(--palette-text-primary);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-12);
+  line-height: 1.5;
+  white-space: pre;
+  overflow: auto;
+  max-height: 60vh;
+}

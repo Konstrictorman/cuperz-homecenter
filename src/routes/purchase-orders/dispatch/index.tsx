@@ -8,6 +8,7 @@ import DispatchOrdersFilterBar, {
 import DispatchOrdersTable from './-DispatchOrdersTable'
 import type { DispatchOrder } from './-DispatchOrdersTable'
 import DispatchOrderDetailModal from './-DispatchOrderDetailModal'
+import DispatchNoticePayloadModal from './-DispatchNoticePayloadModal'
 import {
   toDispatchOrderRow,
   toDispatchOrdersQuery,
@@ -23,6 +24,12 @@ const DispatchOrdersPage = () => {
 
   const [selectedOrder, setSelectedOrder] = useState<DispatchOrder | null>(null)
 
+  // `null` closed; otherwise the `numPedido`s whose payload is being
+  // previewed — one for the row action, several for the bulk one.
+  const [dispatchNoticeNumPedidos, setDispatchNoticeNumPedidos] = useState<
+    string[] | null
+  >(null)
+
   const { data, isError, error, isFetching } = useQuery({
     ...purchaseOrderDispatchListQueryOptions(toDispatchOrdersQuery(filters)),
     // keep the previous rows on screen (dimmed) while a new filter loads
@@ -32,7 +39,7 @@ const DispatchOrdersPage = () => {
   const rows = (data?.data ?? []).map(toDispatchOrderRow)
 
   const handleGenerateDispatchNotice = (order: DispatchOrder) => {
-    alert(`Generando aviso de despacho para la orden ${order.ordenCompra}`)
+    setDispatchNoticeNumPedidos([order.numPedido])
   }
 
   const handleGenerateBarCode = (order: DispatchOrder) => {
@@ -55,8 +62,11 @@ const DispatchOrdersPage = () => {
           loading={isFetching}
           onViewDetail={setSelectedOrder}
           onGenerateDispatchNotice={handleGenerateDispatchNotice}
+          onGenerateDispatchNoticeBulk={setDispatchNoticeNumPedidos}
           onGenerateBarCode={handleGenerateBarCode}
-          detailOpen={selectedOrder !== null}
+          detailOpen={
+            selectedOrder !== null || dispatchNoticeNumPedidos !== null
+          }
         />
       )}
 
@@ -64,6 +74,12 @@ const DispatchOrdersPage = () => {
         order={selectedOrder}
         open={selectedOrder !== null}
         onClose={() => setSelectedOrder(null)}
+      />
+
+      <DispatchNoticePayloadModal
+        numPedidos={dispatchNoticeNumPedidos ?? []}
+        open={dispatchNoticeNumPedidos !== null}
+        onClose={() => setDispatchNoticeNumPedidos(null)}
       />
     </div>
   )
