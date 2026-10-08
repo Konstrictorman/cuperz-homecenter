@@ -1,0 +1,27 @@
+{
+  "ordenes": [
+    {
+      "eanPuntoEntrega": "7703670529804",
+      "ordenCompra": "16060435",
+      "fechaRealDespacho": "2026-10-08",
+      "tiendas": [
+        {
+          "eanTienda": "7703670900900",
+          "contenedores": [
+            {
+              "contenedor": "00077072030000097831",
+              "productos": [
+                {
+                  "eanSku": "7703138000111",
+                  "cantidad": "250",
+                  "peso": "4.89",
+                  "volumen": "3.12"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

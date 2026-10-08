@@ -1,0 +1,79 @@
+{
+  "ordenes": [
+    {
+      "eanPuntoEntrega": "7703670900955",
+      "ordenCompra": "16079936",
+      "fechaRealDespacho": "2026-10-08",
+      "tiendas": [
+        {
+          "eanTienda": "7703670900955",
+          "contenedores": [
+            {
+              "contenedor": "00077072030000097831",
+              "productos": [
+                {
+                  "eanSku": "7703138006953",
+                  "cantidad": "30",
+                  "peso": "17.49",
+                  "volumen": "0.92"
+                },
+                {
+                  "eanSku": "7703138006892",
+                  "cantidad": "25",
+                  "peso": "9.4",
+                  "volumen": "1.73"
+                },
+                {
+                  "eanSku": "7703138007103",
+                  "cantidad": "20",
+                  "peso": "5.32",
+                  "volumen": "1.03"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097832",
+              "productos": [
+                {
+                  "eanSku": "7703138006878",
+                  "cantidad": "80",
+                  "peso": "35.79",
+                  "volumen": "0.4"
+                },
+                {
+                  "eanSku": "7703138006939",
+                  "cantidad": "80",
+                  "peso": "38.98",
+                  "volumen": "2.16"
+                },
+                {
+                  "eanSku": "7703138006700",
+                  "cantidad": "15",
+                  "peso": "33.06",
+                  "volumen": "2.4"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097833",
+              "productos": [
+                {
+                  "eanSku": "7703138006854",
+                  "cantidad": "35",
+                  "peso": "38.38",
+                  "volumen": "5.04"
+                },
+                {
+                  "eanSku": "7703138006830",
+                  "cantidad": "15",
+                  "peso": "24.32",
+                  "volumen": "0.89"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

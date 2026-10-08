@@ -1,0 +1,61 @@
+{
+  "ordenes": [
+    {
+      "eanPuntoEntrega": "7703670529804",
+      "ordenCompra": "16060298",
+      "fechaRealDespacho": "2026-10-08",
+      "tiendas": [
+        {
+          "eanTienda": "7703670900900",
+          "contenedores": [
+            {
+              "contenedor": "00077072030000097831",
+              "productos": [
+                {
+                  "eanSku": "7703138000197",
+                  "cantidad": "100",
+                  "peso": "37.75",
+                  "volumen": "0.96"
+                },
+                {
+                  "eanSku": "7703138000159",
+                  "cantidad": "100",
+                  "peso": "38.82",
+                  "volumen": "0.74"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097832",
+              "productos": [
+                {
+                  "eanSku": "7703138000074",
+                  "cantidad": "100",
+                  "peso": "39.57",
+                  "volumen": "1.13"
+                },
+                {
+                  "eanSku": "7703138000203",
+                  "cantidad": "300",
+                  "peso": "34.77",
+                  "volumen": "1.65"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097833",
+              "productos": [
+                {
+                  "eanSku": "7703138008698",
+                  "cantidad": "110",
+                  "peso": "38.3",
+                  "volumen": "2.73"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "ordenes": [
+    {
+      "eanPuntoEntrega": "7703670900900",
+      "ordenCompra": "16080512",
+      "fechaRealDespacho": "2026-10-08",
+      "tiendas": [
+        {
+          "eanTienda": "7703670900900",
+          "contenedores": [
+            {
+              "contenedor": "00077072030000097831",
+              "productos": [
+                {
+                  "eanSku": "7703138009534",
+                  "cantidad": "8",
+                  "peso": "17.48",
+                  "volumen": "4.83"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097832",
+              "productos": [
+                {
+                  "eanSku": "7703138009527",
+                  "cantidad": "8",
+                  "peso": "8.66",
+                  "volumen": "0.83"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

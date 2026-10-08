@@ -1,0 +1,2170 @@
+{
+  "ordenes": [
+    {
+      "eanPuntoEntrega": "7703670529804",
+      "ordenCompra": "16018346",
+      "fechaRealDespacho": "2026-10-08",
+      "tiendas": [
+        {
+          "eanTienda": "7703670900122",
+          "contenedores": [
+            {
+              "contenedor": "00077072030000097831",
+              "productos": [
+                {
+                  "eanSku": "7703138000807",
+                  "cantidad": "3",
+                  "peso": "17.33",
+                  "volumen": "0.03"
+                },
+                {
+                  "eanSku": "7703138007646",
+                  "cantidad": "23",
+                  "peso": "23.1",
+                  "volumen": "0.29"
+                },
+                {
+                  "eanSku": "7703138000555",
+                  "cantidad": "5",
+                  "peso": "20.98",
+                  "volumen": "0.68"
+                },
+                {
+                  "eanSku": "7703138827831",
+                  "cantidad": "5",
+                  "peso": "14.88",
+                  "volumen": "0.37"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097832",
+              "productos": [
+                {
+                  "eanSku": "7703138000760",
+                  "cantidad": "3",
+                  "peso": "15.71",
+                  "volumen": "2.39"
+                },
+                {
+                  "eanSku": "7703138008551",
+                  "cantidad": "11",
+                  "peso": "10.55",
+                  "volumen": "2.61"
+                },
+                {
+                  "eanSku": "7703138004256",
+                  "cantidad": "5",
+                  "peso": "12.85",
+                  "volumen": "1.07"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097833",
+              "productos": [
+                {
+                  "eanSku": "7703138000395",
+                  "cantidad": "5",
+                  "peso": "21.72",
+                  "volumen": "2.39"
+                },
+                {
+                  "eanSku": "7703138000432",
+                  "cantidad": "5",
+                  "peso": "38.93",
+                  "volumen": "2.02"
+                },
+                {
+                  "eanSku": "7703138000203",
+                  "cantidad": "5",
+                  "peso": "14.36",
+                  "volumen": "1.16"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "eanTienda": "7703670104971",
+          "contenedores": [
+            {
+              "contenedor": "00077072030000097831",
+              "productos": [
+                {
+                  "eanSku": "7703138000807",
+                  "cantidad": "3",
+                  "peso": "37.73",
+                  "volumen": "2.07"
+                },
+                {
+                  "eanSku": "7703138000432",
+                  "cantidad": "5",
+                  "peso": "24.68",
+                  "volumen": "1.74"
+                },
+                {
+                  "eanSku": "7703138006878",
+                  "cantidad": "5",
+                  "peso": "20.6",
+                  "volumen": "0.79"
+                },
+                {
+                  "eanSku": "7703138007103",
+                  "cantidad": "5",
+                  "peso": "26.82",
+                  "volumen": "1.42"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097832",
+              "productos": [
+                {
+                  "eanSku": "7703138000395",
+                  "cantidad": "5",
+                  "peso": "10.83",
+                  "volumen": "0.14"
+                },
+                {
+                  "eanSku": "7703138000203",
+                  "cantidad": "5",
+                  "peso": "18.33",
+                  "volumen": "0.54"
+                },
+                {
+                  "eanSku": "7703138006854",
+                  "cantidad": "5",
+                  "peso": "12.52",
+                  "volumen": "0.29"
+                },
+                {
+                  "eanSku": "7703138006816",
+                  "cantidad": "5",
+                  "peso": "6.87",
+                  "volumen": "0.38"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097833",
+              "productos": [
+                {
+                  "eanSku": "7703138008551",
+                  "cantidad": "3",
+                  "peso": "33.45",
+                  "volumen": "0.34"
+                },
+                {
+                  "eanSku": "7703138007011",
+                  "cantidad": "3",
+                  "peso": "18.31",
+                  "volumen": "3.99"
+                },
+                {
+                  "eanSku": "7703138006939",
+                  "cantidad": "5",
+                  "peso": "3.66",
+                  "volumen": "0.92"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "eanTienda": "7703670900801",
+          "contenedores": [
+            {
+              "contenedor": "00077072030000097831",
+              "productos": [
+                {
+                  "eanSku": "7703138000722",
+                  "cantidad": "3",
+                  "peso": "33.4",
+                  "volumen": "0.57"
+                },
+                {
+                  "eanSku": "7703138004256",
+                  "cantidad": "5",
+                  "peso": "10.79",
+                  "volumen": "1.45"
+                },
+                {
+                  "eanSku": "7703138006816",
+                  "cantidad": "5",
+                  "peso": "29.85",
+                  "volumen": "1.37"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097832",
+              "productos": [
+                {
+                  "eanSku": "7703138007646",
+                  "cantidad": "2",
+                  "peso": "7.56",
+                  "volumen": "1.75"
+                },
+                {
+                  "eanSku": "7703138851966",
+                  "cantidad": "5",
+                  "peso": "24.88",
+                  "volumen": "1.83"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097833",
+              "productos": [
+                {
+                  "eanSku": "7703138008551",
+                  "cantidad": "1",
+                  "peso": "28.79",
+                  "volumen": "0.19"
+                },
+                {
+                  "eanSku": "7703138006892",
+                  "cantidad": "5",
+                  "peso": "30.64",
+                  "volumen": "0.54"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "eanTienda": "7703670900115",
+          "contenedores": [
+            {
+              "contenedor": "00077072030000097831",
+              "productos": [
+                {
+                  "eanSku": "7703138000722",
+                  "cantidad": "3",
+                  "peso": "7.47",
+                  "volumen": "1.98"
+                },
+                {
+                  "eanSku": "7703138007646",
+                  "cantidad": "6",
+                  "peso": "4.96",
+                  "volumen": "1.55"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097832",
+              "productos": [
+                {
+                  "eanSku": "7703138000760",
+                  "cantidad": "3",
+                  "peso": "16.39",
+                  "volumen": "1.64"
+                },
+                {
+                  "eanSku": "7703138155460",
+                  "cantidad": "5",
+                  "peso": "25.04",
+                  "volumen": "1.75"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097833",
+              "productos": [
+                {
+                  "eanSku": "7703138000395",
+                  "cantidad": "5",
+                  "peso": "22.17",
+                  "volumen": "2.77"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "eanTienda": "7703670900559",
+          "contenedores": [
+            {
+              "contenedor": "00077072030000097831",
+              "productos": [
+                {
+                  "eanSku": "7703138000722",
+                  "cantidad": "3",
+                  "peso": "2.46",
+                  "volumen": "1.95"
+                },
+                {
+                  "eanSku": "7703138007646",
+                  "cantidad": "2",
+                  "peso": "25.23",
+                  "volumen": "1.04"
+                },
+                {
+                  "eanSku": "7703138000111",
+                  "cantidad": "5",
+                  "peso": "8.62",
+                  "volumen": "2.55"
+                },
+                {
+                  "eanSku": "7703138006533",
+                  "cantidad": "6",
+                  "peso": "7.62",
+                  "volumen": "0.77"
+                },
+                {
+                  "eanSku": "7703138155460",
+                  "cantidad": "5",
+                  "peso": "17.79",
+                  "volumen": "1.47"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097832",
+              "productos": [
+                {
+                  "eanSku": "7703138000395",
+                  "cantidad": "10",
+                  "peso": "2.41",
+                  "volumen": "1.24"
+                },
+                {
+                  "eanSku": "7703138008551",
+                  "cantidad": "1",
+                  "peso": "24.27",
+                  "volumen": "1.07"
+                },
+                {
+                  "eanSku": "7703138008698",
+                  "cantidad": "5",
+                  "peso": "14.16",
+                  "volumen": "1.37"
+                },
+                {
+                  "eanSku": "7703138007011",
+                  "cantidad": "3",
+                  "peso": "12.62",
+                  "volumen": "0.27"
+                },
+                {
+                  "eanSku": "7703138851966",
+                  "cantidad": "5",
+                  "peso": "17.15",
+                  "volumen": "0.9"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097833",
+              "productos": [
+                {
+                  "eanSku": "7703138000357",
+                  "cantidad": "10",
+                  "peso": "12.14",
+                  "volumen": "1.71"
+                },
+                {
+                  "eanSku": "7703138000432",
+                  "cantidad": "10",
+                  "peso": "26.93",
+                  "volumen": "1.47"
+                },
+                {
+                  "eanSku": "7703138000203",
+                  "cantidad": "5",
+                  "peso": "38.31",
+                  "volumen": "2.21"
+                },
+                {
+                  "eanSku": "7703138283149",
+                  "cantidad": "5",
+                  "peso": "20.74",
+                  "volumen": "2.49"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "eanTienda": "7703670901167",
+          "contenedores": [
+            {
+              "contenedor": "00077072030000097831",
+              "productos": [
+                {
+                  "eanSku": "7703138000760",
+                  "cantidad": "3",
+                  "peso": "17.43",
+                  "volumen": "2.43"
+                },
+                {
+                  "eanSku": "7703138006953",
+                  "cantidad": "5",
+                  "peso": "17.74",
+                  "volumen": "2.67"
+                },
+                {
+                  "eanSku": "7703138006892",
+                  "cantidad": "5",
+                  "peso": "25.29",
+                  "volumen": "1.64"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097832",
+              "productos": [
+                {
+                  "eanSku": "7703138004256",
+                  "cantidad": "5",
+                  "peso": "15.74",
+                  "volumen": "2.8"
+                },
+                {
+                  "eanSku": "7703138006878",
+                  "cantidad": "5",
+                  "peso": "34.68",
+                  "volumen": "2.63"
+                },
+                {
+                  "eanSku": "7703138006939",
+                  "cantidad": "5",
+                  "peso": "34.74",
+                  "volumen": "1.89"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097833",
+              "productos": [
+                {
+                  "eanSku": "7703138000203",
+                  "cantidad": "5",
+                  "peso": "19.44",
+                  "volumen": "0.17"
+                },
+                {
+                  "eanSku": "7703138006854",
+                  "cantidad": "5",
+                  "peso": "32.75",
+                  "volumen": "0.14"
+                },
+                {
+                  "eanSku": "7703138006700",
+                  "cantidad": "5",
+                  "peso": "17.98",
+                  "volumen": "0.41"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "eanTienda": "7703670900702",
+          "contenedores": [
+            {
+              "contenedor": "00077072030000097831",
+              "productos": [
+                {
+                  "eanSku": "7703138000760",
+                  "cantidad": "3",
+                  "peso": "9.48",
+                  "volumen": "0.42"
+                },
+                {
+                  "eanSku": "7703138000203",
+                  "cantidad": "5",
+                  "peso": "5.8",
+                  "volumen": "0.7"
+                },
+                {
+                  "eanSku": "7703138851966",
+                  "cantidad": "5",
+                  "peso": "24.46",
+                  "volumen": "0.8"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097832",
+              "productos": [
+                {
+                  "eanSku": "7703138008551",
+                  "cantidad": "1",
+                  "peso": "13.53",
+                  "volumen": "2.52"
+                },
+                {
+                  "eanSku": "7703138007011",
+                  "cantidad": "3",
+                  "peso": "36",
+                  "volumen": "1.63"
+                },
+                {
+                  "eanSku": "7703138827831",
+                  "cantidad": "5",
+                  "peso": "4.77",
+                  "volumen": "1.12"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097833",
+              "productos": [
+                {
+                  "eanSku": "7703138000159",
+                  "cantidad": "5",
+                  "peso": "4.88",
+                  "volumen": "0.31"
+                },
+                {
+                  "eanSku": "7703138155460",
+                  "cantidad": "5",
+                  "peso": "5.11",
+                  "volumen": "0.16"
+                },
+                {
+                  "eanSku": "7703138006854",
+                  "cantidad": "5",
+                  "peso": "32.92",
+                  "volumen": "0.53"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "eanTienda": "7703670900139",
+          "contenedores": [
+            {
+              "contenedor": "00077072030000097831",
+              "productos": [
+                {
+                  "eanSku": "7703138000760",
+                  "cantidad": "3",
+                  "peso": "14.51",
+                  "volumen": "2.18"
+                },
+                {
+                  "eanSku": "7703138000432",
+                  "cantidad": "10",
+                  "peso": "6.83",
+                  "volumen": "1.93"
+                },
+                {
+                  "eanSku": "7703138007011",
+                  "cantidad": "3",
+                  "peso": "19.18",
+                  "volumen": "2.32"
+                },
+                {
+                  "eanSku": "7703138006687",
+                  "cantidad": "5",
+                  "peso": "34.34",
+                  "volumen": "0.63"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097832",
+              "productos": [
+                {
+                  "eanSku": "7703138000395",
+                  "cantidad": "5",
+                  "peso": "37.94",
+                  "volumen": "0.55"
+                },
+                {
+                  "eanSku": "7703138004256",
+                  "cantidad": "5",
+                  "peso": "4.56",
+                  "volumen": "0.45"
+                },
+                {
+                  "eanSku": "7703138006878",
+                  "cantidad": "5",
+                  "peso": "27.74",
+                  "volumen": "0.25"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097833",
+              "productos": [
+                {
+                  "eanSku": "7703138008551",
+                  "cantidad": "1",
+                  "peso": "19.55",
+                  "volumen": "2.32"
+                },
+                {
+                  "eanSku": "7703138000203",
+                  "cantidad": "15",
+                  "peso": "30.14",
+                  "volumen": "1.1"
+                },
+                {
+                  "eanSku": "7703138006892",
+                  "cantidad": "5",
+                  "peso": "39.91",
+                  "volumen": "0.25"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "eanTienda": "7703670900900",
+          "contenedores": [
+            {
+              "contenedor": "00077072030000097831",
+              "productos": [
+                {
+                  "eanSku": "7703138000593",
+                  "cantidad": "5",
+                  "peso": "7.59",
+                  "volumen": "0.61"
+                },
+                {
+                  "eanSku": "7703138007646",
+                  "cantidad": "17",
+                  "peso": "34.41",
+                  "volumen": "0.15"
+                },
+                {
+                  "eanSku": "7703138006991",
+                  "cantidad": "3",
+                  "peso": "24.5",
+                  "volumen": "0.97"
+                },
+                {
+                  "eanSku": "7703138006953",
+                  "cantidad": "5",
+                  "peso": "31.86",
+                  "volumen": "0.73"
+                },
+                {
+                  "eanSku": "7703138006892",
+                  "cantidad": "5",
+                  "peso": "11.07",
+                  "volumen": "0.6"
+                },
+                {
+                  "eanSku": "7703138007103",
+                  "cantidad": "5",
+                  "peso": "32.26",
+                  "volumen": "0.5"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097832",
+              "productos": [
+                {
+                  "eanSku": "7703138000395",
+                  "cantidad": "15",
+                  "peso": "25.09",
+                  "volumen": "1.27"
+                },
+                {
+                  "eanSku": "7703138008551",
+                  "cantidad": "5",
+                  "peso": "13.45",
+                  "volumen": "0.71"
+                },
+                {
+                  "eanSku": "7703138006533",
+                  "cantidad": "12",
+                  "peso": "34.46",
+                  "volumen": "1.37"
+                },
+                {
+                  "eanSku": "7703138006878",
+                  "cantidad": "5",
+                  "peso": "34.8",
+                  "volumen": "0.79"
+                },
+                {
+                  "eanSku": "7703138006830",
+                  "cantidad": "5",
+                  "peso": "13.12",
+                  "volumen": "1.17"
+                },
+                {
+                  "eanSku": "7703138006816",
+                  "cantidad": "5",
+                  "peso": "29.92",
+                  "volumen": "1.08"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097833",
+              "productos": [
+                {
+                  "eanSku": "7703138000357",
+                  "cantidad": "15",
+                  "peso": "12.32",
+                  "volumen": "0.58"
+                },
+                {
+                  "eanSku": "7703138000555",
+                  "cantidad": "10",
+                  "peso": "29.8",
+                  "volumen": "1.17"
+                },
+                {
+                  "eanSku": "7703138007011",
+                  "cantidad": "18",
+                  "peso": "34.9",
+                  "volumen": "0.21"
+                },
+                {
+                  "eanSku": "7703138006854",
+                  "cantidad": "15",
+                  "peso": "9.11",
+                  "volumen": "1.64"
+                },
+                {
+                  "eanSku": "7703138006687",
+                  "cantidad": "5",
+                  "peso": "37.36",
+                  "volumen": "1.44"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "eanTienda": "7703670900207",
+          "contenedores": [
+            {
+              "contenedor": "00077072030000097831",
+              "productos": [
+                {
+                  "eanSku": "7703138000593",
+                  "cantidad": "20",
+                  "peso": "18.23",
+                  "volumen": "5.96"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097832",
+              "productos": [
+                {
+                  "eanSku": "7703138000432",
+                  "cantidad": "15",
+                  "peso": "21.17",
+                  "volumen": "3.18"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097833",
+              "productos": [
+                {
+                  "eanSku": "7703138000203",
+                  "cantidad": "5",
+                  "peso": "13.14",
+                  "volumen": "7.65"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "eanTienda": "7703670900597",
+          "contenedores": [
+            {
+              "contenedor": "00077072030000097831",
+              "productos": [
+                {
+                  "eanSku": "7703138000395",
+                  "cantidad": "10",
+                  "peso": "13.41",
+                  "volumen": "0.91"
+                },
+                {
+                  "eanSku": "7703138000432",
+                  "cantidad": "5",
+                  "peso": "36.92",
+                  "volumen": "2.96"
+                },
+                {
+                  "eanSku": "7703138000203",
+                  "cantidad": "5",
+                  "peso": "25.88",
+                  "volumen": "1.99"
+                },
+                {
+                  "eanSku": "7703138006854",
+                  "cantidad": "5",
+                  "peso": "26.78",
+                  "volumen": "1.18"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097832",
+              "productos": [
+                {
+                  "eanSku": "7703138007646",
+                  "cantidad": "1",
+                  "peso": "15.53",
+                  "volumen": "1.07"
+                },
+                {
+                  "eanSku": "7703138000111",
+                  "cantidad": "5",
+                  "peso": "33.12",
+                  "volumen": "1.16"
+                },
+                {
+                  "eanSku": "7703138155460",
+                  "cantidad": "5",
+                  "peso": "17.79",
+                  "volumen": "0.96"
+                },
+                {
+                  "eanSku": "7703138006892",
+                  "cantidad": "5",
+                  "peso": "27.51",
+                  "volumen": "0.36"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097833",
+              "productos": [
+                {
+                  "eanSku": "7703138008551",
+                  "cantidad": "1",
+                  "peso": "14.68",
+                  "volumen": "1.33"
+                },
+                {
+                  "eanSku": "7703138008698",
+                  "cantidad": "5",
+                  "peso": "10.79",
+                  "volumen": "0.88"
+                },
+                {
+                  "eanSku": "7703138851966",
+                  "cantidad": "5",
+                  "peso": "19.71",
+                  "volumen": "1.74"
+                },
+                {
+                  "eanSku": "7703138006816",
+                  "cantidad": "10",
+                  "peso": "15.05",
+                  "volumen": "0.93"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "eanTienda": "7703670900436",
+          "contenedores": [
+            {
+              "contenedor": "00077072030000097831",
+              "productos": [
+                {
+                  "eanSku": "7703138000395",
+                  "cantidad": "5",
+                  "peso": "12.46",
+                  "volumen": "1.66"
+                },
+                {
+                  "eanSku": "7703138006878",
+                  "cantidad": "5",
+                  "peso": "39.05",
+                  "volumen": "2.33"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097832",
+              "productos": [
+                {
+                  "eanSku": "7703138000357",
+                  "cantidad": "5",
+                  "peso": "5.53",
+                  "volumen": "6.45"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097833",
+              "productos": [
+                {
+                  "eanSku": "7703138007646",
+                  "cantidad": "1",
+                  "peso": "11.2",
+                  "volumen": "2.98"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "eanTienda": "7703670900412",
+          "contenedores": [
+            {
+              "contenedor": "00077072030000097831",
+              "productos": [
+                {
+                  "eanSku": "7703138000395",
+                  "cantidad": "10",
+                  "peso": "4.04",
+                  "volumen": "1.26"
+                },
+                {
+                  "eanSku": "7703138000111",
+                  "cantidad": "15",
+                  "peso": "7.89",
+                  "volumen": "1.05"
+                },
+                {
+                  "eanSku": "7703138006878",
+                  "cantidad": "25",
+                  "peso": "28.64",
+                  "volumen": "0.07"
+                },
+                {
+                  "eanSku": "7703138006939",
+                  "cantidad": "10",
+                  "peso": "37.47",
+                  "volumen": "0.37"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097832",
+              "productos": [
+                {
+                  "eanSku": "7703138000357",
+                  "cantidad": "5",
+                  "peso": "21.13",
+                  "volumen": "3.24"
+                },
+                {
+                  "eanSku": "7703138000203",
+                  "cantidad": "5",
+                  "peso": "25.08",
+                  "volumen": "0.84"
+                },
+                {
+                  "eanSku": "7703138006854",
+                  "cantidad": "15",
+                  "peso": "12.27",
+                  "volumen": "3.63"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097833",
+              "productos": [
+                {
+                  "eanSku": "7703138008551",
+                  "cantidad": "10",
+                  "peso": "36.41",
+                  "volumen": "0.36"
+                },
+                {
+                  "eanSku": "7703138006991",
+                  "cantidad": "3",
+                  "peso": "31.98",
+                  "volumen": "0.13"
+                },
+                {
+                  "eanSku": "7703138006892",
+                  "cantidad": "10",
+                  "peso": "3.8",
+                  "volumen": "0.82"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "eanTienda": "7703670900450",
+          "contenedores": [
+            {
+              "contenedor": "00077072030000097831",
+              "productos": [
+                {
+                  "eanSku": "7703138000395",
+                  "cantidad": "10",
+                  "peso": "38.84",
+                  "volumen": "2.74"
+                },
+                {
+                  "eanSku": "7703138000555",
+                  "cantidad": "15",
+                  "peso": "22.91",
+                  "volumen": "1.53"
+                },
+                {
+                  "eanSku": "7703138006854",
+                  "cantidad": "5",
+                  "peso": "1.94",
+                  "volumen": "0.65"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097832",
+              "productos": [
+                {
+                  "eanSku": "7703138000357",
+                  "cantidad": "5",
+                  "peso": "33.55",
+                  "volumen": "1.1"
+                },
+                {
+                  "eanSku": "7703138000159",
+                  "cantidad": "5",
+                  "peso": "18.21",
+                  "volumen": "3.19"
+                },
+                {
+                  "eanSku": "7703138007103",
+                  "cantidad": "5",
+                  "peso": "37.3",
+                  "volumen": "1.99"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097833",
+              "productos": [
+                {
+                  "eanSku": "7703138007646",
+                  "cantidad": "1",
+                  "peso": "39.42",
+                  "volumen": "0.81"
+                },
+                {
+                  "eanSku": "7703138155460",
+                  "cantidad": "5",
+                  "peso": "7.43",
+                  "volumen": "2.8"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "eanTienda": "7703670900573",
+          "contenedores": [
+            {
+              "contenedor": "00077072030000097831",
+              "productos": [
+                {
+                  "eanSku": "7703138000395",
+                  "cantidad": "15",
+                  "peso": "23.39",
+                  "volumen": "0.57"
+                },
+                {
+                  "eanSku": "7703138006878",
+                  "cantidad": "5",
+                  "peso": "33.03",
+                  "volumen": "2.91"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097832",
+              "productos": [
+                {
+                  "eanSku": "7703138000357",
+                  "cantidad": "10",
+                  "peso": "25.8",
+                  "volumen": "3.81"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097833",
+              "productos": [
+                {
+                  "eanSku": "7703138008551",
+                  "cantidad": "1",
+                  "peso": "12.21",
+                  "volumen": "6.38"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "eanTienda": "7703670900108",
+          "contenedores": [
+            {
+              "contenedor": "00077072030000097831",
+              "productos": [
+                {
+                  "eanSku": "7703138000395",
+                  "cantidad": "10",
+                  "peso": "29.87",
+                  "volumen": "3.27"
+                },
+                {
+                  "eanSku": "7703138008551",
+                  "cantidad": "1",
+                  "peso": "21.43",
+                  "volumen": "1.85"
+                },
+                {
+                  "eanSku": "7703138283149",
+                  "cantidad": "5",
+                  "peso": "6.88",
+                  "volumen": "1.24"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097832",
+              "productos": [
+                {
+                  "eanSku": "7703138000357",
+                  "cantidad": "5",
+                  "peso": "5.02",
+                  "volumen": "1.45"
+                },
+                {
+                  "eanSku": "7703138000555",
+                  "cantidad": "10",
+                  "peso": "19.19",
+                  "volumen": "1.32"
+                },
+                {
+                  "eanSku": "7703138006892",
+                  "cantidad": "5",
+                  "peso": "4.01",
+                  "volumen": "0.14"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097833",
+              "productos": [
+                {
+                  "eanSku": "7703138007646",
+                  "cantidad": "1",
+                  "peso": "27.13",
+                  "volumen": "0.27"
+                },
+                {
+                  "eanSku": "7703138000203",
+                  "cantidad": "5",
+                  "peso": "11.78",
+                  "volumen": "2.26"
+                },
+                {
+                  "eanSku": "7703138006816",
+                  "cantidad": "5",
+                  "peso": "9.54",
+                  "volumen": "0.9"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "eanTienda": "7703670900504",
+          "contenedores": [
+            {
+              "contenedor": "00077072030000097831",
+              "productos": [
+                {
+                  "eanSku": "7703138000357",
+                  "cantidad": "10",
+                  "peso": "22.2",
+                  "volumen": "0.49"
+                },
+                {
+                  "eanSku": "7703138006854",
+                  "cantidad": "5",
+                  "peso": "27.9",
+                  "volumen": "2.01"
+                },
+                {
+                  "eanSku": "7703138006816",
+                  "cantidad": "5",
+                  "peso": "19.1",
+                  "volumen": "0.55"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097832",
+              "productos": [
+                {
+                  "eanSku": "7703138000111",
+                  "cantidad": "5",
+                  "peso": "6.84",
+                  "volumen": "2.54"
+                },
+                {
+                  "eanSku": "7703138006939",
+                  "cantidad": "10",
+                  "peso": "22.54",
+                  "volumen": "0.57"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097833",
+              "productos": [
+                {
+                  "eanSku": "7703138007059",
+                  "cantidad": "3",
+                  "peso": "19.36",
+                  "volumen": "2.29"
+                },
+                {
+                  "eanSku": "7703138006830",
+                  "cantidad": "5",
+                  "peso": "8.45",
+                  "volumen": "3.33"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "eanTienda": "7703670900566",
+          "contenedores": [
+            {
+              "contenedor": "00077072030000097831",
+              "productos": [
+                {
+                  "eanSku": "7703138000357",
+                  "cantidad": "5",
+                  "peso": "24.21",
+                  "volumen": "2.48"
+                },
+                {
+                  "eanSku": "7703138000074",
+                  "cantidad": "5",
+                  "peso": "25.31",
+                  "volumen": "1.31"
+                },
+                {
+                  "eanSku": "7703138000203",
+                  "cantidad": "5",
+                  "peso": "12.19",
+                  "volumen": "2.41"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097832",
+              "productos": [
+                {
+                  "eanSku": "7703138007646",
+                  "cantidad": "2",
+                  "peso": "14.46",
+                  "volumen": "2.83"
+                },
+                {
+                  "eanSku": "7703138000111",
+                  "cantidad": "10",
+                  "peso": "37.48",
+                  "volumen": "5.03"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097833",
+              "productos": [
+                {
+                  "eanSku": "7703138008551",
+                  "cantidad": "3",
+                  "peso": "36.77",
+                  "volumen": "2.06"
+                },
+                {
+                  "eanSku": "7703138008698",
+                  "cantidad": "10",
+                  "peso": "6.92",
+                  "volumen": "3.83"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "eanTienda": "7703670542537",
+          "contenedores": [
+            {
+              "contenedor": "00077072030000097831",
+              "productos": [
+                {
+                  "eanSku": "7703138007646",
+                  "cantidad": "1",
+                  "peso": "28.83",
+                  "volumen": "1.9"
+                },
+                {
+                  "eanSku": "7703138006854",
+                  "cantidad": "5",
+                  "peso": "9.11",
+                  "volumen": "2.01"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097832",
+              "productos": [
+                {
+                  "eanSku": "7703138000432",
+                  "cantidad": "5",
+                  "peso": "3.8",
+                  "volumen": "0.77"
+                },
+                {
+                  "eanSku": "7703138006816",
+                  "cantidad": "5",
+                  "peso": "13.33",
+                  "volumen": "0.66"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097833",
+              "productos": [
+                {
+                  "eanSku": "7703138008698",
+                  "cantidad": "5",
+                  "peso": "38.88",
+                  "volumen": "2.74"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "eanTienda": "7703670900955",
+          "contenedores": [
+            {
+              "contenedor": "00077072030000097831",
+              "productos": [
+                {
+                  "eanSku": "7703138007646",
+                  "cantidad": "1",
+                  "peso": "35.17",
+                  "volumen": "1.9"
+                },
+                {
+                  "eanSku": "7703138006991",
+                  "cantidad": "3",
+                  "peso": "26.51",
+                  "volumen": "2.1"
+                },
+                {
+                  "eanSku": "7703138007059",
+                  "cantidad": "3",
+                  "peso": "37.55",
+                  "volumen": "0.73"
+                },
+                {
+                  "eanSku": "7703138006892",
+                  "cantidad": "15",
+                  "peso": "1.44",
+                  "volumen": "1.04"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097832",
+              "productos": [
+                {
+                  "eanSku": "7703138000074",
+                  "cantidad": "5",
+                  "peso": "39.17",
+                  "volumen": "1.24"
+                },
+                {
+                  "eanSku": "7703138006533",
+                  "cantidad": "6",
+                  "peso": "33.69",
+                  "volumen": "3.33"
+                },
+                {
+                  "eanSku": "7703138006953",
+                  "cantidad": "5",
+                  "peso": "27.64",
+                  "volumen": "1.81"
+                },
+                {
+                  "eanSku": "7703138006939",
+                  "cantidad": "10",
+                  "peso": "22.08",
+                  "volumen": "1.5"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097833",
+              "productos": [
+                {
+                  "eanSku": "7703138000203",
+                  "cantidad": "5",
+                  "peso": "27.72",
+                  "volumen": "0.22"
+                },
+                {
+                  "eanSku": "7703138007011",
+                  "cantidad": "3",
+                  "peso": "27.91",
+                  "volumen": "2.12"
+                },
+                {
+                  "eanSku": "7703138006878",
+                  "cantidad": "20",
+                  "peso": "3.43",
+                  "volumen": "1.49"
+                },
+                {
+                  "eanSku": "7703138006816",
+                  "cantidad": "5",
+                  "peso": "26.39",
+                  "volumen": "1.29"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "eanTienda": "7703670900306",
+          "contenedores": [
+            {
+              "contenedor": "00077072030000097831",
+              "productos": [
+                {
+                  "eanSku": "7703138007646",
+                  "cantidad": "1",
+                  "peso": "21.47",
+                  "volumen": "0.96"
+                },
+                {
+                  "eanSku": "7703138006953",
+                  "cantidad": "5",
+                  "peso": "32.11",
+                  "volumen": "3.78"
+                },
+                {
+                  "eanSku": "7703138006939",
+                  "cantidad": "5",
+                  "peso": "21.95",
+                  "volumen": "2.31"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097832",
+              "productos": [
+                {
+                  "eanSku": "7703138000111",
+                  "cantidad": "5",
+                  "peso": "17.9",
+                  "volumen": "1.74"
+                },
+                {
+                  "eanSku": "7703138006878",
+                  "cantidad": "20",
+                  "peso": "37.4",
+                  "volumen": "2.37"
+                },
+                {
+                  "eanSku": "7703138006687",
+                  "cantidad": "5",
+                  "peso": "3.04",
+                  "volumen": "2.11"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097833",
+              "productos": [
+                {
+                  "eanSku": "7703138008698",
+                  "cantidad": "5",
+                  "peso": "5.69",
+                  "volumen": "1.33"
+                },
+                {
+                  "eanSku": "7703138006892",
+                  "cantidad": "5",
+                  "peso": "36.7",
+                  "volumen": "2.33"
+                },
+                {
+                  "eanSku": "7703138006816",
+                  "cantidad": "5",
+                  "peso": "34.62",
+                  "volumen": "1.33"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "eanTienda": "7703670900542",
+          "contenedores": [
+            {
+              "contenedor": "00077072030000097831",
+              "productos": [
+                {
+                  "eanSku": "7703138007646",
+                  "cantidad": "7",
+                  "peso": "9.1",
+                  "volumen": "2.73"
+                },
+                {
+                  "eanSku": "7703138000111",
+                  "cantidad": "5",
+                  "peso": "39.46",
+                  "volumen": "2.55"
+                },
+                {
+                  "eanSku": "7703138155460",
+                  "cantidad": "5",
+                  "peso": "18.95",
+                  "volumen": "2.4"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097832",
+              "productos": [
+                {
+                  "eanSku": "7703138008551",
+                  "cantidad": "1",
+                  "peso": "14.69",
+                  "volumen": "0.63"
+                },
+                {
+                  "eanSku": "7703138000159",
+                  "cantidad": "5",
+                  "peso": "16.36",
+                  "volumen": "2.9"
+                },
+                {
+                  "eanSku": "7703138006687",
+                  "cantidad": "5",
+                  "peso": "32.3",
+                  "volumen": "2.11"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097833",
+              "productos": [
+                {
+                  "eanSku": "7703138000074",
+                  "cantidad": "5",
+                  "peso": "12.76",
+                  "volumen": "2.85"
+                },
+                {
+                  "eanSku": "7703138006953",
+                  "cantidad": "5",
+                  "peso": "13",
+                  "volumen": "2.47"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "eanTienda": "7703670900443",
+          "contenedores": [
+            {
+              "contenedor": "00077072030000097831",
+              "productos": [
+                {
+                  "eanSku": "7703138007646",
+                  "cantidad": "2",
+                  "peso": "17.87",
+                  "volumen": "1.84"
+                },
+                {
+                  "eanSku": "7703138007059",
+                  "cantidad": "3",
+                  "peso": "4.49",
+                  "volumen": "1.89"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097832",
+              "productos": [
+                {
+                  "eanSku": "7703138000074",
+                  "cantidad": "5",
+                  "peso": "22.2",
+                  "volumen": "2.03"
+                },
+                {
+                  "eanSku": "7703138799275",
+                  "cantidad": "5",
+                  "peso": "24.27",
+                  "volumen": "1.29"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097833",
+              "productos": [
+                {
+                  "eanSku": "7703138006991",
+                  "cantidad": "3",
+                  "peso": "38.34",
+                  "volumen": "6.26"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "eanTienda": "7703670900405",
+          "contenedores": [
+            {
+              "contenedor": "00077072030000097831",
+              "productos": [
+                {
+                  "eanSku": "7703138007646",
+                  "cantidad": "1",
+                  "peso": "13.38",
+                  "volumen": "2.46"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097832",
+              "productos": [
+                {
+                  "eanSku": "7703138006854",
+                  "cantidad": "10",
+                  "peso": "29.53",
+                  "volumen": "5.86"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097833",
+              "productos": [
+                {
+                  "eanSku": "7703138006939",
+                  "cantidad": "20",
+                  "peso": "34.27",
+                  "volumen": "6.55"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "eanTienda": "7703670900658",
+          "contenedores": [
+            {
+              "contenedor": "00077072030000097831",
+              "productos": [
+                {
+                  "eanSku": "7703138007646",
+                  "cantidad": "1",
+                  "peso": "4.47",
+                  "volumen": "2.98"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097832",
+              "productos": [
+                {
+                  "eanSku": "7703138000159",
+                  "cantidad": "5",
+                  "peso": "11.45",
+                  "volumen": "1.96"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "eanTienda": "7703670901235",
+          "contenedores": [
+            {
+              "contenedor": "00077072030000097831",
+              "productos": [
+                {
+                  "eanSku": "7703138007646",
+                  "cantidad": "1",
+                  "peso": "9.79",
+                  "volumen": "0.25"
+                },
+                {
+                  "eanSku": "7703138008698",
+                  "cantidad": "5",
+                  "peso": "13.04",
+                  "volumen": "0.84"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097832",
+              "productos": [
+                {
+                  "eanSku": "7703138000111",
+                  "cantidad": "5",
+                  "peso": "11.69",
+                  "volumen": "3.21"
+                },
+                {
+                  "eanSku": "7703138000203",
+                  "cantidad": "5",
+                  "peso": "38.49",
+                  "volumen": "0.34"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097833",
+              "productos": [
+                {
+                  "eanSku": "7703138004256",
+                  "cantidad": "5",
+                  "peso": "12.32",
+                  "volumen": "7.14"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "eanTienda": "7703670900184",
+          "contenedores": [
+            {
+              "contenedor": "00077072030000097831",
+              "productos": [
+                {
+                  "eanSku": "7703138007646",
+                  "cantidad": "1",
+                  "peso": "31.34",
+                  "volumen": "0.12"
+                },
+                {
+                  "eanSku": "7703138006892",
+                  "cantidad": "5",
+                  "peso": "14.11",
+                  "volumen": "1.07"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097832",
+              "productos": [
+                {
+                  "eanSku": "7703138000203",
+                  "cantidad": "15",
+                  "peso": "20.93",
+                  "volumen": "3.04"
+                },
+                {
+                  "eanSku": "7703138006816",
+                  "cantidad": "10",
+                  "peso": "30.04",
+                  "volumen": "3.53"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097833",
+              "productos": [
+                {
+                  "eanSku": "7703138006878",
+                  "cantidad": "5",
+                  "peso": "5.67",
+                  "volumen": "3.64"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "eanTienda": "7703670900689",
+          "contenedores": [
+            {
+              "contenedor": "00077072030000097831",
+              "productos": [
+                {
+                  "eanSku": "7703138008551",
+                  "cantidad": "1",
+                  "peso": "34.76",
+                  "volumen": "3.48"
+                },
+                {
+                  "eanSku": "7703138006991",
+                  "cantidad": "6",
+                  "peso": "10.64",
+                  "volumen": "2.16"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097832",
+              "productos": [
+                {
+                  "eanSku": "7703138000111",
+                  "cantidad": "5",
+                  "peso": "23.51",
+                  "volumen": "2.94"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097833",
+              "productos": [
+                {
+                  "eanSku": "7703138000203",
+                  "cantidad": "15",
+                  "peso": "9.81",
+                  "volumen": "2.88"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "eanTienda": "7703670900153",
+          "contenedores": [
+            {
+              "contenedor": "00077072030000097831",
+              "productos": [
+                {
+                  "eanSku": "7703138008551",
+                  "cantidad": "8",
+                  "peso": "11.54",
+                  "volumen": "5.11"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097832",
+              "productos": [
+                {
+                  "eanSku": "7703138006939",
+                  "cantidad": "5",
+                  "peso": "36.5",
+                  "volumen": "5.6"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "eanTienda": "7703670900580",
+          "contenedores": [
+            {
+              "contenedor": "00077072030000097831",
+              "productos": [
+                {
+                  "eanSku": "7703138000074",
+                  "cantidad": "5",
+                  "peso": "18.93",
+                  "volumen": "1.8"
+                },
+                {
+                  "eanSku": "7703138000203",
+                  "cantidad": "5",
+                  "peso": "21.19",
+                  "volumen": "2.94"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097832",
+              "productos": [
+                {
+                  "eanSku": "7703138000111",
+                  "cantidad": "5",
+                  "peso": "6.03",
+                  "volumen": "2.89"
+                },
+                {
+                  "eanSku": "7703138006953",
+                  "cantidad": "5",
+                  "peso": "32.36",
+                  "volumen": "2.99"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097833",
+              "productos": [
+                {
+                  "eanSku": "7703138004256",
+                  "cantidad": "5",
+                  "peso": "25.11",
+                  "volumen": "0.64"
+                },
+                {
+                  "eanSku": "7703138006878",
+                  "cantidad": "5",
+                  "peso": "16.75",
+                  "volumen": "2.84"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "eanTienda": "7703670900320",
+          "contenedores": [
+            {
+              "contenedor": "00077072030000097831",
+              "productos": [
+                {
+                  "eanSku": "7703138000203",
+                  "cantidad": "5",
+                  "peso": "3.71",
+                  "volumen": "0.41"
+                },
+                {
+                  "eanSku": "7703138007103",
+                  "cantidad": "10",
+                  "peso": "35.47",
+                  "volumen": "4.28"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097832",
+              "productos": [
+                {
+                  "eanSku": "7703138006854",
+                  "cantidad": "5",
+                  "peso": "6.11",
+                  "volumen": "1.6"
+                },
+                {
+                  "eanSku": "7703138006816",
+                  "cantidad": "5",
+                  "peso": "1.82",
+                  "volumen": "6.25"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097833",
+              "productos": [
+                {
+                  "eanSku": "7703138006687",
+                  "cantidad": "5",
+                  "peso": "1.69",
+                  "volumen": "0.89"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "eanTienda": "7703670900177",
+          "contenedores": [
+            {
+              "contenedor": "00077072030000097831",
+              "productos": [
+                {
+                  "eanSku": "7703138006991",
+                  "cantidad": "3",
+                  "peso": "24.18",
+                  "volumen": "2.68"
+                },
+                {
+                  "eanSku": "7703138006854",
+                  "cantidad": "5",
+                  "peso": "20.22",
+                  "volumen": "0.55"
+                },
+                {
+                  "eanSku": "7703138006816",
+                  "cantidad": "10",
+                  "peso": "38.85",
+                  "volumen": "4.35"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097832",
+              "productos": [
+                {
+                  "eanSku": "7703138006953",
+                  "cantidad": "5",
+                  "peso": "13.16",
+                  "volumen": "0.53"
+                },
+                {
+                  "eanSku": "7703138006892",
+                  "cantidad": "5",
+                  "peso": "39.43",
+                  "volumen": "0.26"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097833",
+              "productos": [
+                {
+                  "eanSku": "7703138006878",
+                  "cantidad": "25",
+                  "peso": "4.76",
+                  "volumen": "2.04"
+                },
+                {
+                  "eanSku": "7703138006830",
+                  "cantidad": "5",
+                  "peso": "17.4",
+                  "volumen": "2.04"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "eanTienda": "7703670548331",
+          "contenedores": [
+            {
+              "contenedor": "00077072030000097831",
+              "productos": [
+                {
+                  "eanSku": "7703138006533",
+                  "cantidad": "3",
+                  "peso": "34.29",
+                  "volumen": "5.83"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "eanTienda": "7703670900313",
+          "contenedores": [
+            {
+              "contenedor": "00077072030000097831",
+              "productos": [
+                {
+                  "eanSku": "7703138006878",
+                  "cantidad": "15",
+                  "peso": "4.26",
+                  "volumen": "4"
+                },
+                {
+                  "eanSku": "7703138007103",
+                  "cantidad": "5",
+                  "peso": "1.2",
+                  "volumen": "3.24"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097832",
+              "productos": [
+                {
+                  "eanSku": "7703138006854",
+                  "cantidad": "20",
+                  "peso": "2.94",
+                  "volumen": "0.26"
+                },
+                {
+                  "eanSku": "7703138006816",
+                  "cantidad": "10",
+                  "peso": "12.91",
+                  "volumen": "0.45"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097833",
+              "productos": [
+                {
+                  "eanSku": "7703138006830",
+                  "cantidad": "5",
+                  "peso": "1.13",
+                  "volumen": "5.22"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "eanTienda": "7703670901228",
+          "contenedores": [
+            {
+              "contenedor": "00077072030000097831",
+              "productos": [
+                {
+                  "eanSku": "7703138006878",
+                  "cantidad": "5",
+                  "peso": "7.5",
+                  "volumen": "0.55"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "eanTienda": "7703670900214",
+          "contenedores": [
+            {
+              "contenedor": "00077072030000097831",
+              "productos": [
+                {
+                  "eanSku": "7703138006878",
+                  "cantidad": "5",
+                  "peso": "18.28",
+                  "volumen": "1.98"
+                }
+              ]
+            },
+            {
+              "contenedor": "00077072030000097832",
+              "productos": [
+                {
+                  "eanSku": "7703138006892",
+                  "cantidad": "5",
+                  "peso": "17.8",
+                  "volumen": "1.15"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "eanTienda": "7703670900528",
+          "contenedores": [
+            {
+              "contenedor": "00077072030000097831",
+              "productos": [
+                {
+                  "eanSku": "7703138006816",
+                  "cantidad": "5",
+                  "peso": "36.43",
+                  "volumen": "1.24"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
