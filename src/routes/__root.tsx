@@ -16,6 +16,7 @@ import Header from '#/components/header/Header'
 import Footer from '#/components/footer/Footer'
 import { ThemeProvider } from '#/contexts/ThemeContext'
 import Breadcrumbs from '#/components/breadcrumbs/Breadcrumbs'
+import NotFound from '#/components/notFound/NotFound'
 
 const themeInitScript = `
 (function () {
@@ -56,6 +57,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       },
     ],
   }),
+  notFoundComponent: NotFound,
   shellComponent: RootDocument,
 })
 
