@@ -1,6 +1,6 @@
 import AutorenewOutlinedIcon from '@mui/icons-material/AutorenewOutlined'
 import DownloadIcon from '@mui/icons-material/Download'
-import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined'
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
 import { useEffect, useState } from 'react'
 import Alert from '@mui/material/Alert'
 import Snackbar from '@mui/material/Snackbar'
@@ -73,9 +73,19 @@ const PurchaseOrdersTable = ({
     }
   }
 
+  const handleDownloadCsv = async (order: PurchaseOrder) => {
+    setDownloadingOrderId(order.id)
+    try {
+      console.log(`Descargando CSV de la orden ${order.ordenCompra}`)
+    } finally {
+      setDownloadingOrderId(null)
+    }
+  }
+
   const columns = usePurchaseOrdersColumns(
     onViewDetail,
     handleDownloadPdf,
+    handleDownloadCsv,
     downloadingOrderId,
   )
 
@@ -128,10 +138,10 @@ const PurchaseOrdersTable = ({
             onClick: () => console.log('Reinyectar', selection),
           },
           {
-            key: 'dispatch',
-            label: 'Despachar',
-            icon: <LocalShippingOutlinedIcon fontSize="small" />,
-            onClick: () => console.log('Despachar', selection),
+            key: 'download',
+            label: 'Descargar PDF',
+            icon: <PictureAsPdfIcon fontSize="small" />,
+            onClick: () => console.log('Descargar PDF', selection),
           },
         ]}
       />
