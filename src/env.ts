@@ -19,8 +19,16 @@ export const env = createEnv({
 
   client: {
     VITE_APP_TITLE: z.string().min(1).optional(),
-    /** `false`/`0` turns the MSW mock API off (defaults to on in dev). */
+    /** `true`/`1` turns the MSW mock API on (defaults to off — hits VITE_API_BASE_URL). */
     VITE_ENABLE_MOCKS: z.enum(['true', 'false', '0', '1']).optional(),
+    /**
+     * Origin of Cirkus's own FastAPI backend for this platform — not
+     * Homecenter itself, it wraps Homecenter's REST HUB internally (e.g. an
+     * ngrok tunnel to a dev machine, or the deployed QA/Production host).
+     * `/api/v1` is appended by `src/api/http.ts`. Only consulted when
+     * `VITE_ENABLE_MOCKS` is off — unset falls back to same-origin `/api/v1`.
+     */
+    VITE_API_BASE_URL: z.string().url().optional(),
   },
 
   /**

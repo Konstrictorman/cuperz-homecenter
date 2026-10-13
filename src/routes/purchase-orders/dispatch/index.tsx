@@ -51,11 +51,9 @@ const DispatchOrdersPage = () => {
       <DispatchOrdersFilterBar onFilter={setFilters} />
 
       {isError ? (
-        <p role="alert">
-          <Typography className="purchase-orders__error">
-            No se pudieron cargar las órdenes: {error.message}
-          </Typography>
-        </p>
+        <Typography role="alert" className="purchase-orders__error">
+          No se pudieron cargar las órdenes: {error.message}
+        </Typography>
       ) : (
         <DispatchOrdersTable
           rows={rows}

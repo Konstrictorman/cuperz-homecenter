@@ -5,6 +5,7 @@ import {
   useMutation,
   useQueryClient,
 } from '@tanstack/react-query'
+import { mocksEnabled } from '#/mocks/enable'
 import { apiFetch, buildQuery } from './http'
 import { queryKeys } from './query-keys'
 import type {
@@ -90,16 +91,14 @@ export function fetchPurchaseOrdersExport(
 }
 
 /**
- * Triggers a browser download of Homecenter's generated PDF for an order.
- *
  * Hits our own real server route — `/api/purchase-orders/{ordenCompra}/pdf`
- * — which proxies Homecenter's `GenerarPdf` endpoint. This bypasses the
- * `/api/v1` mock layer entirely (see `src/routes/api/purchase-orders/
- * $ordenCompra/pdf.ts`), so it always makes a real call to Homecenter.
+ * — which proxies Homecenter's `GenerarPdf` endpoint directly. This is the
+ * mock-era path: it bypasses the `/api/v1` mock layer entirely (see
+ * `src/routes/api/purchase-orders/$ordenCompra/pdf.ts`), since there's no
+ * useful way to fake PDF bytes, so it always makes a real call to Homecenter
+ * even while the rest of the app runs against MSW.
  */
-export async function downloadPurchaseOrderPdf(
-  ordenCompra: string,
-): Promise<void> {
+async function fetchPdfViaHomecenterProxy(ordenCompra: string): Promise<Blob> {
   const response = await fetch(
     `/api/purchase-orders/${encodeURIComponent(ordenCompra)}/pdf`,
   )
@@ -117,7 +116,30 @@ export async function downloadPurchaseOrderPdf(
     throw new Error(message)
   }
 
-  const blob = await response.blob()
+  return response.blob()
+}
+
+/**
+ * Once the platform's own FastAPI backend is live (`VITE_ENABLE_MOCKS=false`,
+ * see [[homecenter-fastapi-backend]] / CLAUDE.md), the backend generates the
+ * PDF itself via its own `POST /api/v1/ordenes-compra/generar-pdf` — no need
+ * for our Homecenter-proxying server route in that mode.
+ */
+function fetchPdfViaBackend(ordenCompra: string): Promise<Blob> {
+  return apiFetch<Blob>('/ordenes-compra/generar-pdf', {
+    method: 'POST',
+    body: { ordenes: [ordenCompra] },
+  })
+}
+
+/** Triggers a browser download of the generated PDF for a purchase order. */
+export async function downloadPurchaseOrderPdf(
+  ordenCompra: string,
+): Promise<void> {
+  const blob = mocksEnabled()
+    ? await fetchPdfViaHomecenterProxy(ordenCompra)
+    : await fetchPdfViaBackend(ordenCompra)
+
   const url = URL.createObjectURL(blob)
   const link = document.createElement('a')
   link.href = url

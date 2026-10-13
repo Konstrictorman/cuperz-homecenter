@@ -31,12 +31,15 @@ production bundles entirely.
 ## Running it
 
 ```bash
-npm run dev
+VITE_ENABLE_MOCKS=true npm run dev
 ```
 
-Open the app — the console shows `[MSW] Mocking enabled` and every
-`GET/POST /api/v1/...` is logged. To hit a real backend instead, set
-`VITE_ENABLE_MOCKS=false`.
+Mocks are **off by default** — the app hits `VITE_API_BASE_URL` (or
+same-origin `/api/v1` when unset) unless `VITE_ENABLE_MOCKS=true`/`1` is set
+explicitly, e.g. in `.env.local`. With mocks on, the console shows `[MSW]
+Mocking enabled` and every `GET/POST /api/v1/...` is logged. The real
+backend's own auth (see the "Cuperz Homecenter API" Postman collection) isn't
+wired into `apiFetch` yet — see `src/api/http.ts`.
 
 ## Using the API layer in a component
 

@@ -3,11 +3,10 @@
 
 import { setMockGate } from '#/api/http'
 
-/** Set `VITE_ENABLE_MOCKS=false` to hit a real backend instead. */
-function mocksEnabled(): boolean {
+/** Set `VITE_ENABLE_MOCKS=true` to use mocked data instead of a real backend. */
+export function mocksEnabled(): boolean {
   const flag = import.meta.env.VITE_ENABLE_MOCKS
-  if (flag === 'false' || flag === '0') return false
-  return import.meta.env.DEV
+  return flag === 'true' || flag === '1'
 }
 
 let started: Promise<unknown> | undefined
