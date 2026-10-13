@@ -1,5 +1,13 @@
 #!/usr/bin/env python3
-"""One-off build-time generator — NOT shipped to the browser, NOT run by the
+"""DEPRECATED — superseded by
+`generate-purchase-order-dispatch-seed-desadv.py`, which sources the
+Orden→Tienda→Contenedor→Producto tree from the legacy SQL Server DESADV
+database (10.0.1.75) instead of the MySQL siicrossdocking predistribution
+tables below. Kept for reference (it reuses this MySQL source for the
+ordenCompra→numPedido mapping) — do not extend this one further; make
+changes to the DESADV version instead.
+
+One-off build-time generator — NOT shipped to the browser, NOT run by the
 app at request time. Queries the legacy SIICUPERZ MySQL databases
 (10.0.1.72, see CLAUDE.md) for the real Cross-Docking predistribution data
 (container/product/weight/volume breakdown) behind the purchase orders
