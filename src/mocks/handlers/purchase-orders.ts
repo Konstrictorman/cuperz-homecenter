@@ -17,32 +17,26 @@ function totalRequested(order: PurchaseOrderRecord): number {
   return order.productos.reduce((sum, p) => sum + p.cantidadSolicitada, 0)
 }
 
-/** Distinct store count across all lines — a product-first order can repeat
- *  the same store across several lines, so this can't just be an array length
- *  the way it could when stores were the outer level. */
-function distinctStoreCount(order: PurchaseOrderRecord): number {
-  const eans = new Set<string>()
-  for (const producto of order.productos) {
-    for (const tienda of producto.tiendas) eans.add(tienda.eanTienda)
-  }
-  return eans.size
-}
-
 function toSummary(order: PurchaseOrderRecord): PurchaseOrderSummary {
   return {
     ordenCompra: order.ordenCompra,
     eanPuntoEntrega: order.eanPuntoEntrega,
     cliente: order.cliente,
     ciudadEntrega: order.ciudadEntrega,
-    cantidadTiendas: distinctStoreCount(order),
-    cantidadTotalSolicitada: totalRequested(order),
-    costoTotalOc: order.costoTotalOc,
+    cantidadTotOc: totalRequested(order),
+    costoTotOc: order.costoTotalOc,
+    estadoOc: order.estadoOc,
     estado: order.estado,
     fechaTransmision: order.fechaTransmision,
-    ultimaActualizacion: order.ultimaActualizacion,
-    numPedido: order.numPedido,
     fechaMinEntrega: order.fechaMinEntrega,
     fechaMaxEntrega: order.fechaMaxEntrega,
+    fechaDespacho: order.fechaDespacho,
+    sticker: order.sticker ?? '-1',
+    observaciones: order.observaciones,
+    numeroPedido: order.numPedido,
+    // Semantics unconfirmed — always `null` in every real response sampled
+    // so far (2026-10-13). See `PurchaseOrderSummary.fechaOrden`.
+    fechaOrden: null,
   }
 }
 
@@ -152,7 +146,7 @@ function filterPurchaseOrders(url: URL): Array<PurchaseOrderRecord> {
 }
 
 const CSV_HEADER =
-  'ordenCompra;eanPuntoEntrega;cliente;ciudadEntrega;cantidadTiendas;cantidadTotalSolicitada;estado;fechaTransmision'
+  'ordenCompra;eanPuntoEntrega;cliente;ciudadEntrega;cantidadTotOc;estado;fechaTransmision'
 
 export const purchaseOrdersHandlers = [
   // § 1.1
@@ -177,8 +171,7 @@ export const purchaseOrdersHandlers = [
           r.eanPuntoEntrega,
           r.cliente,
           r.ciudadEntrega,
-          r.cantidadTiendas,
-          r.cantidadTotalSolicitada,
+          r.cantidadTotOc,
           r.estado,
           r.fechaTransmision,
         ].join(';'),

@@ -16,7 +16,6 @@ export interface PurchaseOrder {
   ordenCompra: string
   cliente: string
   ciudadEntrega: string
-  tiendas: number
   cantidadTotal: number
   costoTotalOc: number
   estadoTone: StatusBadgeTone

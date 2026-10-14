@@ -84,6 +84,11 @@ export interface PurchaseOrderRecord {
   fechaMinEntrega: IsoDateTime | null
   fechaMaxEntrega: IsoDateTime | null
   fechaCancelacion: IsoDateTime | null
+  /** Raw order-level status code (`"1-PENDIENTE"` / `"4-ESTADO FINAL"`) —
+   *  distinct from the normalised `estado` above. Confirmed via a real
+   *  `/api/v1/ordenes-compra` response (2026-10-13). */
+  estadoOc: string
+  fechaDespacho: IsoDateTime | null
   sticker: string | null
   tipoOc: string
   tipoDocumento: string | null
@@ -372,6 +377,13 @@ function buildPurchaseOrder(seedOrder: SeedOrder): PurchaseOrderRecord {
 
   const ultimaActualizacionDate =
     seedOrder.fechaEstadoFinal ?? seedOrder.fechaCreacion
+  // Mirrors the "never progressed past PENDIENTE" treatment `fechaCancelacion`
+  // already gets above — Homecenter's raw ESTADO_OC for a CANCELADO order
+  // isn't confirmed, so it's modeled as staying "1-PENDIENTE" rather than
+  // inventing a code.
+  const estadoOc =
+    seedOrder.estadoRaw === 'FINAL' ? '4-ESTADO FINAL' : '1-PENDIENTE'
+  const fechaDespacho = estado === 'DESPACHADA' ? ultimaActualizacionDate : null
   const codigoSesionRecibo =
     estado === 'DESPACHADA' && faker.datatype.boolean(0.5)
       ? `REC-${ultimaActualizacionDate.slice(0, 10).replace(/-/g, '')}-${faker.number.int({ min: 1, max: 9 })}`
@@ -402,6 +414,8 @@ function buildPurchaseOrder(seedOrder: SeedOrder): PurchaseOrderRecord {
     fechaMinEntrega: seedOrder.fechaMinEntrega,
     fechaMaxEntrega: seedOrder.fechaMaxEntrega,
     fechaCancelacion,
+    estadoOc,
+    fechaDespacho,
     sticker: faker.datatype.boolean(0.85) ? faker.string.numeric(12) : null,
     // Raw `TIPO_DE_OC` is always "RETAIL" for this slice of the export —
     // doesn't match the numeric-prefixed `TIPO_OC` format the backend spec

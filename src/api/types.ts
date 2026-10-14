@@ -53,26 +53,48 @@ export type OrderStatus =
 export type OrderLineStatus =
   'PENDIENTE' | 'DESPACHADA' | 'PARCIAL' | 'CANCELADA' | 'SUPERA_SOLICITADO'
 
-/** Row shape for `GET /api/v1/ordenes-compra` (§ 1.1). */
+/** Row shape for `GET /api/v1/ordenes-compra` (§ 1.1).
+ *
+ *  Confirmed against a real response from this endpoint (2026-10-13) —
+ *  several fields differ from what docs/especificacion-endpoints-backend
+ *  (2).md documents for § 1.1 (`costoTotalOc`/`cantidadTotalSolicitada`/
+ *  `numPedido`/`ultimaActualizacion`/`cantidadTiendas`): those names don't
+ *  appear on the wire. Treat this shape as the real contract for this
+ *  endpoint, not that doc. */
 export interface PurchaseOrderSummary {
   ordenCompra: string
   eanPuntoEntrega: string
-  cliente: string
-  ciudadEntrega: string
-  cantidadTiendas: number
-  cantidadTotalSolicitada: number
-  costoTotalOc: number
+  cliente: string | null
+  ciudadEntrega: string | null
+  /** Raw `CANTIDAD_TOT_OC`. */
+  cantidadTotOc: number
+  /** Raw `COSTO_TOT_OC`. */
+  costoTotOc: number
+  /** Raw Homecenter status code, e.g. `"1-PENDIENTE"` / `"4-ESTADO FINAL"` —
+   *  distinct from the normalised `estado` below. */
+  estadoOc: string
   estado: OrderStatus
   /** Raw `FECHA_TRANSMISION`. */
-  fechaTransmision: IsoDate
-  ultimaActualizacion: IsoDateTime
-  /** Platform-only field (not part of Homecenter's contract) — distinct from
-   *  `PurchaseOrderDetail.notaPedido` (raw `NOTA_PEDIDO`). `null` when unset. */
-  numPedido: string | null
+  fechaTransmision: IsoDateTime
   /** Raw `FECHA_MIN_ENTREGA`, normalised — see `PurchaseOrderDetail.fechaMinEntrega`. */
   fechaMinEntrega: IsoDateTime | null
   /** Raw `FECHA_MAX_ENTREGA`, normalised — see `PurchaseOrderDetail.fechaMaxEntrega`. */
   fechaMaxEntrega: IsoDateTime | null
+  /** Seen `null` on every sampled row so far — when this gets set is
+   *  unconfirmed. */
+  fechaDespacho: IsoDateTime | null
+  /** Raw `STICKER`; Homecenter's `"-1"` "not assigned" sentinel is seen
+   *  un-translated here (contrast `PurchaseOrderDetail.sticker`, which the
+   *  doc says translates it to `null`). */
+  sticker: string | null
+  observaciones: string | null
+  /** Platform-only field (not part of Homecenter's contract) — distinct from
+   *  `PurchaseOrderDetail.notaPedido` (raw `NOTA_PEDIDO`). `null` when unset. */
+  numeroPedido: string | null
+  /** Seen `null` on every sampled row so far — doesn't obviously map to
+   *  `fechaTransmision`/`fechaMinEntrega`/`fechaMaxEntrega`; semantics
+   *  unconfirmed. */
+  fechaOrden: IsoDateTime | null
 }
 
 /** Per-store product line within a `PurchaseOrderDetail`. Homecenter's raw
