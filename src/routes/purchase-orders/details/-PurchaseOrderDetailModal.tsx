@@ -40,12 +40,7 @@ const PurchaseOrderDetailModal = ({
           </Typography>
           <Typography>{detail?.cabecera.eanPuntoEntrega ?? '—'}</Typography>
         </div>
-        <div>
-          <Typography className="purchase-order-detail-modal__label">
-            Número de pedido
-          </Typography>
-          <Typography>{detail?.cabecera.numeroPedido ?? '—'}</Typography>
-        </div>
+
         <div>
           <Typography className="purchase-order-detail-modal__label">
             Fecha de pedido
@@ -81,21 +76,15 @@ const PurchaseOrderDetailModal = ({
         </div>
         <div>
           <Typography className="purchase-order-detail-modal__label">
-            Cliente / cadena
-          </Typography>
-          <Typography>{order.cliente}</Typography>
-        </div>
-        <div>
-          <Typography className="purchase-order-detail-modal__label">
             Dirección de entrega
           </Typography>
           <Typography>{detail?.cabecera.direccionEntrega ?? '—'}</Typography>
         </div>
         <div>
           <Typography className="purchase-order-detail-modal__label">
-            Código sesión recibo
+            Observaciones
           </Typography>
-          <Typography>{detail?.cabecera.codigoSesionRecibo ?? '—'}</Typography>
+          <Typography>{detail?.cabecera.observaciones ?? '—'}</Typography>
         </div>
       </div>
 

@@ -122,6 +122,9 @@ const PurchaseOrdersTable = ({
         rowCount={rowCount}
         paginationModel={paginationModel}
         onPaginationModelChange={onPaginationModelChange}
+        initialState={{
+          columns: { columnVisibilityModel: { cliente: false } },
+        }}
       />
       <Snackbar
         open={downloadError !== null}
