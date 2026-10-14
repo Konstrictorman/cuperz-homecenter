@@ -2,10 +2,18 @@
 
 import { HttpResponse, http } from 'msw'
 import { API, apiError, latency, readPageParams, withinRange } from './shared'
-import { db, nextLogId, nextSyncId, nowIso, paginate } from '../data/db'
+import {
+  db,
+  MOCK_ESTADO_SKU_CODE,
+  nextLogId,
+  nextSyncId,
+  nowIso,
+  paginate,
+} from '../data/db'
 import type { PurchaseOrderRecord } from '../data/db'
 import type {
   PurchaseOrderDetail,
+  PurchaseOrderDetailCabecera,
   PurchaseOrderStore,
   PurchaseOrderSummary,
   ReprocessOrderResponse,
@@ -42,12 +50,25 @@ function toSummary(order: PurchaseOrderRecord): PurchaseOrderSummary {
 
 /** Inverts Homecenter's raw `productos[].tiendas[]` nesting (as persisted on
  *  `PurchaseOrderRecord`) into the `/api/v1` contract's `tiendas[].productos[]`
- *  — the same inversion the real backend performs at this boundary. */
+ *  — the same inversion the real backend performs at this boundary.
+ *  `productoId`/`detalleId` are platform-only identifiers assigned here:
+ *  `productoId` stable per distinct SKU on the order (shared across the
+ *  stores it ships to, matching how a real response repeats it), `detalleId`
+ *  unique per store/product line — the mock has no real source for either,
+ *  since `PurchaseOrderRecord` never carried them. */
 function toStoreGroupedProducts(
   productos: PurchaseOrderRecord['productos'],
 ): Array<PurchaseOrderStore> {
   const byTienda = new Map<string, PurchaseOrderStore>()
+  const productoIdBySku = new Map<string, number>()
+  let nextDetalleId = 1
+
   for (const producto of productos) {
+    if (!productoIdBySku.has(producto.eanSku)) {
+      productoIdBySku.set(producto.eanSku, productoIdBySku.size + 1)
+    }
+    const productoId = productoIdBySku.get(producto.eanSku) as number
+
     for (const tienda of producto.tiendas) {
       let store = byTienda.get(tienda.eanTienda)
       if (!store) {
@@ -59,62 +80,76 @@ function toStoreGroupedProducts(
         byTienda.set(tienda.eanTienda, store)
       }
       store.productos.push({
-        eanSku: producto.eanSku,
-        skuHomecenter: producto.skuHomecenter,
-        descripcion: producto.descripcion,
+        productoId,
+        detalleId: nextDetalleId++,
+        sku: producto.skuHomecenter,
+        producto: producto.descripcion,
+        eanProducto: producto.eanSku,
         cantidad: tienda.cantidad,
-        cantidadSolicitada: producto.cantidadSolicitada,
+        cantidadSku: producto.cantidadSolicitada,
         cantidadCancelada: producto.cantidadCancelada,
-        cantidadDevuelta: producto.cantidadDevuelta,
-        estadoLinea: producto.estadoLinea,
-        costoUnitario: producto.costoUnitario,
-        condicionPago: producto.condicionPago,
-        descuentoSku: producto.descuentoSku,
+        cantidadDevueltaSku: producto.cantidadDevuelta,
+        estadoSku: MOCK_ESTADO_SKU_CODE[producto.estadoLinea],
+        estadoDetalle: producto.estadoLinea,
+        costoSku: producto.costoUnitario,
         unidadVenta: producto.unidadVenta,
+        observaciones: null,
       })
     }
   }
   return Array.from(byTienda.values())
 }
 
-function toDetail(order: PurchaseOrderRecord): PurchaseOrderDetail {
+function toCabecera(order: PurchaseOrderRecord): PurchaseOrderDetailCabecera {
   return {
     ordenCompra: order.ordenCompra,
-    eanPuntoEntrega: order.eanPuntoEntrega,
-    cliente: order.cliente,
-    direccionEntrega: order.direccionEntrega,
-    barrioEntrega: order.barrioEntrega,
-    departamentoEntrega: order.departamentoEntrega,
-    codigoDaneEntrega: order.codigoDaneEntrega,
-    facturacion: order.facturacion,
-    estado: order.estado,
-    codigoSesionRecibo: order.codigoSesionRecibo,
-    tiendas: toStoreGroupedProducts(order.productos),
-    costoTotalOc: order.costoTotalOc,
-    cantidadTotalSolicitada: totalRequested(order),
-    transportadora: order.transportadora,
+    cantidadTotOc: totalRequested(order),
+    costoTotOc: order.costoTotalOc,
+    sticker: order.sticker ?? '-1',
+    estadoOc: order.estadoOc,
     fechaTransmision: order.fechaTransmision,
+    cliente: order.cliente,
+    ciudadEntrega: order.ciudadEntrega,
     fechaMinEntrega: order.fechaMinEntrega,
     fechaMaxEntrega: order.fechaMaxEntrega,
+    fechaDespacho: order.fechaDespacho,
     fechaCancelacion: order.fechaCancelacion,
-    sticker: order.sticker,
+    transportadora: order.transportadora,
     tipoOc: order.tipoOc,
-    numPedido: order.numPedido,
-    tipoDocumento: order.tipoDocumento,
     notaPedido: order.notaPedido,
-    cedulaComprador: order.cedulaComprador,
+    cedula: order.cedulaComprador,
     emailCliente: order.emailCliente,
     telefonoCliente: order.telefonoCliente,
-    clienteRecibe: order.clienteRecibe,
-    eanTiendaVenta: order.eanTiendaVenta,
-    eanTiendaFacturacion: order.eanTiendaFacturacion,
+    barrioEntrega: order.barrioEntrega,
+    departamentoEntrega: order.departamentoEntrega,
+    direccionEntrega: order.direccionEntrega,
+    barrioFac: order.barrioFac,
+    ciudadFac: order.ciudadFac,
+    departamentoFac: order.departamentoFac,
+    direccionFac: order.direccionFac,
+    tiendaVenta: order.eanTiendaVenta,
+    tiendaFacturacion: order.eanTiendaFacturacion,
     localidad: order.localidad,
     eanEmpresaCompradora: order.eanEmpresaCompradora,
     tipoDeOrden: order.tipoDeOrden,
     tipoEntrega: order.tipoEntrega,
-    observaciones: order.observaciones,
+    codigoDaneCe: order.codigoDaneEntrega,
     observacionesNpc: order.observacionesNpc,
     observacionesNpl: order.observacionesNpl,
+    clienteRecibe: order.clienteRecibe,
+    eanPuntoEntrega: order.eanPuntoEntrega,
+    estado: order.estado,
+    observaciones: order.observaciones,
+    numeroPedido: order.numPedido,
+    codigoSesionRecibo: order.codigoSesionRecibo,
+    tipoDocumento: order.tipoDocumento,
+  }
+}
+
+function toDetail(order: PurchaseOrderRecord): PurchaseOrderDetail {
+  return {
+    cabecera: toCabecera(order),
+    tiendas: toStoreGroupedProducts(order.productos),
   }
 }
 

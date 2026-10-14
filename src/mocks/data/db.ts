@@ -27,7 +27,6 @@ import type {
   IsoDateTime,
   OrderLineStatus,
   OrderStatus,
-  PurchaseOrderBillingAddress,
 } from '#/api/types'
 
 // --- Record shapes (superset of the API DTOs) ---
@@ -73,7 +72,10 @@ export interface PurchaseOrderRecord {
   barrioEntrega: string
   departamentoEntrega: string
   codigoDaneEntrega: string
-  facturacion: PurchaseOrderBillingAddress
+  barrioFac: string
+  ciudadFac: string
+  departamentoFac: string
+  direccionFac: string
   estado: OrderStatus
   codigoSesionRecibo: string | null
   fechaTransmision: string
@@ -398,12 +400,10 @@ function buildPurchaseOrder(seedOrder: SeedOrder): PurchaseOrderRecord {
     barrioEntrega: CEDI_FUNZA.ciudad,
     departamentoEntrega: CEDI_FUNZA.departamento,
     codigoDaneEntrega: CEDI_FUNZA.codigoDane,
-    facturacion: {
-      barrio: CEDI_FUNZA.ciudad,
-      ciudad: CEDI_FUNZA.ciudad,
-      departamento: CEDI_FUNZA.departamento,
-      direccion: CEDI_FUNZA.direccion,
-    },
+    barrioFac: CEDI_FUNZA.ciudad,
+    ciudadFac: CEDI_FUNZA.ciudad,
+    departamentoFac: CEDI_FUNZA.departamento,
+    direccionFac: CEDI_FUNZA.direccion,
     estado,
     codigoSesionRecibo,
     fechaTransmision: seedOrder.fechaTransmision.slice(0, 10),
@@ -464,7 +464,7 @@ function purchaseOrderToHomecenterRequest(order: PurchaseOrderRecord) {
  *  confirmed, the rest are unconfirmed placeholders. Local to this mock
  *  echo builder only: the frontend never resolves this prefix itself (see
  *  docs/especificacion-endpoints-backend (2).md, "Convenciones generales"). */
-const MOCK_ESTADO_SKU_CODE: Record<OrderLineStatus, string> = {
+export const MOCK_ESTADO_SKU_CODE: Record<OrderLineStatus, string> = {
   PENDIENTE: '1-PENDIENTE',
   DESPACHADA: '2-DESPACHADA',
   PARCIAL: '3-PARCIAL',
@@ -515,10 +515,10 @@ function purchaseOrderToHomecenterResponse(order: PurchaseOrderRecord) {
         CIUDAD_ENTREGA: order.ciudadEntrega,
         DEPARTAMENTO_ENTREGA: order.departamentoEntrega,
         DIRECCION_ENTREGA: order.direccionEntrega,
-        BARRIO_FAC: order.facturacion.barrio,
-        CIUDAD_FAC: order.facturacion.ciudad,
-        DEPARTAMENTO_FAC: order.facturacion.departamento,
-        DIRECCION_FAC: order.facturacion.direccion,
+        BARRIO_FAC: order.barrioFac,
+        CIUDAD_FAC: order.ciudadFac,
+        DEPARTAMENTO_FAC: order.departamentoFac,
+        DIRECCION_FAC: order.direccionFac,
         TIENDA_VENTA: order.eanTiendaVenta,
         TIENDA_FACTURACION: order.eanTiendaFacturacion,
         PUNTO_ENTREGA: order.eanPuntoEntrega,

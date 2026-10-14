@@ -50,11 +50,11 @@ describe('purchase orders', () => {
 
   it('returns the canonical order detail grouped by store', async () => {
     const { status, body } = await json<{
-      ordenCompra: string
+      cabecera: { ordenCompra: string }
       tiendas: Array<{ eanTienda: string; productos: unknown[] }>
     }>('/ordenes-compra/8467343')
     expect(status).toBe(200)
-    expect(body.ordenCompra).toBe('8467343')
+    expect(body.cabecera.ordenCompra).toBe('8467343')
     expect(body.tiendas).toHaveLength(1)
     expect(body.tiendas[0].productos).toHaveLength(2)
   })

@@ -56,11 +56,11 @@ const PurchaseOrderStoresTable = ({
 
   const rows: Array<PurchaseOrderStoreProductRow> = tiendas.flatMap((tienda) =>
     tienda.productos.map((producto) => ({
-      id: `${tienda.eanTienda}-${producto.eanSku}`,
+      id: `${tienda.eanTienda}-${producto.detalleId}`,
       tienda: tienda.nombreTienda,
-      descripcion: producto.descripcion,
+      descripcion: producto.producto,
       cantidad: producto.cantidad,
-      valorLinea: producto.cantidad * producto.costoUnitario,
+      valorLinea: producto.cantidad * producto.costoSku,
     })),
   )
 

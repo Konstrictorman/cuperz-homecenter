@@ -18,6 +18,8 @@ export const usePurchaseOrderStoresColumns =
           headerName: 'Cantidad',
           type: 'number',
           flex: 0.3,
+          valueFormatter: (value: number) =>
+            `${Math.round(value).toLocaleString('es-CO')}`,
         },
         {
           field: 'valorLinea',

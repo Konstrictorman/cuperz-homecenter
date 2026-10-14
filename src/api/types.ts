@@ -103,29 +103,45 @@ export interface PurchaseOrderSummary {
  *  `tiendas[].productos[]` before responding, because the platform's screens
  *  (starting with the purchase-order detail table, grouped/expandable by
  *  store) consume it store-first. The frontend never sees Homecenter's raw
- *  shape. */
+ *  shape.
+ *
+ *  Confirmed against a real `GET /api/v1/ordenes-compra/{ordenCompra}`
+ *  response (2026-10-13) — several field names differ from what was
+ *  previously assumed here (`eanSku`→`eanProducto`, `skuHomecenter`→`sku`,
+ *  `descripcion`→`producto`, `cantidadSolicitada`→`cantidadSku`,
+ *  `cantidadDevuelta`→`cantidadDevueltaSku`, `costoUnitario`→`costoSku`);
+ *  `condicionPago`/`descuentoSku` don't appear on the wire at all. Treat this
+ *  shape as the real contract for this endpoint. */
 export interface PurchaseOrderStoreLine {
-  eanSku: string
-  /** Homecenter's own internal product code (raw `SKU`), distinct from eanSku. */
-  skuHomecenter: string
-  descripcion: string
+  /** Platform-only internal id, not part of Homecenter's contract. */
+  productoId: number
+  /** Platform-only internal id, not part of Homecenter's contract. */
+  detalleId: number
+  /** Homecenter's own internal product code (raw `SKU`), distinct from
+   *  `eanProducto`. */
+  sku: string
+  /** Raw `PRODUCTO` — product description. */
+  producto: string
+  eanProducto: string
   /** Quantity requested for this SKU specifically at this store. */
   cantidad: number
-  /** Raw line total requested for this SKU across every store on the order —
-   *  the same value repeats on each store's entry for the SKU; it is not
-   *  store-specific (see `cantidad`). */
-  cantidadSolicitada: number
+  /** Raw `CANTIDAD_SKU` — total requested for this SKU across every store on
+   *  the order; the same value repeats on each store's entry for the SKU; it
+   *  is not store-specific (see `cantidad`). */
+  cantidadSku: number
   cantidadCancelada: number
-  cantidadDevuelta: number
-  estadoLinea: OrderLineStatus
+  /** Raw `CANTIDAD_DEVUELTA_SKU`. */
+  cantidadDevueltaSku: number
+  /** Raw order-line status code, e.g. `"1-PENDIENTE"` — distinct from the
+   *  normalised `estadoDetalle` below (mirrors `estadoOc`/`estado` at the
+   *  cabecera level). */
+  estadoSku: string
+  estadoDetalle: OrderLineStatus
   /** Raw `COSTO_SKU`. */
-  costoUnitario: number
-  /** Raw `CONDICION_PAGO`, trimmed. */
-  condicionPago: string
-  /** Raw `DESCUENTO_SKU`. */
-  descuentoSku: number
-  /** Raw `UNIDAD_VENTA`, trimmed. */
-  unidadVenta: string
+  costoSku: number
+  /** Raw `UNIDAD_VENTA`. Seen `null` on a real response. */
+  unidadVenta: string | null
+  observaciones: string | null
 }
 
 /** A store within a `PurchaseOrderDetail`, with the products allocated to it. */
@@ -133,13 +149,6 @@ export interface PurchaseOrderStore {
   eanTienda: string
   nombreTienda: string
   productos: Array<PurchaseOrderStoreLine>
-}
-
-export interface PurchaseOrderBillingAddress {
-  barrio: string
-  ciudad: string
-  departamento: string
-  direccion: string
 }
 
 /** Raw `NEGOCIACION`/`*_VE`/`NIT_CONSTRUCTOR` project-sale block. Not yet
@@ -158,52 +167,95 @@ export interface PurchaseOrderNegotiation {
   nitConstructor: string
 }
 
-/** Full shape for `GET /api/v1/ordenes-compra/{ordenCompra}` (§ 1.2). */
-export interface PurchaseOrderDetail {
+/** `cabecera` block of `GET /api/v1/ordenes-compra/{ordenCompra}` (§ 1.2).
+ *
+ *  Confirmed against a real response from this endpoint (2026-10-13) — the
+ *  previous flat (non-`cabecera`-wrapped) shape documented in
+ *  docs/especificacion-endpoints-backend (2).md doesn't match the wire at
+ *  all: several fields are renamed (`cantidadTotalSolicitada`→`cantidadTotOc`,
+ *  `costoTotalOc`→`costoTotOc`, `codigoDaneEntrega`→`codigoDaneCe`,
+ *  `eanTiendaVenta`→`tiendaVenta`, `eanTiendaFacturacion`→`tiendaFacturacion`,
+ *  `cedulaComprador`→`cedula`, `numPedido`→`numeroPedido`), the nested
+ *  `facturacion` object is actually flat (`barrioFac`/`ciudadFac`/
+ *  `departamentoFac`/`direccionFac`), and most string fields observed as
+ *  `null` here were previously typed as always-present. Treat this shape as
+ *  the real contract, not that doc — see `PurchaseOrderSummary`'s doc comment
+ *  for the same caveat on the list endpoint. */
+export interface PurchaseOrderDetailCabecera {
   ordenCompra: string
-  eanPuntoEntrega: string
-  cliente: string
-  direccionEntrega: string
-  barrioEntrega: string
-  departamentoEntrega: string
-  codigoDaneEntrega: string
-  facturacion: PurchaseOrderBillingAddress
-  estado: OrderStatus
-  codigoSesionRecibo: string | null
-  tiendas: Array<PurchaseOrderStore>
+  /** Raw `CANTIDAD_TOT_OC`. */
+  cantidadTotOc: number
   /** Raw `COSTO_TOT_OC`. */
-  costoTotalOc: number
-  cantidadTotalSolicitada: number
-  transportadora: string
+  costoTotOc: number
+  /** Raw `STICKER`; seen un-translated (`"-1"`) on a real response — contrast
+   *  the old doc's claim that Homecenter's "not assigned" sentinel gets
+   *  translated to `null` here (compare `PurchaseOrderSummary.sticker`,
+   *  which never translated it either). */
+  sticker: string | null
+  /** Raw order-level status code, e.g. `"1-PENDIENTE"` — distinct from the
+   *  normalised `estado` below. */
+  estadoOc: string
   fechaTransmision: IsoDateTime | null
+  cliente: string | null
+  ciudadEntrega: string | null
   fechaMinEntrega: IsoDateTime | null
   fechaMaxEntrega: IsoDateTime | null
+  fechaDespacho: IsoDateTime | null
   fechaCancelacion: IsoDateTime | null
-  /** Raw `STICKER`; Homecenter's `"-1"` sentinel is translated to null. */
-  sticker: string | null
-  /** Raw `TIPO_OC`, e.g. `"4-Venta Empresa"` — opaque, not parsed here. */
+  transportadora: string
+  /** Raw `TIPO_OC`, e.g. `"2-Retail"` — opaque, not parsed here. */
   tipoOc: string
-  /** Raw `TIPO_DOCUMENTO`; Homecenter's `-1` sentinel is translated to null. */
-  numPedido: string | null
-  tipoDocumento: string | null
-  notaPedido: string
-  cedulaComprador: string
-  emailCliente: string
-  telefonoCliente: string
-  clienteRecibe: string
-  eanTiendaVenta: string
-  eanTiendaFacturacion: string
+  notaPedido: string | null
+  /** Raw `CEDULA`. */
+  cedula: string | null
+  emailCliente: string | null
+  telefonoCliente: string | null
+  barrioEntrega: string | null
+  departamentoEntrega: string | null
+  direccionEntrega: string | null
+  /** Raw `BARRIO_FAC` — billing address is flat on the wire, not a nested
+   *  object. */
+  barrioFac: string | null
+  ciudadFac: string | null
+  departamentoFac: string | null
+  direccionFac: string | null
+  /** Raw `TIENDA_VENTA`. */
+  tiendaVenta: string | null
+  /** Raw `TIENDA_FACTURACION`. */
+  tiendaFacturacion: string | null
   localidad: string
+  /** Raw `FECHA_PAGO`. Optional/unused — no consuming screen yet, see SPEC 02. */
+  fechaPago?: IsoDateTime | null
   eanEmpresaCompradora: string
   tipoDeOrden: string
   tipoEntrega: string
-  observaciones: string
+  /** Raw `CODIGO_DANE_CE`. */
+  codigoDaneCe: string | null
   observacionesNpc: string
-  observacionesNpl: string
-  /** Raw `FECHA_PAGO`. Optional/unused — no consuming screen yet, see SPEC 02. */
-  fechaPago?: IsoDateTime | null
+  observacionesNpl: string | null
+  clienteRecibe: string | null
+  eanPuntoEntrega: string
+  estado: OrderStatus
+  observaciones: string | null
+  /** Platform-only field (not part of Homecenter's contract) — distinct from
+   *  `notaPedido` (raw `NOTA_PEDIDO`); same field as
+   *  `PurchaseOrderSummary.numeroPedido`. */
+  numeroPedido: string | null
+  /** Didn't appear at all (not even as `null`) on the real response sampled
+   *  for a PENDIENTE order (2026-10-13) — whether it's present for other
+   *  `estado` values (e.g. once a receipt notice exists) is unconfirmed. */
+  codigoSesionRecibo?: string | null
+  /** Same caveat as `codigoSesionRecibo` above — absent on the sampled
+   *  response. */
+  tipoDocumento?: string | null
   /** Optional/unused — no consuming screen yet, see SPEC 02. */
   negociacion?: PurchaseOrderNegotiation
+}
+
+/** Full shape for `GET /api/v1/ordenes-compra/{ordenCompra}` (§ 1.2). */
+export interface PurchaseOrderDetail {
+  cabecera: PurchaseOrderDetailCabecera
+  tiendas: Array<PurchaseOrderStore>
 }
 
 /** Query params for `GET /api/v1/ordenes-compra` and `.../export` (§ 1.1, § 1.5). */

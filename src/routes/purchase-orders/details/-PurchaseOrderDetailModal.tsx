@@ -38,20 +38,20 @@ const PurchaseOrderDetailModal = ({
           <Typography className="purchase-order-detail-modal__label">
             EAN punto de entrega
           </Typography>
-          <Typography>{detail?.eanPuntoEntrega ?? '—'}</Typography>
+          <Typography>{detail?.cabecera.eanPuntoEntrega ?? '—'}</Typography>
         </div>
         <div>
           <Typography className="purchase-order-detail-modal__label">
             Número de pedido
           </Typography>
-          <Typography>{detail?.numPedido ?? '—'}</Typography>
+          <Typography>{detail?.cabecera.numeroPedido ?? '—'}</Typography>
         </div>
         <div>
           <Typography className="purchase-order-detail-modal__label">
             Fecha de pedido
           </Typography>
           <Typography>
-            {formatDate(detail?.fechaTransmision ?? undefined)}
+            {formatDate(detail?.cabecera.fechaTransmision ?? undefined)}
           </Typography>
         </div>
         <div>
@@ -64,7 +64,11 @@ const PurchaseOrderDetailModal = ({
           <Typography className="purchase-order-detail-modal__label">
             Cantidad Total
           </Typography>
-          <Typography>{detail?.cantidadTotalSolicitada ?? '—'}</Typography>
+          <Typography>
+            {Math.round(detail?.cabecera.cantidadTotOc ?? 0).toLocaleString(
+              'es-CO',
+            )}
+          </Typography>
         </div>
         <div>
           <Typography className="purchase-order-detail-modal__label">
@@ -72,7 +76,7 @@ const PurchaseOrderDetailModal = ({
           </Typography>
 
           <Typography>
-            {`$${Math.round(detail?.costoTotalOc ?? 0).toLocaleString('es-CO')}`}
+            {`$${Math.round(detail?.cabecera.costoTotOc ?? 0).toLocaleString('es-CO')}`}
           </Typography>
         </div>
         <div>
@@ -85,13 +89,13 @@ const PurchaseOrderDetailModal = ({
           <Typography className="purchase-order-detail-modal__label">
             Dirección de entrega
           </Typography>
-          <Typography>{detail?.direccionEntrega ?? '—'}</Typography>
+          <Typography>{detail?.cabecera.direccionEntrega ?? '—'}</Typography>
         </div>
         <div>
           <Typography className="purchase-order-detail-modal__label">
             Código sesión recibo
           </Typography>
-          <Typography>{detail?.codigoSesionRecibo ?? '—'}</Typography>
+          <Typography>{detail?.cabecera.codigoSesionRecibo ?? '—'}</Typography>
         </div>
       </div>
 
