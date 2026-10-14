@@ -1,4 +1,3 @@
-import AutorenewOutlinedIcon from '@mui/icons-material/AutorenewOutlined'
 import DownloadIcon from '@mui/icons-material/Download'
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
 import { useEffect, useState } from 'react'
@@ -148,12 +147,6 @@ const PurchaseOrdersTable = ({
             label: 'Exportar',
             icon: <DownloadIcon fontSize="small" />,
             onClick: () => console.log('Exportar', selection),
-          },
-          {
-            key: 'retry',
-            label: 'Reinyectar',
-            icon: <AutorenewOutlinedIcon fontSize="small" />,
-            onClick: () => console.log('Reinyectar', selection),
           },
           {
             key: 'download',
