@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import type { GridPaginationModel } from '@mui/x-data-grid'
 import OrdersFilterBar, {
   DEFAULT_ORDERS_FILTER_VALUES,
 } from './-OrdersFilterBar'
@@ -17,10 +18,23 @@ const PurchaseOrdersPage = () => {
   const [filters, setFilters] = useState<OrdersFilterValues>(
     DEFAULT_ORDERS_FILTER_VALUES,
   )
+  const [paginationModel, setPaginationModel] = useState<GridPaginationModel>(
+    { page: 0, pageSize: 10 },
+  )
   const [selectedOrder, setSelectedOrder] = useState<PurchaseOrder | null>(null)
 
+  const handleFilter = (values: OrdersFilterValues) => {
+    setFilters(values)
+    // a new filter invalidates whatever page we were on
+    setPaginationModel((model) => ({ ...model, page: 0 }))
+  }
+
   const { data, isError, error, isFetching } = useQuery({
-    ...purchaseOrdersListQueryOptions(toPurchaseOrdersQuery(filters)),
+    ...purchaseOrdersListQueryOptions({
+      ...toPurchaseOrdersQuery(filters),
+      page: paginationModel.page + 1,
+      pageSize: paginationModel.pageSize,
+    }),
     // keep the previous rows on screen (dimmed) while a new filter loads
     placeholderData: keepPreviousData,
   })
@@ -29,7 +43,7 @@ const PurchaseOrdersPage = () => {
 
   return (
     <div className="purchase-orders">
-      <OrdersFilterBar onFilter={setFilters} />
+      <OrdersFilterBar onFilter={handleFilter} />
 
       {isError ? (
         <Typography role="alert" className="purchase-orders__error">
@@ -41,6 +55,9 @@ const PurchaseOrdersPage = () => {
           loading={isFetching}
           onViewDetail={setSelectedOrder}
           detailOpen={selectedOrder !== null}
+          rowCount={data?.pagination.total ?? 0}
+          paginationModel={paginationModel}
+          onPaginationModelChange={setPaginationModel}
         />
       )}
 

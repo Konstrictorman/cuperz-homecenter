@@ -4,7 +4,10 @@ import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
 import { useEffect, useState } from 'react'
 import Alert from '@mui/material/Alert'
 import Snackbar from '@mui/material/Snackbar'
-import type { GridRowSelectionModel } from '@mui/x-data-grid'
+import type {
+  GridPaginationModel,
+  GridRowSelectionModel,
+} from '@mui/x-data-grid'
 import DataTable from '#/components/dataTable/DataTable'
 import type { StatusBadgeTone } from '#/components/statusBadge/StatusBadge'
 import ToolBar from '#/components/toolBar/ToolBar'
@@ -33,6 +36,12 @@ interface PurchaseOrdersTableProps {
   /** Whether the detail modal is currently open, so the toolbar can hide
    * and the row selection can clear while it's up. */
   detailOpen?: boolean
+  /** Total row count across every page (`pagination.total` from the API) —
+   *  `rows` only ever holds the current page, since `/ordenes-compra` paginates
+   *  server-side. */
+  rowCount: number
+  paginationModel: GridPaginationModel
+  onPaginationModelChange: (model: GridPaginationModel) => void
 }
 
 const EMPTY_SELECTION: GridRowSelectionModel = {
@@ -49,6 +58,9 @@ const PurchaseOrdersTable = ({
   loading,
   onViewDetail,
   detailOpen = false,
+  rowCount,
+  paginationModel,
+  onPaginationModelChange,
 }: PurchaseOrdersTableProps) => {
   const [selection, setSelection] =
     useState<GridRowSelectionModel>(EMPTY_SELECTION)
@@ -106,6 +118,10 @@ const PurchaseOrdersTable = ({
         loading={loading}
         rowSelectionModel={selection}
         onRowSelectionModelChange={setSelection}
+        paginationMode="server"
+        rowCount={rowCount}
+        paginationModel={paginationModel}
+        onPaginationModelChange={onPaginationModelChange}
       />
       <Snackbar
         open={downloadError !== null}
