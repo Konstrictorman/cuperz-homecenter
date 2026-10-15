@@ -15,8 +15,9 @@ const NotFound = () => {
       <Typography color="text.secondary">
         La ruta a la que intentas acceder no existe.
       </Typography>
-      <Typography variant="h4">¡¡ Qué Oso !!</Typography>
+
       <img src={shyBear} alt="Oso tímido" className="not-found__image" />
+      <Typography variant="h4">¡¡ Qué Oso !!</Typography>
       <div className="not-found__spacer" />
       <Button
         variant="contained"
