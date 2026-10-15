@@ -11,6 +11,7 @@ import {
   paginate,
 } from '../data/db'
 import type { PurchaseOrderRecord } from '../data/db'
+import { buildLabelsPdf } from '../data/labels-pdf'
 import { formatDate } from '#/common/util'
 import type {
   PurchaseOrderDetail,
@@ -332,6 +333,32 @@ export const purchaseOrdersHandlers = [
         ordenCompra,
         estado: 'PROCESANDO',
         intentoNumero: order.intentos + 1,
+      })
+    },
+  ),
+
+  // Not in the spec — mirrors the live backend (sampled 2026-10-15): any
+  // integer order number gets a PDF, even one that doesn't exist; only
+  // non-integer path params are rejected, with FastAPI's 422.
+  http.get(
+    `${API}/ordenes-compra/:ordenCompra/etiquetas/:numTags`,
+    async ({ params }) => {
+      await latency()
+      const ordenCompra = String(params.ordenCompra)
+      const numTags = String(params.numTags)
+      if (!/^\d+$/.test(ordenCompra) || !/^\d+$/.test(numTags)) {
+        return apiError(
+          422,
+          'PARAMETRO_INVALIDO',
+          'ordenCompra y numTags deben ser números enteros.',
+        )
+      }
+      return new HttpResponse(buildLabelsPdf(ordenCompra, Number(numTags)), {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/pdf',
+          'Content-Disposition': `attachment; filename="etiquetas-${ordenCompra}-${numTags}.pdf"`,
+        },
       })
     },
   ),

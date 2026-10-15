@@ -38,6 +38,9 @@ export class ApiError extends Error {
   readonly status: number
   readonly code: string
   readonly details: Array<unknown>
+  /** The backend's own human-readable message, when it sent one — `message`
+   *  falls back to a technical `METHOD path → status` string otherwise. */
+  readonly serverMessage: string | undefined
 
   constructor(status: number, body: unknown, fallback: string) {
     // `body` is whatever the server returned — don't trust it to match the type.
@@ -51,6 +54,7 @@ export class ApiError extends Error {
     this.status = status
     this.code = err?.code ?? detail?.code ?? 'ERROR_DESCONOCIDO'
     this.details = err?.details ?? []
+    this.serverMessage = err?.message
   }
 }
 

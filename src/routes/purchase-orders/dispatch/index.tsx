@@ -10,12 +10,18 @@ import DispatchOrdersTable from './-DispatchOrdersTable'
 import type { DispatchOrder } from './-DispatchOrdersTable'
 import DispatchOrderDetailModal from './-DispatchOrderDetailModal'
 import DispatchNoticePayloadModal from './-DispatchNoticePayloadModal'
+import GenerateLabelsModal from './-GenerateLabelsModal'
 import {
   toDispatchOrderRow,
   toDispatchOrdersQuery,
 } from './-dispatchOrderPresentation'
 import type { DispatchOrdersFilterValues } from './-DispatchOrdersFilterBar'
 import { dispatchPreviewsByDateQueryOptions } from '#/api/dispatch-notices'
+import { ApiError } from '#/api/http'
+import { useDownloadPurchaseOrderLabels } from '#/api/purchase-orders'
+import FeedbackSnackbar from '#/components/feedbackSnackbar/FeedbackSnackbar'
+import type { FeedbackSnackbarProps } from '#/components/feedbackSnackbar/FeedbackSnackbar'
+import LoadingBackdrop from '#/components/loadingBackdrop/LoadingBackdrop'
 import '../PurchaseOrdersPage.css'
 
 const DispatchOrdersPage = () => {
@@ -34,6 +40,15 @@ const DispatchOrdersPage = () => {
   const [dispatchNoticeOrders, setDispatchNoticeOrders] = useState<
     DispatchOrder[] | null
   >(null)
+
+  // `null` closed; otherwise the order whose barcode labels are being printed.
+  const [labelsOrder, setLabelsOrder] = useState<DispatchOrder | null>(null)
+
+  const [feedback, setFeedback] = useState<
+    Pick<FeedbackSnackbarProps, 'open' | 'message' | 'severity'>
+  >({ open: false, message: '', severity: 'info' })
+
+  const downloadLabels = useDownloadPurchaseOrderLabels()
 
   const handleFilter = (values: DispatchOrdersFilterValues) => {
     setFilters(values)
@@ -58,7 +73,33 @@ const DispatchOrdersPage = () => {
   }
 
   const handleGenerateBarCode = (order: DispatchOrder) => {
-    alert(`Generando código de barras para la orden ${order.ordenCompra}`)
+    setLabelsOrder(order)
+  }
+
+  const handleGenerateLabels = (order: DispatchOrder, numTags: number) => {
+    downloadLabels.mutate(
+      { ordenCompra: order.ordenCompra, numTags },
+      {
+        onSuccess: () =>
+          setFeedback({
+            open: true,
+            severity: 'success',
+            message:
+              'Se descargaron las etiquetas de la orden satisfactoriamente. Por favor, revisa tu carpeta de descargas.',
+          }),
+        onError: (labelsError) =>
+          setFeedback({
+            open: true,
+            severity: 'error',
+            // only surface backend wording that's meant for people — not
+            // ApiError's technical `METHOD path → status` fallback
+            message:
+              labelsError instanceof ApiError && labelsError.serverMessage
+                ? labelsError.serverMessage
+                : `No se pudieron generar las etiquetas de la orden ${order.ordenCompra}.`,
+          }),
+      },
+    )
   }
 
   return (
@@ -92,6 +133,19 @@ const DispatchOrdersPage = () => {
         orders={dispatchNoticeOrders ?? []}
         open={dispatchNoticeOrders !== null}
         onClose={() => setDispatchNoticeOrders(null)}
+      />
+
+      <GenerateLabelsModal
+        order={labelsOrder}
+        onClose={() => setLabelsOrder(null)}
+        onSubmit={handleGenerateLabels}
+      />
+
+      <LoadingBackdrop open={downloadLabels.isPending} />
+
+      <FeedbackSnackbar
+        {...feedback}
+        onClose={() => setFeedback((prev) => ({ ...prev, open: false }))}
       />
     </div>
   )

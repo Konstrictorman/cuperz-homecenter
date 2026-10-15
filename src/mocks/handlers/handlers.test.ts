@@ -82,6 +82,20 @@ describe('purchase orders', () => {
       'Numero de la Orden de Compra;EAN Entidad a Facturar',
     )
   })
+
+  it('generates the barcode labels PDF', async () => {
+    const res = await fetch(`${BASE}/ordenes-compra/8467343/etiquetas/3`)
+    expect(res.status).toBe(200)
+    expect(res.headers.get('content-type')).toBe('application/pdf')
+    const pdf = await res.text()
+    expect(pdf.startsWith('%PDF-1.4')).toBe(true)
+    expect(pdf).toContain('/Count 3')
+  })
+
+  it('rejects non-integer label params with 422', async () => {
+    const res = await fetch(`${BASE}/ordenes-compra/abc/etiquetas/1`)
+    expect(res.status).toBe(422)
+  })
 })
 
 describe('dispatch previews by date', () => {

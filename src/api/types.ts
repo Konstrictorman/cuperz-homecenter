@@ -295,6 +295,19 @@ export interface ReprocessOrderResponse {
   intentoNumero: number
 }
 
+/**
+ * Path params for `GET /api/v1/ordenes-compra/{ordenCompra}/etiquetas/{numTags}`
+ * — not in the backend spec; observed against the live backend (2026-10-15).
+ * Responds `200 application/pdf` (`etiquetas-{ordenCompra}-{numTags}.pdf`);
+ * both params must parse as integers or the backend answers `422`. It wraps
+ * Homecenter's `GenerarEtiqueta/{ordenCompra}/{numTags}`.
+ */
+export interface PurchaseOrderLabelsRequest {
+  ordenCompra: string
+  /** How many label copies to print. */
+  numTags: number
+}
+
 // ===========================================================================
 // Process 2 — Dispatch Notices (Platform → Homecenter) · § 2
 // ===========================================================================

@@ -11,6 +11,7 @@ import { apiFetch, buildQuery } from './http'
 import { queryKeys } from './query-keys'
 import type {
   PurchaseOrderDetail,
+  PurchaseOrderLabelsRequest,
   PurchaseOrdersQuery,
   PurchaseOrderSummary,
   Paginated,
@@ -189,6 +190,28 @@ export async function downloadPurchaseOrderPdf(
 ): Promise<void> {
   const blob = await fetchPurchaseOrderPdf(ordenCompra)
   triggerDownload(blob, `orden-${ordenCompra}.pdf`)
+}
+
+/** `GET /api/v1/ordenes-compra/{ordenCompra}/etiquetas/{numTags}` — the
+ *  barcode labels PDF for an order, `numTags` copies. */
+export function fetchPurchaseOrderLabels({
+  ordenCompra,
+  numTags,
+}: PurchaseOrderLabelsRequest): Promise<Blob> {
+  return apiFetch<Blob>(
+    `/ordenes-compra/${encodeURIComponent(ordenCompra)}/etiquetas/${numTags}`,
+    { headers: { Accept: 'application/pdf' } },
+  )
+}
+
+/** Triggers a browser download of an order's barcode labels PDF. */
+export function useDownloadPurchaseOrderLabels() {
+  return useMutation({
+    mutationFn: async (request: PurchaseOrderLabelsRequest) => {
+      const blob = await fetchPurchaseOrderLabels(request)
+      triggerDownload(blob, `etiquetas-${request.ordenCompra}.pdf`)
+    },
+  })
 }
 
 /**
