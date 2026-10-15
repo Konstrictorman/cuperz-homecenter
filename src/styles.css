@@ -35,10 +35,13 @@
   /*
    * Stacking order. 1300 is MUI's modal layer (theme.zIndex.modal); the
    * floating ToolBar deliberately sits one above it and its backdrop one below.
+   * The app-wide LoadingBackdrop sits above the ToolBar so a running task
+   * blocks it too; MUI's Snackbar (1400) still shows on top.
    */
   --z-header: 50;
   --z-toolbar-backdrop: 1300;
   --z-toolbar: 1301;
+  --z-loading-backdrop: 1302;
 }
 
 /*

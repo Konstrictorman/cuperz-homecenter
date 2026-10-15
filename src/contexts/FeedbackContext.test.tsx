@@ -60,6 +60,23 @@ describe('FeedbackProvider', () => {
     expect(await screen.findByText('Listo')).toBeInTheDocument()
   })
 
+  it('makes the app inert while running', async () => {
+    const user = userEvent.setup()
+    const task = deferred()
+    render(
+      <FeedbackProvider>
+        <Harness tasks={[() => task.promise]} />
+      </FeedbackProvider>,
+    )
+    const trigger = screen.getByText('run 0')
+
+    await user.click(trigger)
+    expect(trigger.closest('[inert]')).not.toBeNull()
+
+    await act(async () => task.resolve())
+    expect(trigger.closest('[inert]')).toBeNull()
+  })
+
   it('shows standalone info and warning messages', async () => {
     const user = userEvent.setup()
     const NotifyHarness = () => {

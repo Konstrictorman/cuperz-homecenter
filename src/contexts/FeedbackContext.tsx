@@ -88,7 +88,13 @@ export function FeedbackProvider({ children }: { children: ReactNode }) {
 
   return (
     <FeedbackContext.Provider value={value}>
-      {children}
+      {/* The backdrop only stops the pointer; `inert` also takes the app out
+          of the focus order so a focused button can't be re-triggered from
+          the keyboard. `display: contents` keeps the wrapper out of layout.
+          MUI portals (menus, dialogs) mount outside it and aren't covered. */}
+      <div inert={pending > 0} style={{ display: 'contents' }}>
+        {children}
+      </div>
       <LoadingBackdrop open={pending > 0} />
       <FeedbackSnackbar
         key={snackbar.key}
