@@ -76,3 +76,65 @@ export const Interactive: Story = {
     )
   },
 }
+
+export const SmallWidth: Story = {
+  args: {
+    title: 'Confirmar envío',
+    onOpen: true,
+    onClose: () => {},
+    maxWidth: 'xs',
+    children: <p>¿Enviar el aviso de despacho a Homecenter?</p>,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Overrides the default `maxWidth="lg"` with `"xs"` — e.g. for a short confirmation.',
+      },
+    },
+  },
+}
+
+export const LongTitle: Story = {
+  args: {
+    title:
+      'Detalle de la orden de compra 8467343 — Homecenter Calle 80, Bogotá D.C. (despacho programado)',
+    onOpen: true,
+    onClose: () => {},
+    maxWidth: 'sm',
+    children: <p>Contenido del modal.</p>,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'A title longer than the dialog: checks it wraps without pushing the close button out.',
+      },
+    },
+  },
+}
+
+export const ScrollingContent: Story = {
+  args: {
+    title: 'Productos de la orden',
+    onOpen: true,
+    onClose: () => {},
+    children: (
+      <>
+        {Array.from({ length: 60 }, (_, i) => (
+          <p key={i}>
+            SKU {String(100000 + i)} — Producto de ejemplo {i + 1}
+          </p>
+        ))}
+      </>
+    ),
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Content taller than the viewport: the title stays fixed and only the content area scrolls.',
+      },
+    },
+  },
+}
