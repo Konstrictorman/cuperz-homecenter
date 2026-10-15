@@ -5,6 +5,7 @@ import type { StatusBadgeTone } from '#/components/statusBadge/StatusBadge'
 import Button from '#/components/button/Button'
 import FilterAltIcon from '@mui/icons-material/FilterAlt'
 import FilterAltOffIcon from '@mui/icons-material/FilterAltOff'
+import { validateRangeOrder } from '../-dateRange'
 import '../FilterBar.css'
 
 export type OrdersFilterStatus = StatusBadgeTone | 'all'
@@ -103,7 +104,17 @@ const OrdersFilterBar = ({ onFilter }: OrdersFilterBarProps) => {
         )}
       </form.Field>
 
-      <form.Field name="fechaTransmisionHasta">
+      <form.Field
+        name="fechaTransmisionHasta"
+        validators={{
+          onChangeListenTo: ['fechaTransmisionDesde'],
+          onChange: ({ value, fieldApi }) =>
+            validateRangeOrder(
+              fieldApi.form.getFieldValue('fechaTransmisionDesde'),
+              value,
+            ),
+        }}
+      >
         {(field) => (
           <TextField
             label="Fecha hasta"
@@ -111,6 +122,8 @@ const OrdersFilterBar = ({ onFilter }: OrdersFilterBarProps) => {
             size="small"
             className="filter-bar__field filter-bar__field--narrow"
             slotProps={{ inputLabel: { shrink: true } }}
+            error={field.state.meta.errors.length > 0}
+            helperText={field.state.meta.errors[0]}
             value={field.state.value}
             onChange={(event) => field.handleChange(event.target.value)}
             onBlur={field.handleBlur}

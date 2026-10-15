@@ -4,6 +4,7 @@ import { useForm } from '@tanstack/react-form'
 import Button from '#/components/button/Button'
 import FilterAltIcon from '@mui/icons-material/FilterAlt'
 import FilterAltOffIcon from '@mui/icons-material/FilterAltOff'
+import { validateRangeOrder } from '../-dateRange'
 import '../FilterBar.css'
 
 /** Mirrors `DispatchPreviewStatus` (`#/api/types`) — the endpoint only
@@ -31,7 +32,7 @@ const STATUS_OPTIONS: Array<{
   label: string
 }> = [
   { value: 'all', label: 'Todos' },
-  { value: 'pending', label: 'Pendiente despacho' },
+  { value: 'pending', label: 'Pendiente' },
   { value: 'dispatched', label: 'Despachada' },
 ]
 
@@ -115,6 +116,12 @@ const DispatchOrdersFilterBar = ({
       <form.Field
         name="fechaHasta"
         validators={{
+          onChangeListenTo: ['fechaDesde'],
+          onChange: ({ value, fieldApi }) =>
+            validateRangeOrder(
+              fieldApi.form.getFieldValue('fechaDesde'),
+              value,
+            ),
           onSubmit: ({ value, fieldApi }) =>
             validateRangeEnd(value, fieldApi.form.getFieldValue('fechaDesde')),
         }}

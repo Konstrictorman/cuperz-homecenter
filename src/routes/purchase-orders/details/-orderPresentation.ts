@@ -21,7 +21,7 @@ export const ORDER_STATUS_UI: Record<
   CON_ERROR: { tone: 'error', label: 'Error' },
   CANCELADA: { tone: 'cancelled', label: 'Cancelada' },
   PROCESANDO: { tone: 'processing', label: 'Procesando' },
-  ALISTADO: { tone: 'partial', label: 'Alistado' },
+  ALISTADO: { tone: 'partial', label: 'Alistada' },
   RECIBIDO: { tone: 'processing', label: 'Recibido' },
 }
 
