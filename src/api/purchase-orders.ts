@@ -177,13 +177,35 @@ function fetchPdfViaBackend(ordenCompra: string): Promise<Blob> {
   })
 }
 
+function fetchPurchaseOrderPdf(ordenCompra: string): Promise<Blob> {
+  return mocksEnabled()
+    ? fetchPdfViaHomecenterProxy(ordenCompra)
+    : fetchPdfViaBackend(ordenCompra)
+}
+
 /** Triggers a browser download of the generated PDF for a purchase order. */
 export async function downloadPurchaseOrderPdf(
   ordenCompra: string,
 ): Promise<void> {
-  const blob = mocksEnabled()
-    ? await fetchPdfViaHomecenterProxy(ordenCompra)
-    : await fetchPdfViaBackend(ordenCompra)
-
+  const blob = await fetchPurchaseOrderPdf(ordenCompra)
   triggerDownload(blob, `orden-${ordenCompra}.pdf`)
+}
+
+/**
+ * Generates the PDF for each given order and bundles them into a single
+ * `purchase-orders-pdf.zip` download — one request per order, same as
+ * {@link downloadPurchaseOrderPdf}.
+ */
+export async function downloadPurchaseOrdersPdfZip(
+  ordenCompras: Array<string>,
+): Promise<void> {
+  const blobs = await Promise.all(ordenCompras.map(fetchPurchaseOrderPdf))
+
+  const zip = new JSZip()
+  ordenCompras.forEach((ordenCompra, index) => {
+    zip.file(`orden-${ordenCompra}.pdf`, blobs[index])
+  })
+  const zipBlob = await zip.generateAsync({ type: 'blob' })
+
+  triggerDownload(zipBlob, 'purchase-orders-pdf.zip')
 }

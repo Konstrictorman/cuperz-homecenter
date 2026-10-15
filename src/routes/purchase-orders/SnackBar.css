@@ -1,0 +1,4 @@
+.snack-bar {
+  border-radius: var(--radius-8);
+  background-color: var(--table-bg) !important;
+}

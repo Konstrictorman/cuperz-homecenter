@@ -3,6 +3,7 @@ import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
 import { useEffect, useState } from 'react'
 import Alert from '@mui/material/Alert'
 import Snackbar from '@mui/material/Snackbar'
+import type { SnackbarOrigin } from '@mui/material/Snackbar'
 import type {
   GridPaginationModel,
   GridRowSelectionModel,
@@ -14,7 +15,11 @@ import { usePurchaseOrdersColumns } from './-usePurchaseOrdersColumns'
 import {
   downloadPurchaseOrderPdf,
   downloadPurchaseOrdersCsv,
+  downloadPurchaseOrdersPdfZip,
 } from '#/api/purchase-orders'
+import Backdrop from '@mui/material/Backdrop'
+import CircularProgress from '@mui/material/CircularProgress'
+import '../SnackBar.css'
 
 export interface PurchaseOrder {
   id: string
@@ -46,6 +51,12 @@ interface PurchaseOrdersTableProps {
   onPaginationModelChange: (model: GridPaginationModel) => void
 }
 
+interface SnackBarState extends SnackbarOrigin {
+  open: boolean
+  message: string
+  severity: 'error' | 'info' | 'success' | 'warning'
+}
+
 const EMPTY_SELECTION: GridRowSelectionModel = {
   type: 'include',
   ids: new Set(),
@@ -69,19 +80,37 @@ const PurchaseOrdersTable = ({
   const [downloadingOrderId, setDownloadingOrderId] = useState<string | null>(
     null,
   )
-  const [downloadError, setDownloadError] = useState<string | null>(null)
   const [exportingSelection, setExportingSelection] = useState(false)
+  const [downloadingSelectionPdf, setDownloadingSelectionPdf] = useState(false)
+  const [snackbarStatus, setSnackbarStatus] = useState<SnackBarState>({
+    open: false,
+    message: '',
+    severity: 'info',
+    vertical: 'top',
+    horizontal: 'center',
+  })
 
   const handleDownloadPdf = async (order: PurchaseOrder) => {
     setDownloadingOrderId(order.id)
     try {
       await downloadPurchaseOrderPdf(order.ordenCompra)
+      setSnackbarStatus({
+        ...snackbarStatus,
+        open: true,
+        message:
+          'Se descargó el PDF de la orden de compra satisfactoriamente. Por favor, revisa tu carpeta de descargas.',
+        severity: 'success',
+      })
     } catch (error) {
-      setDownloadError(
-        error instanceof Error
-          ? error.message
-          : `No se pudo generar el PDF de la orden ${order.ordenCompra}.`,
-      )
+      setSnackbarStatus({
+        ...snackbarStatus,
+        open: true,
+        message:
+          error instanceof Error
+            ? error.message
+            : `No se pudo generar el PDF de la orden ${order.ordenCompra}.`,
+        severity: 'error',
+      })
     } finally {
       setDownloadingOrderId(null)
     }
@@ -91,12 +120,23 @@ const PurchaseOrdersTable = ({
     setDownloadingOrderId(order.id)
     try {
       await downloadPurchaseOrdersCsv([order.ordenCompra])
+      setSnackbarStatus({
+        ...snackbarStatus,
+        open: true,
+        message:
+          'Se exportó el CSV de la orden de compra satisfactoriamente. Por favor, revisa tu carpeta de descargas.',
+        severity: 'success',
+      })
     } catch (error) {
-      setDownloadError(
-        error instanceof Error
-          ? error.message
-          : `No se pudo exportar el CSV de la orden ${order.ordenCompra}.`,
-      )
+      setSnackbarStatus({
+        ...snackbarStatus,
+        open: true,
+        message:
+          error instanceof Error
+            ? error.message
+            : `No se pudo exportar el CSV de la orden ${order.ordenCompra}.`,
+        severity: 'error',
+      })
     } finally {
       setDownloadingOrderId(null)
     }
@@ -129,14 +169,51 @@ const PurchaseOrdersTable = ({
     setExportingSelection(true)
     try {
       await downloadPurchaseOrdersCsv(selectedOrdenCompras)
+      setSnackbarStatus({
+        ...snackbarStatus,
+        open: true,
+        message:
+          'Se exportaron los CSV de las órdenes seleccionadas se descargaron correctamente. Por favor, revisa tu carpeta de descargas.',
+        severity: 'success',
+      })
     } catch (error) {
-      setDownloadError(
-        error instanceof Error
-          ? error.message
-          : 'No se pudieron exportar las órdenes seleccionadas.',
-      )
+      setSnackbarStatus({
+        ...snackbarStatus,
+        open: true,
+        message:
+          error instanceof Error
+            ? error.message
+            : 'No se pudieron exportar las órdenes seleccionadas.',
+        severity: 'error',
+      })
     } finally {
       setExportingSelection(false)
+    }
+  }
+
+  const handleDownloadSelectedPdf = async () => {
+    setDownloadingSelectionPdf(true)
+    try {
+      await downloadPurchaseOrdersPdfZip(selectedOrdenCompras)
+      setSnackbarStatus({
+        ...snackbarStatus,
+        open: true,
+        message:
+          'Los PDF de las órdenes seleccionadas se descargaron correctamente. Por favor, revisa tu carpeta de descargas.',
+        severity: 'success',
+      })
+    } catch (error) {
+      setSnackbarStatus({
+        ...snackbarStatus,
+        open: true,
+        message:
+          error instanceof Error
+            ? error.message
+            : 'No se pudieron generar los PDF de las órdenes seleccionadas.',
+        severity: 'error',
+      })
+    } finally {
+      setDownloadingSelectionPdf(false)
     }
   }
 
@@ -163,12 +240,17 @@ const PurchaseOrdersTable = ({
         }}
       />
       <Snackbar
-        open={downloadError !== null}
+        open={snackbarStatus.open}
         autoHideDuration={6000}
-        onClose={() => setDownloadError(null)}
+        onClose={() => setSnackbarStatus({ ...snackbarStatus, open: false })}
+        anchorOrigin={snackbarStatus}
       >
-        <Alert severity="error" onClose={() => setDownloadError(null)}>
-          {downloadError}
+        <Alert
+          className="snack-bar"
+          severity={snackbarStatus.severity}
+          onClose={() => setSnackbarStatus({ ...snackbarStatus, open: false })}
+        >
+          {snackbarStatus.message}
         </Alert>
       </Snackbar>
       <ToolBar
@@ -190,10 +272,21 @@ const PurchaseOrdersTable = ({
             key: 'download',
             label: 'Descargar PDF',
             icon: <PictureAsPdfIcon fontSize="small" />,
-            onClick: () => console.log('Descargar PDF', selection),
+            onClick: handleDownloadSelectedPdf,
+            disabled: downloadingSelectionPdf,
           },
         ]}
       />
+      <Backdrop
+        sx={(theme) => ({ color: '#fff', zIndex: theme.zIndex.drawer + 1 })}
+        open={
+          downloadingSelectionPdf ||
+          exportingSelection ||
+          downloadingOrderId !== null
+        }
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
     </>
   )
 }
