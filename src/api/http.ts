@@ -124,3 +124,21 @@ export async function apiFetch<T>(
   if (response.status === 204) return undefined as T
   return parseBody(response) as Promise<T>
 }
+
+/**
+ * The text to show a person for a failed request: the backend's own message
+ * when it sent one, a plain `Error`'s message (e.g. thrown by our own code
+ * with user-facing wording), otherwise `fallback`. Never surfaces ApiError's
+ * technical `METHOD path → status` text, nor a `TypeError` from `fetch`
+ * itself (network down, CORS — "Failed to fetch").
+ */
+export function userFacingErrorMessage(
+  error: unknown,
+  fallback: string,
+): string {
+  if (error instanceof ApiError) return error.serverMessage ?? fallback
+  if (error instanceof Error && !(error instanceof TypeError)) {
+    return error.message
+  }
+  return fallback
+}

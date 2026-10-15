@@ -17,10 +17,12 @@ import {
 } from './-dispatchOrderPresentation'
 import type { DispatchOrdersFilterValues } from './-DispatchOrdersFilterBar'
 import { dispatchPreviewsByDateQueryOptions } from '#/api/dispatch-notices'
-import { ApiError } from '#/api/http'
+import { userFacingErrorMessage } from '#/api/http'
 import { useDownloadPurchaseOrderLabels } from '#/api/purchase-orders'
-import FeedbackSnackbar from '#/components/feedbackSnackbar/FeedbackSnackbar'
-import type { FeedbackSnackbarProps } from '#/components/feedbackSnackbar/FeedbackSnackbar'
+import FeedbackSnackbar, {
+  CLOSED_FEEDBACK,
+} from '#/components/feedbackSnackbar/FeedbackSnackbar'
+import type { FeedbackSnackbarState } from '#/components/feedbackSnackbar/FeedbackSnackbar'
 import LoadingBackdrop from '#/components/loadingBackdrop/LoadingBackdrop'
 import '../PurchaseOrdersPage.css'
 
@@ -44,9 +46,8 @@ const DispatchOrdersPage = () => {
   // `null` closed; otherwise the order whose barcode labels are being printed.
   const [labelsOrder, setLabelsOrder] = useState<DispatchOrder | null>(null)
 
-  const [feedback, setFeedback] = useState<
-    Pick<FeedbackSnackbarProps, 'open' | 'message' | 'severity'>
-  >({ open: false, message: '', severity: 'info' })
+  const [feedback, setFeedback] =
+    useState<FeedbackSnackbarState>(CLOSED_FEEDBACK)
 
   const downloadLabels = useDownloadPurchaseOrderLabels()
 
@@ -91,12 +92,10 @@ const DispatchOrdersPage = () => {
           setFeedback({
             open: true,
             severity: 'error',
-            // only surface backend wording that's meant for people — not
-            // ApiError's technical `METHOD path → status` fallback
-            message:
-              labelsError instanceof ApiError && labelsError.serverMessage
-                ? labelsError.serverMessage
-                : `No se pudieron generar las etiquetas de la orden ${order.ordenCompra}.`,
+            message: userFacingErrorMessage(
+              labelsError,
+              `No se pudieron generar las etiquetas de la orden ${order.ordenCompra}.`,
+            ),
           }),
       },
     )

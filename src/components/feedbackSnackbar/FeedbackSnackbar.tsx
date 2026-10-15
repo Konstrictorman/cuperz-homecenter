@@ -10,6 +10,18 @@ export interface FeedbackSnackbarProps {
   onClose: () => void
 }
 
+/** The part of the props a caller keeps in state. */
+export type FeedbackSnackbarState = Pick<
+  FeedbackSnackbarProps,
+  'open' | 'message' | 'severity'
+>
+
+export const CLOSED_FEEDBACK: FeedbackSnackbarState = {
+  open: false,
+  message: '',
+  severity: 'info',
+}
+
 /** Top-centred, auto-hiding outcome message for a user action. */
 const FeedbackSnackbar = ({
   open,

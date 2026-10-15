@@ -1,9 +1,6 @@
 import DownloadIcon from '@mui/icons-material/Download'
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
 import { useEffect, useState } from 'react'
-import Alert from '@mui/material/Alert'
-import Snackbar from '@mui/material/Snackbar'
-import type { SnackbarOrigin } from '@mui/material/Snackbar'
 import type {
   GridPaginationModel,
   GridRowSelectionModel,
@@ -12,14 +9,6 @@ import DataTable from '#/components/dataTable/DataTable'
 import type { StatusBadgeTone } from '#/components/statusBadge/StatusBadge'
 import ToolBar from '#/components/toolBar/ToolBar'
 import { usePurchaseOrdersColumns } from './-usePurchaseOrdersColumns'
-import {
-  downloadPurchaseOrderPdf,
-  downloadPurchaseOrdersCsv,
-  downloadPurchaseOrdersPdfZip,
-} from '#/api/purchase-orders'
-import Backdrop from '@mui/material/Backdrop'
-import CircularProgress from '@mui/material/CircularProgress'
-import '../SnackBar.css'
 
 export interface PurchaseOrder {
   id: string
@@ -49,12 +38,15 @@ interface PurchaseOrdersTableProps {
   rowCount: number
   paginationModel: GridPaginationModel
   onPaginationModelChange: (model: GridPaginationModel) => void
-}
-
-interface SnackBarState extends SnackbarOrigin {
-  open: boolean
-  message: string
-  severity: 'error' | 'info' | 'success' | 'warning'
+  onDownloadPdf: (order: PurchaseOrder) => void
+  onDownloadCsv: (order: PurchaseOrder) => void
+  /** Bulk toolbar actions — receive the selected rows' `ordenCompra`s. */
+  onExportSelected: (ordenCompras: Array<string>) => void
+  onDownloadSelectedPdf: (ordenCompras: Array<string>) => void
+  /** Row whose single-order download is in flight, so its actions disable. */
+  downloadingOrderId: string | null
+  exportingSelection: boolean
+  downloadingSelectionPdf: boolean
 }
 
 const EMPTY_SELECTION: GridRowSelectionModel = {
@@ -74,78 +66,21 @@ const PurchaseOrdersTable = ({
   rowCount,
   paginationModel,
   onPaginationModelChange,
+  onDownloadPdf,
+  onDownloadCsv,
+  onExportSelected,
+  onDownloadSelectedPdf,
+  downloadingOrderId,
+  exportingSelection,
+  downloadingSelectionPdf,
 }: PurchaseOrdersTableProps) => {
   const [selection, setSelection] =
     useState<GridRowSelectionModel>(EMPTY_SELECTION)
-  const [downloadingOrderId, setDownloadingOrderId] = useState<string | null>(
-    null,
-  )
-  const [exportingSelection, setExportingSelection] = useState(false)
-  const [downloadingSelectionPdf, setDownloadingSelectionPdf] = useState(false)
-  const [snackbarStatus, setSnackbarStatus] = useState<SnackBarState>({
-    open: false,
-    message: '',
-    severity: 'info',
-    vertical: 'top',
-    horizontal: 'center',
-  })
-
-  const handleDownloadPdf = async (order: PurchaseOrder) => {
-    setDownloadingOrderId(order.id)
-    try {
-      await downloadPurchaseOrderPdf(order.ordenCompra)
-      setSnackbarStatus({
-        ...snackbarStatus,
-        open: true,
-        message:
-          'Se descargó el PDF de la orden de compra satisfactoriamente. Por favor, revisa tu carpeta de descargas.',
-        severity: 'success',
-      })
-    } catch (error) {
-      setSnackbarStatus({
-        ...snackbarStatus,
-        open: true,
-        message:
-          error instanceof Error
-            ? error.message
-            : `No se pudo generar el PDF de la orden ${order.ordenCompra}.`,
-        severity: 'error',
-      })
-    } finally {
-      setDownloadingOrderId(null)
-    }
-  }
-
-  const handleDownloadCsv = async (order: PurchaseOrder) => {
-    setDownloadingOrderId(order.id)
-    try {
-      await downloadPurchaseOrdersCsv([order.ordenCompra])
-      setSnackbarStatus({
-        ...snackbarStatus,
-        open: true,
-        message:
-          'Se exportó el CSV de la orden de compra satisfactoriamente. Por favor, revisa tu carpeta de descargas.',
-        severity: 'success',
-      })
-    } catch (error) {
-      setSnackbarStatus({
-        ...snackbarStatus,
-        open: true,
-        message:
-          error instanceof Error
-            ? error.message
-            : `No se pudo exportar el CSV de la orden ${order.ordenCompra}.`,
-        severity: 'error',
-      })
-    } finally {
-      setDownloadingOrderId(null)
-    }
-  }
 
   const columns = usePurchaseOrdersColumns(
     onViewDetail,
-    handleDownloadPdf,
-    handleDownloadCsv,
+    onDownloadPdf,
+    onDownloadCsv,
     downloadingOrderId,
   )
 
@@ -164,58 +99,6 @@ const PurchaseOrdersTable = ({
       : rows
           .filter((row) => !selection.ids.has(row.id))
           .map((row) => row.ordenCompra)
-
-  const handleExportSelected = async () => {
-    setExportingSelection(true)
-    try {
-      await downloadPurchaseOrdersCsv(selectedOrdenCompras)
-      setSnackbarStatus({
-        ...snackbarStatus,
-        open: true,
-        message:
-          'Se exportaron los CSV de las órdenes seleccionadas se descargaron correctamente. Por favor, revisa tu carpeta de descargas.',
-        severity: 'success',
-      })
-    } catch (error) {
-      setSnackbarStatus({
-        ...snackbarStatus,
-        open: true,
-        message:
-          error instanceof Error
-            ? error.message
-            : 'No se pudieron exportar las órdenes seleccionadas.',
-        severity: 'error',
-      })
-    } finally {
-      setExportingSelection(false)
-    }
-  }
-
-  const handleDownloadSelectedPdf = async () => {
-    setDownloadingSelectionPdf(true)
-    try {
-      await downloadPurchaseOrdersPdfZip(selectedOrdenCompras)
-      setSnackbarStatus({
-        ...snackbarStatus,
-        open: true,
-        message:
-          'Los PDF de las órdenes seleccionadas se descargaron correctamente. Por favor, revisa tu carpeta de descargas.',
-        severity: 'success',
-      })
-    } catch (error) {
-      setSnackbarStatus({
-        ...snackbarStatus,
-        open: true,
-        message:
-          error instanceof Error
-            ? error.message
-            : 'No se pudieron generar los PDF de las órdenes seleccionadas.',
-        severity: 'error',
-      })
-    } finally {
-      setDownloadingSelectionPdf(false)
-    }
-  }
 
   // Opening the detail modal shouldn't leave the selection toolbar floating
   // behind it — drop the selection so both disappear together.
@@ -239,20 +122,6 @@ const PurchaseOrdersTable = ({
           columns: { columnVisibilityModel: { cliente: false } },
         }}
       />
-      <Snackbar
-        open={snackbarStatus.open}
-        autoHideDuration={6000}
-        onClose={() => setSnackbarStatus({ ...snackbarStatus, open: false })}
-        anchorOrigin={snackbarStatus}
-      >
-        <Alert
-          className="snack-bar"
-          severity={snackbarStatus.severity}
-          onClose={() => setSnackbarStatus({ ...snackbarStatus, open: false })}
-        >
-          {snackbarStatus.message}
-        </Alert>
-      </Snackbar>
       <ToolBar
         blockInteraction={false}
         open={selected > 0 && !detailOpen}
@@ -265,28 +134,18 @@ const PurchaseOrdersTable = ({
             key: 'export',
             label: 'Exportar CSV',
             icon: <DownloadIcon fontSize="small" />,
-            onClick: handleExportSelected,
+            onClick: () => onExportSelected(selectedOrdenCompras),
             disabled: exportingSelection,
           },
           {
             key: 'download',
             label: 'Descargar PDF',
             icon: <PictureAsPdfIcon fontSize="small" />,
-            onClick: handleDownloadSelectedPdf,
+            onClick: () => onDownloadSelectedPdf(selectedOrdenCompras),
             disabled: downloadingSelectionPdf,
           },
         ]}
       />
-      <Backdrop
-        sx={(theme) => ({ color: '#fff', zIndex: theme.zIndex.drawer + 1 })}
-        open={
-          downloadingSelectionPdf ||
-          exportingSelection ||
-          downloadingOrderId !== null
-        }
-      >
-        <CircularProgress color="inherit" />
-      </Backdrop>
     </>
   )
 }

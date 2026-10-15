@@ -134,5 +134,5 @@ export const usePurchaseOrdersColumns = (
         align: 'center',
       },
     ],
-    [onViewDetail, onDownloadPdf, downloadingOrderId],
+    [onViewDetail, onDownloadPdf, onDownloadCsv, downloadingOrderId],
   )
