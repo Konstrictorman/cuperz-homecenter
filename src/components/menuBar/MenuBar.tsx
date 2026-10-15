@@ -74,13 +74,6 @@ const MenuBar = () => {
           >
             Despachos
           </MenuItem>
-          <MenuItem
-            component={Link}
-            to="/purchase-orders/receipt-notices"
-            onClick={handleClose}
-          >
-            Recepción
-          </MenuItem>
         </Menu>
       </div>
     </div>
