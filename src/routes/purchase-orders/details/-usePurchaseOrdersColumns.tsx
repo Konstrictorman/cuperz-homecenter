@@ -12,7 +12,6 @@ export const usePurchaseOrdersColumns = (
   onViewDetail?: (order: PurchaseOrder) => void,
   onDownloadPdf?: (order: PurchaseOrder) => void,
   onDownloadCsv?: (order: PurchaseOrder) => void,
-  downloadingOrderId?: string | null,
 ): GridColDef<PurchaseOrder>[] =>
   useMemo(
     () => [
@@ -121,18 +120,16 @@ export const usePurchaseOrdersColumns = (
             icon={<DownloadIcon />}
             label="Descargar CSV"
             onClick={() => onDownloadCsv?.(params.row)}
-            disabled={downloadingOrderId === params.row.id}
           />,
           <GridActionsCellItem
             icon={<PictureAsPdfIcon />}
             label="Descargar PDF"
             onClick={() => onDownloadPdf?.(params.row)}
-            disabled={downloadingOrderId === params.row.id}
           />,
         ],
         headerAlign: 'center',
         align: 'center',
       },
     ],
-    [onViewDetail, onDownloadPdf, onDownloadCsv, downloadingOrderId],
+    [onViewDetail, onDownloadPdf, onDownloadCsv],
   )

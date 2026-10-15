@@ -15,6 +15,7 @@ import type { QueryClient } from '@tanstack/react-query'
 import Header from '#/components/header/Header'
 import Footer from '#/components/footer/Footer'
 import { ThemeProvider } from '#/contexts/ThemeContext'
+import { FeedbackProvider } from '#/contexts/FeedbackContext'
 import Breadcrumbs from '#/components/breadcrumbs/Breadcrumbs'
 import NotFound from '#/components/notFound/NotFound'
 import ErrorComponent from '#/components/errorComponent/ErrorComponent'
@@ -75,10 +76,12 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <body>
         <TanstackQueryProvider queryClient={queryClient}>
           <ThemeProvider>
-            <Header />
-            <Breadcrumbs />
-            <main className="app-main">{children}</main>
-            <Footer />
+            <FeedbackProvider>
+              <Header />
+              <Breadcrumbs />
+              <main className="app-main">{children}</main>
+              <Footer />
+            </FeedbackProvider>
           </ThemeProvider>
           <TanStackDevtools
             config={{

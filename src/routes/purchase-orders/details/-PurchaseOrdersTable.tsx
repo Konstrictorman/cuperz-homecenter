@@ -43,10 +43,6 @@ interface PurchaseOrdersTableProps {
   /** Bulk toolbar actions — receive the selected rows' `ordenCompra`s. */
   onExportSelected: (ordenCompras: Array<string>) => void
   onDownloadSelectedPdf: (ordenCompras: Array<string>) => void
-  /** Row whose single-order download is in flight, so its actions disable. */
-  downloadingOrderId: string | null
-  exportingSelection: boolean
-  downloadingSelectionPdf: boolean
 }
 
 const EMPTY_SELECTION: GridRowSelectionModel = {
@@ -70,9 +66,6 @@ const PurchaseOrdersTable = ({
   onDownloadCsv,
   onExportSelected,
   onDownloadSelectedPdf,
-  downloadingOrderId,
-  exportingSelection,
-  downloadingSelectionPdf,
 }: PurchaseOrdersTableProps) => {
   const [selection, setSelection] =
     useState<GridRowSelectionModel>(EMPTY_SELECTION)
@@ -81,7 +74,6 @@ const PurchaseOrdersTable = ({
     onViewDetail,
     onDownloadPdf,
     onDownloadCsv,
-    downloadingOrderId,
   )
 
   const selected = selectionCount(selection, rows.length)
@@ -135,14 +127,12 @@ const PurchaseOrdersTable = ({
             label: 'Exportar CSV',
             icon: <DownloadIcon fontSize="small" />,
             onClick: () => onExportSelected(selectedOrdenCompras),
-            disabled: exportingSelection,
           },
           {
             key: 'download',
             label: 'Descargar PDF',
             icon: <PictureAsPdfIcon fontSize="small" />,
             onClick: () => onDownloadSelectedPdf(selectedOrdenCompras),
-            disabled: downloadingSelectionPdf,
           },
         ]}
       />

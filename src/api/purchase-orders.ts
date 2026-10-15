@@ -205,13 +205,14 @@ export function fetchPurchaseOrderLabels({
 }
 
 /** Triggers a browser download of an order's barcode labels PDF. */
-export function useDownloadPurchaseOrderLabels() {
-  return useMutation({
-    mutationFn: async (request: PurchaseOrderLabelsRequest) => {
-      const blob = await fetchPurchaseOrderLabels(request)
-      triggerDownload(blob, `etiquetas-${request.ordenCompra}.pdf`)
-    },
-  })
+export async function downloadPurchaseOrderLabels(
+  request: PurchaseOrderLabelsRequest,
+): Promise<void> {
+  const blob = await fetchPurchaseOrderLabels(request)
+  triggerDownload(
+    blob,
+    `etiquetas-${request.ordenCompra}-${request.numTags}.pdf`,
+  )
 }
 
 /**
