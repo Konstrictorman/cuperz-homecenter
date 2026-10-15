@@ -33,7 +33,11 @@ const FeedbackSnackbar = ({
     <Snackbar
       open={open}
       autoHideDuration={6000}
-      onClose={onClose}
+      // Ignore click-away: the click that triggers a new message would
+      // otherwise dismiss it immediately. Auto-hide and ✕ still close it.
+      onClose={(_event, reason) => {
+        if (reason !== 'clickaway') onClose()
+      }}
       anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
     >
       <Alert

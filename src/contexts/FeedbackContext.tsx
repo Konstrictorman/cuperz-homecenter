@@ -22,6 +22,8 @@ export interface RunMessages {
 
 interface FeedbackContextValue {
   success: (message: string) => void
+  info: (message: string) => void
+  warning: (message: string) => void
   error: (message: string) => void
   /** Blocks the screen with the backdrop while `task` runs, then reports the
    *  outcome in the snackbar. Never rejects — failures become the snackbar. */
@@ -76,6 +78,8 @@ export function FeedbackProvider({ children }: { children: ReactNode }) {
   const value = useMemo<FeedbackContextValue>(
     () => ({
       success: (message) => show('success', message),
+      info: (message) => show('info', message),
+      warning: (message) => show('warning', message),
       error: (message) => show('error', message),
       run,
     }),

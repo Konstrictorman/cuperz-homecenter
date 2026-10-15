@@ -60,6 +60,33 @@ describe('FeedbackProvider', () => {
     expect(await screen.findByText('Listo')).toBeInTheDocument()
   })
 
+  it('shows standalone info and warning messages', async () => {
+    const user = userEvent.setup()
+    const NotifyHarness = () => {
+      const feedback = useFeedback()
+      return (
+        <>
+          <button onClick={() => feedback.info('Aviso informativo')}>
+            info
+          </button>
+          <button onClick={() => feedback.warning('Cuidado')}>warning</button>
+        </>
+      )
+    }
+    render(
+      <FeedbackProvider>
+        <NotifyHarness />
+      </FeedbackProvider>,
+    )
+
+    await user.click(screen.getByText('info'))
+    expect(await screen.findByRole('alert')).toHaveClass('MuiAlert-colorInfo')
+
+    await user.click(screen.getByText('warning'))
+    const alert = await screen.findByText('Cuidado')
+    expect(alert.closest('.MuiAlert-root')).toHaveClass('MuiAlert-colorWarning')
+  })
+
   it('falls back to the given error message for a non user-facing error', async () => {
     const user = userEvent.setup()
     render(
