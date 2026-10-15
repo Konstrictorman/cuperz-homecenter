@@ -15,7 +15,7 @@ export const DISPATCH_ORDER_STATUS_UI: Record<
   DispatchPreviewStatus,
   { tone: StatusBadgeTone; label: string }
 > = {
-  NODESPACHADO: { tone: 'pending', label: 'Pendiente' },
+  NODESPACHADO: { tone: 'partial', label: 'Alistada' },
   DESPACHADO: { tone: 'dispatched', label: 'Despachada' },
 }
 
@@ -24,8 +24,10 @@ const TONE_TO_DISPATCH_ORDER_STATUS: Record<
   Exclude<DispatchOrdersFilterValues['estado'], 'all'>,
   DispatchPreviewStatus
 > = {
-  pending: 'NODESPACHADO',
+  ready: 'NODESPACHADO',
   dispatched: 'DESPACHADO',
+  error: 'DESPACHADO',
+  cancelled: 'DESPACHADO',
 }
 
 /** The response doesn't echo `estado` per order; the backend's own

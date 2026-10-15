@@ -10,7 +10,8 @@ import '../FilterBar.css'
 /** Mirrors `DispatchPreviewStatus` (`#/api/types`) — the endpoint only
  *  distinguishes NODESPACHADO/DESPACHADO, unlike the richer `StatusBadgeTone`
  *  union the details-route filter bar uses. */
-export type DispatchOrdersFilterStatus = 'pending' | 'dispatched' | 'all'
+export type DispatchOrdersFilterStatus =
+  'ready' | 'dispatched' | 'all' | 'error' | 'cancelled'
 
 /** `GET /avisos-despacho/por-fecha` only filters by estado and a date range
  *  (both ends required together), so that's all this bar offers. */
@@ -32,8 +33,10 @@ const STATUS_OPTIONS: Array<{
   label: string
 }> = [
   { value: 'all', label: 'Todos' },
-  { value: 'pending', label: 'Pendiente' },
+  { value: 'ready', label: 'Alistada' },
   { value: 'dispatched', label: 'Despachada' },
+  { value: 'error', label: 'Error' },
+  { value: 'cancelled', label: 'Cancelada' },
 ]
 
 const INCOMPLETE_RANGE = 'Indique ambas fechas'
