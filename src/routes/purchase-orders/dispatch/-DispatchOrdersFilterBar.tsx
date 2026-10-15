@@ -6,15 +6,14 @@ import FilterAltIcon from '@mui/icons-material/FilterAlt'
 import FilterAltOffIcon from '@mui/icons-material/FilterAltOff'
 import '../FilterBar.css'
 
-/** Mirrors `PurchaseOrderDispatchStatus` (`#/api/types`) — this status set
- *  only has PENDIENTE/DESPACHADA/CON_ERROR, unlike the richer
- *  `StatusBadgeTone` union the details-route filter bar uses. */
-export type DispatchOrdersFilterStatus =
-  'pending' | 'dispatched' | 'error' | 'all'
+/** Mirrors `DispatchPreviewStatus` (`#/api/types`) — the endpoint only
+ *  distinguishes NODESPACHADO/DESPACHADO, unlike the richer `StatusBadgeTone`
+ *  union the details-route filter bar uses. */
+export type DispatchOrdersFilterStatus = 'pending' | 'dispatched' | 'all'
 
+/** `GET /avisos-despacho/por-fecha` only filters by estado and a date range
+ *  (both ends required together), so that's all this bar offers. */
 export interface DispatchOrdersFilterValues {
-  ordenCompra: string
-  numPedido: string
   estado: DispatchOrdersFilterStatus
   fechaDesde: string
   fechaHasta: string
@@ -22,8 +21,6 @@ export interface DispatchOrdersFilterValues {
 
 export const DEFAULT_DISPATCH_ORDERS_FILTER_VALUES: DispatchOrdersFilterValues =
   {
-    ordenCompra: '',
-    numPedido: '',
     estado: 'all',
     fechaDesde: '',
     fechaHasta: '',
@@ -36,8 +33,14 @@ const STATUS_OPTIONS: Array<{
   { value: 'all', label: 'Todos' },
   { value: 'pending', label: 'Pendiente despacho' },
   { value: 'dispatched', label: 'Despachada' },
-  { value: 'error', label: 'Error integración' },
 ]
+
+const INCOMPLETE_RANGE = 'Indique ambas fechas'
+
+/** Shared by both date fields: the backend rejects a half-open range
+ *  (`422 RANGO_FECHAS_INCOMPLETO`), so flag whichever end is missing. */
+const validateRangeEnd = (value: string, otherEnd: string) =>
+  !value && otherEnd ? INCOMPLETE_RANGE : undefined
 
 interface DispatchOrdersFilterBarProps {
   onFilter: (values: DispatchOrdersFilterValues) => void
@@ -62,34 +65,6 @@ const DispatchOrdersFilterBar = ({
         void form.handleSubmit()
       }}
     >
-      <form.Field name="numPedido">
-        {(field) => (
-          <TextField
-            label="Número de pedido"
-            placeholder="Buscar pedido"
-            size="small"
-            className="filter-bar__field"
-            value={field.state.value}
-            onChange={(event) => field.handleChange(event.target.value)}
-            onBlur={field.handleBlur}
-          />
-        )}
-      </form.Field>
-
-      <form.Field name="ordenCompra">
-        {(field) => (
-          <TextField
-            label="Orden de compra"
-            placeholder="Buscar OC"
-            size="small"
-            className="filter-bar__field"
-            value={field.state.value}
-            onChange={(event) => field.handleChange(event.target.value)}
-            onBlur={field.handleBlur}
-          />
-        )}
-      </form.Field>
-
       <form.Field name="estado">
         {(field) => (
           <TextField
@@ -114,7 +89,13 @@ const DispatchOrdersFilterBar = ({
         )}
       </form.Field>
 
-      <form.Field name="fechaDesde">
+      <form.Field
+        name="fechaDesde"
+        validators={{
+          onSubmit: ({ value, fieldApi }) =>
+            validateRangeEnd(value, fieldApi.form.getFieldValue('fechaHasta')),
+        }}
+      >
         {(field) => (
           <TextField
             label="Fecha desde"
@@ -122,6 +103,8 @@ const DispatchOrdersFilterBar = ({
             size="small"
             className="filter-bar__field filter-bar__field--narrow"
             slotProps={{ inputLabel: { shrink: true } }}
+            error={field.state.meta.errors.length > 0}
+            helperText={field.state.meta.errors[0]}
             value={field.state.value}
             onChange={(event) => field.handleChange(event.target.value)}
             onBlur={field.handleBlur}
@@ -129,7 +112,13 @@ const DispatchOrdersFilterBar = ({
         )}
       </form.Field>
 
-      <form.Field name="fechaHasta">
+      <form.Field
+        name="fechaHasta"
+        validators={{
+          onSubmit: ({ value, fieldApi }) =>
+            validateRangeEnd(value, fieldApi.form.getFieldValue('fechaDesde')),
+        }}
+      >
         {(field) => (
           <TextField
             label="Fecha hasta"
@@ -137,6 +126,8 @@ const DispatchOrdersFilterBar = ({
             size="small"
             className="filter-bar__field filter-bar__field--narrow"
             slotProps={{ inputLabel: { shrink: true } }}
+            error={field.state.meta.errors.length > 0}
+            helperText={field.state.meta.errors[0]}
             value={field.state.value}
             onChange={(event) => field.handleChange(event.target.value)}
             onBlur={field.handleBlur}

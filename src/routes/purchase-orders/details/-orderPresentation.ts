@@ -17,7 +17,7 @@ export const ORDER_STATUS_UI: Record<
   { tone: StatusBadgeTone; label: string }
 > = {
   PENDIENTE: { tone: 'pending', label: 'Pendiente' },
-  DESPACHADA: { tone: 'dispatched', label: 'Despachada' },
+  DESPACHADO: { tone: 'dispatched', label: 'Despachada' },
   CON_ERROR: { tone: 'error', label: 'Error' },
   CANCELADA: { tone: 'cancelled', label: 'Cancelada' },
   PROCESANDO: { tone: 'processing', label: 'Procesando' },
@@ -31,7 +31,7 @@ export const ORDER_LINE_STATUS_UI: Record<
   { tone: StatusBadgeTone; label: string }
 > = {
   PENDIENTE: { tone: 'pending', label: 'Pendiente' },
-  DESPACHADA: { tone: 'dispatched', label: 'Despachada' },
+  DESPACHADO: { tone: 'dispatched', label: 'Despachada' },
   PARCIAL: { tone: 'partial', label: 'Parcial' },
   CANCELADA: { tone: 'cancelled', label: 'Cancelada' },
   SUPERA_SOLICITADO: { tone: 'exceeded', label: 'Supera solicitado' },
@@ -47,7 +47,7 @@ export const ORDER_LINE_STATUS_UI: Record<
  *  correspondence. */
 const TONE_TO_ORDER_STATUS: Record<StatusBadgeTone, OrderStatus> = {
   pending: 'PENDIENTE',
-  dispatched: 'DESPACHADA',
+  dispatched: 'DESPACHADO',
   error: 'CON_ERROR',
   processing: 'PROCESANDO',
   partial: 'PROCESANDO',

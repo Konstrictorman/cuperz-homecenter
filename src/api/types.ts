@@ -49,7 +49,7 @@ export type IsoDateTime = string
 
 export type OrderStatus =
   | 'PENDIENTE'
-  | 'DESPACHADA'
+  | 'DESPACHADO'
   | 'CON_ERROR'
   | 'PROCESANDO'
   | 'CANCELADA'
@@ -57,7 +57,7 @@ export type OrderStatus =
   | 'RECIBIDO'
 
 export type OrderLineStatus =
-  'PENDIENTE' | 'DESPACHADA' | 'PARCIAL' | 'CANCELADA' | 'SUPERA_SOLICITADO'
+  'PENDIENTE' | 'DESPACHADO' | 'PARCIAL' | 'CANCELADA' | 'SUPERA_SOLICITADO'
 
 /** Row shape for `GET /api/v1/ordenes-compra` (§ 1.1).
  *
@@ -441,49 +441,62 @@ export interface DispatchNoticeAttemptsResponse {
 }
 
 // ===========================================================================
-// Purchase Order Dispatch Status — confirmed directly with the user
-// (2026-10-07); not yet in docs/especificacion-endpoints-backend. A
-// numPedido-keyed pair, distinct from the avisoId-keyed Dispatch Notices
-// above: the master row answers "is this PO pending/dispatched/erroed",
-// the detail is the Orden→Tienda→Contenedor→Producto tree for one PO.
+// Dispatch previews by date — `GET /api/v1/avisos-despacho/por-fecha`.
+// Not in docs/especificacion-endpoints-backend; shape taken from the live
+// FastAPI backend (its OpenAPI leaves the 200 body untyped) and a sample
+// response the user supplied (2026-10-15). One entry per PO, already in the
+// Orden→Tienda→Contenedor→Producto shape Homecenter's AvisoDespacho payload
+// uses — so the list alone feeds both the table and the payload preview, no
+// per-row detail fetch needed.
 // ===========================================================================
 
-export type PurchaseOrderDispatchStatus =
-  'PENDIENTE' | 'DESPACHADA' | 'CON_ERROR'
+/** `estado` filter values the backend accepts. Not echoed back per order —
+ *  the UI derives it from `fechaRealDespacho` (see
+ *  `-dispatchOrderPresentation.ts`). */
+export type DispatchPreviewStatus = 'DESPACHADO' | 'NODESPACHADO'
 
-/** Row shape for `GET /api/v1/ordenes-compra/despacho` (route unconfirmed —
- *  no backend spec exists yet for this pair, see the api module's doc
- *  comment). `fechaDespacho` is the date entered when the PO was dispatched;
- *  `null` while `estado` is `PENDIENTE`. Only POs that already have a
- *  `numPedido` assigned are expected to appear here. */
-export interface PurchaseOrderDispatchSummary {
-  eanPuntoEntrega: string
-  ordenCompra: string
-  numPedido: string
-  fechaDespacho: IsoDate | null
-  estado: PurchaseOrderDispatchStatus
+/** Numbers arrive as decimal strings (`"6.000"`, `"5"`), exactly as
+ *  Homecenter's AvisoDespacho payload carries them. */
+export interface DispatchPreviewProduct {
+  eanSku: string
+  cantidad: string
+  peso: string
+  volumen: string
 }
 
-/** Query params for `GET /api/v1/ordenes-compra/despacho`. */
-export interface PurchaseOrderDispatchQuery extends PaginationQuery {
-  ordenCompra?: string
-  numPedido?: string
-  estado?: PurchaseOrderDispatchStatus
-  fechaDespachoDesde?: IsoDate
-  fechaDespachoHasta?: IsoDate
+export interface DispatchPreviewContainer {
+  contenedor: string
+  productos: Array<DispatchPreviewProduct>
 }
 
-/** Full shape for `GET /api/v1/ordenes-compra/despacho/{numPedido}` — reuses
- *  the same per-store/container/product tree `avisos-despacho` (§ 2) takes
- *  as input (`DispatchNoticeStoreInput`), since this is effectively the
- *  prefilled suggestion the dispatch wizard starts from. */
-export interface PurchaseOrderDispatchDetail {
+export interface DispatchPreviewStore {
+  /** Data-quality caveat: the backend has been observed sending the literal
+   *  string `"None"` (a stringified Python `None`) when the store is unknown. */
+  eanTienda: string
+  contenedores: Array<DispatchPreviewContainer>
+}
+
+export interface DispatchPreviewOrder {
   eanPuntoEntrega: string
   ordenCompra: string
-  numPedido: string
-  fechaDespacho: IsoDate | null
-  estado: PurchaseOrderDispatchStatus
-  tiendas: Array<DispatchNoticeStoreInput>
+  /** `null` until the PO has actually been dispatched. */
+  fechaRealDespacho: IsoDate | null
+  tiendas: Array<DispatchPreviewStore>
+}
+
+/** `200` body — note the list lives under `ordenes`, not the usual `data`
+ *  of `Paginated<T>`. */
+export interface DispatchPreviewsByDateResponse {
+  ordenes: Array<DispatchPreviewOrder>
+  pagination: Pagination
+}
+
+/** Query params. `fechaDesde`/`fechaHasta` must be sent together — either
+ *  alone is rejected with `422 RANGO_FECHAS_INCOMPLETO`. */
+export interface DispatchPreviewsByDateQuery extends PaginationQuery {
+  estado?: DispatchPreviewStatus
+  fechaDesde?: IsoDate
+  fechaHasta?: IsoDate
 }
 
 // ===========================================================================

@@ -16,14 +16,6 @@ export const useDispatchOrdersColumns = (
   useMemo(
     () => [
       {
-        field: 'numPedido',
-        headerName: 'Número de pedido',
-        flex: 1,
-        minWidth: 150,
-        align: 'center',
-        headerAlign: 'center',
-      },
-      {
         field: 'ordenCompra',
         headerName: 'Orden Compra',
         flex: 1,
@@ -41,14 +33,32 @@ export const useDispatchOrdersColumns = (
         headerAlign: 'center',
       },
       {
-        field: 'fechaDespacho',
+        field: 'cantidadTiendas',
+        headerName: 'Tiendas',
+        type: 'number',
+        flex: 0.6,
+        minWidth: 90,
+        align: 'center',
+        headerAlign: 'center',
+      },
+      {
+        field: 'cantidadContenedores',
+        headerName: 'Contenedores',
+        type: 'number',
+        flex: 0.6,
+        minWidth: 110,
+        align: 'center',
+        headerAlign: 'center',
+      },
+      {
+        field: 'fechaRealDespacho',
         headerName: 'Fecha despacho',
         flex: 1,
         minWidth: 130,
         align: 'center',
         headerAlign: 'center',
-        valueFormatter: (value: DispatchOrder['fechaDespacho']) =>
-          formatDate(value),
+        valueFormatter: (value: DispatchOrder['fechaRealDespacho']) =>
+          formatDate(value) || '—',
       },
       {
         field: 'estado',
@@ -81,7 +91,7 @@ export const useDispatchOrdersColumns = (
             icon={<LocalShippingOutlinedIcon />}
             label="Generar aviso de despacho"
             onClick={() => onGenerateDispatchNotice?.(params.row)}
-            // disabled={params.row.estadoTone !== 'pending'}
+            disabled={params.row.estadoTone !== 'pending'}
           />,
           <GridActionsCellItem
             icon={<QrCodeIcon />}

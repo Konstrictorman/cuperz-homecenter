@@ -14,6 +14,8 @@ import type {
   DispatchNoticeEan128Response,
   DispatchNoticeAttemptsResponse,
   DispatchNoticesQuery,
+  DispatchPreviewsByDateQuery,
+  DispatchPreviewsByDateResponse,
   CreateDispatchNoticeRequest,
   Paginated,
   ResendDispatchNoticeRequest,
@@ -27,6 +29,22 @@ export function dispatchNoticesListQueryOptions(
     queryFn: ({ signal }) =>
       apiFetch<Paginated<DispatchNoticeSummary>>(
         `/avisos-despacho${buildQuery({ ...query })}`,
+        { signal },
+      ),
+  })
+}
+
+/** `GET /api/v1/avisos-despacho/por-fecha` — one Orden→Tienda→Contenedor→
+ *  Producto tree per PO, ready to drop into an AvisoDespacho payload. Not in
+ *  the backend spec; see the type's doc comment in `./types`. */
+export function dispatchPreviewsByDateQueryOptions(
+  query: DispatchPreviewsByDateQuery = {},
+) {
+  return queryOptions({
+    queryKey: queryKeys.dispatchNotices.previewsByDate(query),
+    queryFn: ({ signal }) =>
+      apiFetch<DispatchPreviewsByDateResponse>(
+        `/avisos-despacho/por-fecha${buildQuery({ ...query })}`,
         { signal },
       ),
   })

@@ -1,29 +1,42 @@
 import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined'
 import { useEffect, useState } from 'react'
-import type { GridRowSelectionModel } from '@mui/x-data-grid'
+import type {
+  GridPaginationModel,
+  GridRowSelectionModel,
+} from '@mui/x-data-grid'
+import type { DispatchPreviewOrder } from '#/api/types'
 import DataTable from '#/components/dataTable/DataTable'
 import type { StatusBadgeTone } from '#/components/statusBadge/StatusBadge'
 import ToolBar from '#/components/toolBar/ToolBar'
 import { useDispatchOrdersColumns } from './-useDispatchOrdersColumns'
 
 export interface DispatchOrder {
+  /** == `ordenCompra` — the only per-order key the API returns. */
   id: string
   ordenCompra: string
-  numPedido: string
   eanPuntoEntrega: string
-  fechaDespacho: string
+  /** `''` while not yet dispatched. */
+  fechaRealDespacho: string
+  cantidadTiendas: number
+  cantidadContenedores: number
   estadoTone: StatusBadgeTone
   estadoLabel: string
+  /** The untouched API order — its Tienda→Contenedor→Producto tree feeds the
+   *  detail modal and the payload preview without another request. */
+  source: DispatchPreviewOrder
 }
 
 interface DispatchOrdersTableProps {
   rows: DispatchOrder[]
   loading?: boolean
+  rowCount: number
+  paginationModel: GridPaginationModel
+  onPaginationModelChange: (model: GridPaginationModel) => void
   onViewDetail?: (order: DispatchOrder) => void
   onGenerateDispatchNotice?: (order: DispatchOrder) => void
   /** Bulk/toolbar variant of the same action: fires with every selected
-   * row's `numPedido` so one payload's `ordenes[]` can cover them all. */
-  onGenerateDispatchNoticeBulk?: (numPedidos: string[]) => void
+   * row so one payload's `ordenes[]` can cover them all. */
+  onGenerateDispatchNoticeBulk?: (orders: DispatchOrder[]) => void
   /** Whether a detail view is currently open, so the toolbar can hide and
    * the row selection can clear while it's up. */
   onGenerateBarCode?: (order: DispatchOrder) => void
@@ -39,19 +52,22 @@ const EMPTY_SELECTION: GridRowSelectionModel = {
 const selectionCount = (model: GridRowSelectionModel, total: number): number =>
   model.type === 'include' ? model.ids.size : total - model.ids.size
 
-/** Row ids (== `numPedido`, see `toDispatchOrderRow`) the selection model
- * covers, resolving the `exclude` case against the currently loaded rows. */
-const selectedIds = (
+/** Loaded rows the selection model covers. With server pagination only the
+ * current page is loaded, so selections on other pages can't be resolved. */
+const selectedRows = (
   model: GridRowSelectionModel,
   rows: DispatchOrder[],
-): string[] =>
-  model.type === 'include'
-    ? Array.from(model.ids, String)
-    : rows.map((row) => row.id).filter((id) => !model.ids.has(id))
+): DispatchOrder[] =>
+  rows.filter((row) =>
+    model.type === 'include' ? model.ids.has(row.id) : !model.ids.has(row.id),
+  )
 
 const DispatchOrdersTable = ({
   rows,
   loading,
+  rowCount,
+  paginationModel,
+  onPaginationModelChange,
   onViewDetail,
   onGenerateDispatchNotice,
   onGenerateDispatchNoticeBulk,
@@ -67,7 +83,7 @@ const DispatchOrdersTable = ({
     onGenerateBarCode,
   )
 
-  const selected = selectionCount(selection, rows.length)
+  const selected = selectionCount(selection, rowCount)
 
   const clearSelection = () => setSelection(EMPTY_SELECTION)
 
@@ -85,6 +101,10 @@ const DispatchOrdersTable = ({
         loading={loading}
         rowSelectionModel={selection}
         onRowSelectionModelChange={setSelection}
+        paginationMode="server"
+        rowCount={rowCount}
+        paginationModel={paginationModel}
+        onPaginationModelChange={onPaginationModelChange}
       />
       <ToolBar
         blockInteraction={false}
@@ -99,7 +119,7 @@ const DispatchOrdersTable = ({
             label: 'Generar aviso de despacho',
             icon: <LocalShippingOutlinedIcon fontSize="small" />,
             onClick: () =>
-              onGenerateDispatchNoticeBulk?.(selectedIds(selection, rows)),
+              onGenerateDispatchNoticeBulk?.(selectedRows(selection, rows)),
           },
         ]}
       />

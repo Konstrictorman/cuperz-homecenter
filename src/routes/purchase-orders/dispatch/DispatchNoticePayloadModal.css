@@ -1,9 +1,3 @@
-.dispatch-notice-payload-modal__status {
-  display: flex;
-  justify-content: center;
-  padding: var(--space-xl) 0;
-}
-
 .dispatch-notice-payload-modal__actions {
   display: flex;
   justify-content: flex-end;

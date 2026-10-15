@@ -14,19 +14,32 @@ interface ThemeContextValue {
 
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined)
 
-function getInitialTheme(): Theme {
-  if (typeof window === 'undefined') return 'light'
-  const stored = localStorage.getItem(STORAGE_KEY)
-  if (stored === 'light' || stored === 'dark') return stored
-  return window.matchMedia('(prefers-color-scheme: dark)').matches
-    ? 'dark'
-    : 'light'
+/** What the server renders — it can't know the user's stored preference. */
+const SSR_THEME: Theme = 'light'
+
+/** The blocking script in `__root.tsx` has already resolved the preference
+ *  (localStorage, then `prefers-color-scheme`) onto `data-theme` before
+ *  hydration, so that attribute is the source of truth on the client. */
+function readClientTheme(): Theme {
+  const attr = document.documentElement.getAttribute('data-theme')
+  return attr === 'dark' || attr === 'light' ? attr : SSR_THEME
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [mode, setMode] = useState<Theme>(getInitialTheme)
+  // `null` until mounted: the first client render must match the server's
+  // HTML (`SSR_THEME`), or React reports a hydration mismatch on anything
+  // theme-dependent (e.g. the header's switch `checked` state). The real
+  // theme is picked up right after hydration.
+  const [mode, setMode] = useState<Theme | null>(null)
 
   useEffect(() => {
+    setMode(readClientTheme())
+  }, [])
+
+  useEffect(() => {
+    // Skip the pre-mount render, or it would overwrite the stored preference
+    // with `SSR_THEME`.
+    if (mode === null) return
     document.documentElement.setAttribute('data-theme', mode)
     localStorage.setItem(STORAGE_KEY, mode)
   }, [mode])
@@ -36,7 +49,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <ThemeContext.Provider value={{ theme: mode, toggleTheme }}>
+    <ThemeContext.Provider value={{ theme: mode ?? SSR_THEME, toggleTheme }}>
       {/*
         One MUI theme carries both colour schemes as CSS variables scoped to the
         `data-theme` attribute (see `theme.cssVariables.colorSchemeSelector`).

@@ -3,19 +3,20 @@
 // `groupBy` is its literal worked example for this exact tree shape).
 
 import Box from '@mui/material/Box'
-import CircularProgress from '@mui/material/CircularProgress'
 import Typography from '@mui/material/Typography'
-import type { DispatchNoticeStoreInput } from '#/api/types'
+import type { DispatchPreviewStore } from '#/api/types'
 import GroupedDataTable from '#/components/groupedDataTable/GroupedDataTable'
 import type { AggregationFunction } from '#/components/groupedDataTable/GroupedDataTable'
 import { useDispatchOrderProductsColumns } from './-useDispatchOrderProductsColumns'
 import './DispatchOrderProductsTable.css'
 
 interface DispatchOrderProductsTableProps {
-  numPedido: string
-  tiendas: Array<DispatchNoticeStoreInput>
-  loading?: boolean
+  ordenCompra: string
+  tiendas: Array<DispatchPreviewStore>
 }
+
+/** The backend sends a stringified Python `None` for an unknown store. */
+const MISSING_STORE = 'None'
 
 /** Overrides the built-in `sum` so `peso`/`volumen` subtotals and grand
  *  totals round to 2 decimals instead of showing raw binary-float noise
@@ -28,7 +29,7 @@ const aggregationFunctions: Record<string, AggregationFunction> = {
 }
 
 /** One product line flattened out of a tienda → contenedor pair — the grain
- *  `GroupedDataTable` actually renders/groups. `DispatchNoticeStoreInput` is
+ *  `GroupedDataTable` actually renders/groups. `DispatchPreviewStore` is
  *  a nested tienda → contenedor → producto tree, which `GroupedDataTable`
  *  can't group on directly: it expects one flat row per leaf record, with
  *  every `groupBy` field (`eanTienda`, `contenedor`) repeated on each row. */
@@ -43,19 +44,10 @@ export interface DispatchOrderProductRow {
 }
 
 const DispatchOrderProductsTable = ({
-  numPedido,
+  ordenCompra,
   tiendas,
-  loading,
 }: DispatchOrderProductsTableProps) => {
   const columns = useDispatchOrderProductsColumns()
-
-  if (loading) {
-    return (
-      <Box className="dispatch-order-products-table__status">
-        <CircularProgress size={28} />
-      </Box>
-    )
-  }
 
   if (tiendas.length === 0) {
     return (
@@ -69,12 +61,14 @@ const DispatchOrderProductsTable = ({
     tienda.contenedores.flatMap((contenedor) =>
       contenedor.productos.map((producto) => ({
         id: `${tienda.eanTienda}-${contenedor.contenedor}-${producto.eanSku}`,
-        eanTienda: tienda.eanTienda,
+        eanTienda:
+          tienda.eanTienda === MISSING_STORE ? 'Sin tienda' : tienda.eanTienda,
         contenedor: contenedor.contenedor,
         eanSku: producto.eanSku,
-        cantidad: producto.cantidad,
-        peso: producto.peso,
-        volumen: producto.volumen,
+        // API sends decimal strings (`"6.000"`); the grid sums numbers.
+        cantidad: Number(producto.cantidad),
+        peso: Number(producto.peso),
+        volumen: Number(producto.volumen),
       })),
     ),
   )
@@ -90,8 +84,8 @@ const DispatchOrderProductsTable = ({
       rows={rows}
       columns={columns}
       aggregationFunctions={aggregationFunctions}
-      exportFileName={`Detalle despacho ${numPedido}`}
-      tableTitle={`Detalle de productos por tienda y contenedor — Pedido ${numPedido}`}
+      exportFileName={`Detalle despacho ${ordenCompra}`}
+      tableTitle={`Detalle de productos por tienda y contenedor — Orden ${ordenCompra}`}
     />
   )
 }

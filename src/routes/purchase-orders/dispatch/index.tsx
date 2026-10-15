@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import Typography from '@mui/material/Typography'
+import type { GridPaginationModel } from '@mui/x-data-grid'
 import DispatchOrdersFilterBar, {
   DEFAULT_DISPATCH_ORDERS_FILTER_VALUES,
 } from './-DispatchOrdersFilterBar'
@@ -14,7 +15,7 @@ import {
   toDispatchOrdersQuery,
 } from './-dispatchOrderPresentation'
 import type { DispatchOrdersFilterValues } from './-DispatchOrdersFilterBar'
-import { purchaseOrderDispatchListQueryOptions } from '#/api/purchase-order-dispatch'
+import { dispatchPreviewsByDateQueryOptions } from '#/api/dispatch-notices'
 import '../PurchaseOrdersPage.css'
 
 const DispatchOrdersPage = () => {
@@ -22,24 +23,39 @@ const DispatchOrdersPage = () => {
     DEFAULT_DISPATCH_ORDERS_FILTER_VALUES,
   )
 
+  const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
+    page: 0,
+    pageSize: 10,
+  })
+
   const [selectedOrder, setSelectedOrder] = useState<DispatchOrder | null>(null)
 
-  // `null` closed; otherwise the `numPedido`s whose payload is being
-  // previewed — one for the row action, several for the bulk one.
-  const [dispatchNoticeNumPedidos, setDispatchNoticeNumPedidos] = useState<
-    string[] | null
+  // `null` closed; otherwise the orders whose payload is being previewed —
+  // one for the row action, several for the bulk one.
+  const [dispatchNoticeOrders, setDispatchNoticeOrders] = useState<
+    DispatchOrder[] | null
   >(null)
 
+  const handleFilter = (values: DispatchOrdersFilterValues) => {
+    setFilters(values)
+    // a new filter invalidates whatever page we were on
+    setPaginationModel((model) => ({ ...model, page: 0 }))
+  }
+
   const { data, isError, error, isFetching } = useQuery({
-    ...purchaseOrderDispatchListQueryOptions(toDispatchOrdersQuery(filters)),
+    ...dispatchPreviewsByDateQueryOptions({
+      ...toDispatchOrdersQuery(filters),
+      page: paginationModel.page + 1,
+      pageSize: paginationModel.pageSize,
+    }),
     // keep the previous rows on screen (dimmed) while a new filter loads
     placeholderData: keepPreviousData,
   })
 
-  const rows = (data?.data ?? []).map(toDispatchOrderRow)
+  const rows = (data?.ordenes ?? []).map(toDispatchOrderRow)
 
   const handleGenerateDispatchNotice = (order: DispatchOrder) => {
-    setDispatchNoticeNumPedidos([order.numPedido])
+    setDispatchNoticeOrders([order])
   }
 
   const handleGenerateBarCode = (order: DispatchOrder) => {
@@ -48,7 +64,7 @@ const DispatchOrdersPage = () => {
 
   return (
     <div className="purchase-orders">
-      <DispatchOrdersFilterBar onFilter={setFilters} />
+      <DispatchOrdersFilterBar onFilter={handleFilter} />
 
       {isError ? (
         <Typography role="alert" className="purchase-orders__error">
@@ -58,13 +74,14 @@ const DispatchOrdersPage = () => {
         <DispatchOrdersTable
           rows={rows}
           loading={isFetching}
+          rowCount={data?.pagination.total ?? 0}
+          paginationModel={paginationModel}
+          onPaginationModelChange={setPaginationModel}
           onViewDetail={setSelectedOrder}
           onGenerateDispatchNotice={handleGenerateDispatchNotice}
-          onGenerateDispatchNoticeBulk={setDispatchNoticeNumPedidos}
+          onGenerateDispatchNoticeBulk={setDispatchNoticeOrders}
           onGenerateBarCode={handleGenerateBarCode}
-          detailOpen={
-            selectedOrder !== null || dispatchNoticeNumPedidos !== null
-          }
+          detailOpen={selectedOrder !== null || dispatchNoticeOrders !== null}
         />
       )}
 
@@ -75,9 +92,9 @@ const DispatchOrdersPage = () => {
       />
 
       <DispatchNoticePayloadModal
-        numPedidos={dispatchNoticeNumPedidos ?? []}
-        open={dispatchNoticeNumPedidos !== null}
-        onClose={() => setDispatchNoticeNumPedidos(null)}
+        orders={dispatchNoticeOrders ?? []}
+        open={dispatchNoticeOrders !== null}
+        onClose={() => setDispatchNoticeOrders(null)}
       />
     </div>
   )

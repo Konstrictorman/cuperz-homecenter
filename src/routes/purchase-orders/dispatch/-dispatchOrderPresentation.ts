@@ -3,61 +3,70 @@
 
 import type { StatusBadgeTone } from '#/components/statusBadge/StatusBadge'
 import type {
-  PurchaseOrderDispatchQuery,
-  PurchaseOrderDispatchStatus,
-  PurchaseOrderDispatchSummary,
+  DispatchPreviewOrder,
+  DispatchPreviewStatus,
+  DispatchPreviewsByDateQuery,
 } from '#/api/types'
 import type { DispatchOrdersFilterValues } from './-DispatchOrdersFilterBar'
 import type { DispatchOrder } from './-DispatchOrdersTable'
 
 /** API dispatch status → badge tone + Spanish label. */
 export const DISPATCH_ORDER_STATUS_UI: Record<
-  PurchaseOrderDispatchStatus,
+  DispatchPreviewStatus,
   { tone: StatusBadgeTone; label: string }
 > = {
-  PENDIENTE: { tone: 'pending', label: 'Pendiente' },
-  DESPACHADA: { tone: 'dispatched', label: 'Despachada' },
-  CON_ERROR: { tone: 'error', label: 'Error' },
+  NODESPACHADO: { tone: 'pending', label: 'Pendiente' },
+  DESPACHADO: { tone: 'dispatched', label: 'Despachada' },
 }
 
 /** Filter bar uses badge tones; the API query wants the enum. */
 const TONE_TO_DISPATCH_ORDER_STATUS: Record<
   Exclude<DispatchOrdersFilterValues['estado'], 'all'>,
-  PurchaseOrderDispatchStatus
+  DispatchPreviewStatus
 > = {
-  pending: 'PENDIENTE',
-  dispatched: 'DESPACHADA',
-  error: 'CON_ERROR',
+  pending: 'NODESPACHADO',
+  dispatched: 'DESPACHADO',
 }
 
-/** API list row → the shape `DispatchOrdersTable` renders. */
-export function toDispatchOrderRow(
-  o: PurchaseOrderDispatchSummary,
-): DispatchOrder {
-  const ui = DISPATCH_ORDER_STATUS_UI[o.estado]
+/** The response doesn't echo `estado` per order; the backend's own
+ *  `DESPACHADO`/`NODESPACHADO` filter is assumed to key off whether a real
+ *  dispatch date has been recorded, so the row status is derived the same
+ *  way. */
+const dispatchStatusOf = (o: DispatchPreviewOrder): DispatchPreviewStatus =>
+  o.fechaRealDespacho ? 'DESPACHADO' : 'NODESPACHADO'
+
+/** API order → the shape `DispatchOrdersTable` renders. */
+export function toDispatchOrderRow(o: DispatchPreviewOrder): DispatchOrder {
+  const ui = DISPATCH_ORDER_STATUS_UI[dispatchStatusOf(o)]
   return {
-    id: o.numPedido,
+    id: o.ordenCompra,
     ordenCompra: o.ordenCompra,
-    numPedido: o.numPedido,
     eanPuntoEntrega: o.eanPuntoEntrega,
-    fechaDespacho: o.fechaDespacho ?? '',
+    fechaRealDespacho: o.fechaRealDespacho ?? '',
+    cantidadTiendas: o.tiendas.length,
+    cantidadContenedores: o.tiendas.reduce(
+      (sum, tienda) => sum + tienda.contenedores.length,
+      0,
+    ),
     estadoTone: ui.tone,
     estadoLabel: ui.label,
+    source: o,
   }
 }
 
-/** Filter-bar values → API query params (`undefined` means "don't filter"). */
+/** Filter-bar values → API query params (`undefined` means "don't filter").
+ *  The backend only accepts the date range as a pair — the filter bar
+ *  enforces that before submitting. */
 export function toDispatchOrdersQuery(
   filters: DispatchOrdersFilterValues,
-): PurchaseOrderDispatchQuery {
+): DispatchPreviewsByDateQuery {
+  const hasRange = Boolean(filters.fechaDesde && filters.fechaHasta)
   return {
-    ordenCompra: filters.ordenCompra.trim() || undefined,
-    numPedido: filters.numPedido.trim() || undefined,
     estado:
       filters.estado === 'all'
         ? undefined
         : TONE_TO_DISPATCH_ORDER_STATUS[filters.estado],
-    fechaDespachoDesde: filters.fechaDesde || undefined,
-    fechaDespachoHasta: filters.fechaHasta || undefined,
+    fechaDesde: hasRange ? filters.fechaDesde : undefined,
+    fechaHasta: hasRange ? filters.fechaHasta : undefined,
   }
 }
