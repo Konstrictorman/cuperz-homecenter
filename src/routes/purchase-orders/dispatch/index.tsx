@@ -30,8 +30,7 @@ const DispatchOrdersPage = () => {
 
   const [selectedOrder, setSelectedOrder] = useState<DispatchOrder | null>(null)
 
-  // `null` closed; otherwise the orders whose payload is being previewed —
-  // one for the row action, several for the bulk one.
+  // `null` closed; otherwise the orders whose payload is being previewed.
   const [dispatchNoticeOrders, setDispatchNoticeOrders] = useState<
     DispatchOrder[] | null
   >(null)
@@ -79,9 +78,7 @@ const DispatchOrdersPage = () => {
           onPaginationModelChange={setPaginationModel}
           onViewDetail={setSelectedOrder}
           onGenerateDispatchNotice={handleGenerateDispatchNotice}
-          onGenerateDispatchNoticeBulk={setDispatchNoticeOrders}
           onGenerateBarCode={handleGenerateBarCode}
-          detailOpen={selectedOrder !== null || dispatchNoticeOrders !== null}
         />
       )}
 
