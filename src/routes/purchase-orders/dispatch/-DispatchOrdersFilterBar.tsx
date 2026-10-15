@@ -98,7 +98,7 @@ const DispatchOrdersFilterBar = ({
       >
         {(field) => (
           <TextField
-            label="Fecha desde"
+            label="Fecha despacho desde"
             type="date"
             size="small"
             className="filter-bar__field filter-bar__field--narrow"
@@ -121,7 +121,7 @@ const DispatchOrdersFilterBar = ({
       >
         {(field) => (
           <TextField
-            label="Fecha hasta"
+            label="Fecha despacho hasta"
             type="date"
             size="small"
             className="filter-bar__field filter-bar__field--narrow"
