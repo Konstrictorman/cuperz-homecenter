@@ -48,7 +48,13 @@ export type IsoDateTime = string
 // ===========================================================================
 
 export type OrderStatus =
-  'PENDIENTE' | 'DESPACHADA' | 'CON_ERROR' | 'PROCESANDO'
+  | 'PENDIENTE'
+  | 'DESPACHADA'
+  | 'CON_ERROR'
+  | 'PROCESANDO'
+  | 'CANCELADA'
+  | 'ALISTADO'
+  | 'RECIBIDO'
 
 export type OrderLineStatus =
   'PENDIENTE' | 'DESPACHADA' | 'PARCIAL' | 'CANCELADA' | 'SUPERA_SOLICITADO'

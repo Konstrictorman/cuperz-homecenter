@@ -19,7 +19,10 @@ export const ORDER_STATUS_UI: Record<
   PENDIENTE: { tone: 'pending', label: 'Pendiente' },
   DESPACHADA: { tone: 'dispatched', label: 'Despachada' },
   CON_ERROR: { tone: 'error', label: 'Error' },
+  CANCELADA: { tone: 'cancelled', label: 'Cancelada' },
   PROCESANDO: { tone: 'processing', label: 'Procesando' },
+  ALISTADO: { tone: 'partial', label: 'Alistado' },
+  RECIBIDO: { tone: 'processing', label: 'Recibido' },
 }
 
 /** API line status → badge tone + Spanish label. */

@@ -15,7 +15,6 @@ import { Route as PurchaseOrdersIndexRouteImport } from './routes/purchase-order
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as PurchaseOrdersDetailsIndexRouteImport } from './routes/purchase-orders/details/index'
 import { Route as PurchaseOrdersDispatchIndexRouteImport } from './routes/purchase-orders/dispatch/index'
-import { Route as PurchaseOrdersReceiptNoticesIndexRouteImport } from './routes/purchase-orders/receipt-notices/index'
 import { Route as ApiPurchaseOrdersOrdenCompraPdfRouteImport } from './routes/api/purchase-orders/$ordenCompra/pdf'
 
 const IndexRoute = IndexRouteImport.update({
@@ -50,12 +49,6 @@ const PurchaseOrdersDispatchIndexRoute =
     path: '/dispatch/',
     getParentRoute: () => PurchaseOrdersRouteRoute,
   } as any)
-const PurchaseOrdersReceiptNoticesIndexRoute =
-  PurchaseOrdersReceiptNoticesIndexRouteImport.update({
-    id: '/receipt-notices/',
-    path: '/receipt-notices/',
-    getParentRoute: () => PurchaseOrdersRouteRoute,
-  } as any)
 const ApiPurchaseOrdersOrdenCompraPdfRoute =
   ApiPurchaseOrdersOrdenCompraPdfRouteImport.update({
     id: '/api/purchase-orders/$ordenCompra/pdf',
@@ -70,7 +63,6 @@ export interface FileRoutesByFullPath {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/purchase-orders/details/': typeof PurchaseOrdersDetailsIndexRoute
   '/purchase-orders/dispatch/': typeof PurchaseOrdersDispatchIndexRoute
-  '/purchase-orders/receipt-notices/': typeof PurchaseOrdersReceiptNoticesIndexRoute
   '/api/purchase-orders/$ordenCompra/pdf': typeof ApiPurchaseOrdersOrdenCompraPdfRoute
 }
 export interface FileRoutesByTo {
@@ -79,7 +71,6 @@ export interface FileRoutesByTo {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/purchase-orders/details': typeof PurchaseOrdersDetailsIndexRoute
   '/purchase-orders/dispatch': typeof PurchaseOrdersDispatchIndexRoute
-  '/purchase-orders/receipt-notices': typeof PurchaseOrdersReceiptNoticesIndexRoute
   '/api/purchase-orders/$ordenCompra/pdf': typeof ApiPurchaseOrdersOrdenCompraPdfRoute
 }
 export interface FileRoutesById {
@@ -90,7 +81,6 @@ export interface FileRoutesById {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/purchase-orders/details/': typeof PurchaseOrdersDetailsIndexRoute
   '/purchase-orders/dispatch/': typeof PurchaseOrdersDispatchIndexRoute
-  '/purchase-orders/receipt-notices/': typeof PurchaseOrdersReceiptNoticesIndexRoute
   '/api/purchase-orders/$ordenCompra/pdf': typeof ApiPurchaseOrdersOrdenCompraPdfRoute
 }
 export interface FileRouteTypes {
@@ -102,7 +92,6 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/purchase-orders/details/'
     | '/purchase-orders/dispatch/'
-    | '/purchase-orders/receipt-notices/'
     | '/api/purchase-orders/$ordenCompra/pdf'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -111,7 +100,6 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/purchase-orders/details'
     | '/purchase-orders/dispatch'
-    | '/purchase-orders/receipt-notices'
     | '/api/purchase-orders/$ordenCompra/pdf'
   id:
     | '__root__'
@@ -121,7 +109,6 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/purchase-orders/details/'
     | '/purchase-orders/dispatch/'
-    | '/purchase-orders/receipt-notices/'
     | '/api/purchase-orders/$ordenCompra/pdf'
   fileRoutesById: FileRoutesById
 }
@@ -176,13 +163,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PurchaseOrdersDispatchIndexRouteImport
       parentRoute: typeof PurchaseOrdersRouteRoute
     }
-    '/purchase-orders/receipt-notices/': {
-      id: '/purchase-orders/receipt-notices/'
-      path: '/receipt-notices'
-      fullPath: '/purchase-orders/receipt-notices/'
-      preLoaderRoute: typeof PurchaseOrdersReceiptNoticesIndexRouteImport
-      parentRoute: typeof PurchaseOrdersRouteRoute
-    }
     '/api/purchase-orders/$ordenCompra/pdf': {
       id: '/api/purchase-orders/$ordenCompra/pdf'
       path: '/api/purchase-orders/$ordenCompra/pdf'
@@ -197,15 +177,12 @@ interface PurchaseOrdersRouteRouteChildren {
   PurchaseOrdersIndexRoute: typeof PurchaseOrdersIndexRoute
   PurchaseOrdersDetailsIndexRoute: typeof PurchaseOrdersDetailsIndexRoute
   PurchaseOrdersDispatchIndexRoute: typeof PurchaseOrdersDispatchIndexRoute
-  PurchaseOrdersReceiptNoticesIndexRoute: typeof PurchaseOrdersReceiptNoticesIndexRoute
 }
 
 const PurchaseOrdersRouteRouteChildren: PurchaseOrdersRouteRouteChildren = {
   PurchaseOrdersIndexRoute: PurchaseOrdersIndexRoute,
   PurchaseOrdersDetailsIndexRoute: PurchaseOrdersDetailsIndexRoute,
   PurchaseOrdersDispatchIndexRoute: PurchaseOrdersDispatchIndexRoute,
-  PurchaseOrdersReceiptNoticesIndexRoute:
-    PurchaseOrdersReceiptNoticesIndexRoute,
 }
 
 const PurchaseOrdersRouteRouteWithChildren =
