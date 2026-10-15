@@ -79,7 +79,9 @@ describe('purchase orders', () => {
   it('exports CSV', async () => {
     const res = await fetch(`${BASE}/ordenes-compra/export`)
     expect(res.headers.get('content-type')).toContain('text/csv')
-    expect(await res.text()).toContain('ordenCompra;eanPuntoEntrega')
+    expect(await res.text()).toContain(
+      'Numero de la Orden de Compra;EAN Entidad a Facturar',
+    )
   })
 })
 

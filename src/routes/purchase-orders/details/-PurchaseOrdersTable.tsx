@@ -11,7 +11,10 @@ import DataTable from '#/components/dataTable/DataTable'
 import type { StatusBadgeTone } from '#/components/statusBadge/StatusBadge'
 import ToolBar from '#/components/toolBar/ToolBar'
 import { usePurchaseOrdersColumns } from './-usePurchaseOrdersColumns'
-import { downloadPurchaseOrderPdf } from '#/api/purchase-orders'
+import {
+  downloadPurchaseOrderPdf,
+  downloadPurchaseOrdersCsv,
+} from '#/api/purchase-orders'
 
 export interface PurchaseOrder {
   id: string
@@ -67,6 +70,7 @@ const PurchaseOrdersTable = ({
     null,
   )
   const [downloadError, setDownloadError] = useState<string | null>(null)
+  const [exportingSelection, setExportingSelection] = useState(false)
 
   const handleDownloadPdf = async (order: PurchaseOrder) => {
     setDownloadingOrderId(order.id)
@@ -86,7 +90,13 @@ const PurchaseOrdersTable = ({
   const handleDownloadCsv = async (order: PurchaseOrder) => {
     setDownloadingOrderId(order.id)
     try {
-      console.log(`Descargando CSV de la orden ${order.ordenCompra}`)
+      await downloadPurchaseOrdersCsv([order.ordenCompra])
+    } catch (error) {
+      setDownloadError(
+        error instanceof Error
+          ? error.message
+          : `No se pudo exportar el CSV de la orden ${order.ordenCompra}.`,
+      )
     } finally {
       setDownloadingOrderId(null)
     }
@@ -102,6 +112,33 @@ const PurchaseOrdersTable = ({
   const selected = selectionCount(selection, rows.length)
 
   const clearSelection = () => setSelection(EMPTY_SELECTION)
+
+  // `rows` only ever holds the current page, so a `type: 'exclude'`
+  // selection (from "Seleccionar todos") resolves to every row on the page,
+  // not every row across the whole filtered result set.
+  const selectedOrdenCompras =
+    selection.type === 'include'
+      ? rows
+          .filter((row) => selection.ids.has(row.id))
+          .map((row) => row.ordenCompra)
+      : rows
+          .filter((row) => !selection.ids.has(row.id))
+          .map((row) => row.ordenCompra)
+
+  const handleExportSelected = async () => {
+    setExportingSelection(true)
+    try {
+      await downloadPurchaseOrdersCsv(selectedOrdenCompras)
+    } catch (error) {
+      setDownloadError(
+        error instanceof Error
+          ? error.message
+          : 'No se pudieron exportar las órdenes seleccionadas.',
+      )
+    } finally {
+      setExportingSelection(false)
+    }
+  }
 
   // Opening the detail modal shouldn't leave the selection toolbar floating
   // behind it — drop the selection so both disappear together.
@@ -144,9 +181,10 @@ const PurchaseOrdersTable = ({
         actions={[
           {
             key: 'export',
-            label: 'Exportar',
+            label: 'Exportar CSV',
             icon: <DownloadIcon fontSize="small" />,
-            onClick: () => console.log('Exportar', selection),
+            onClick: handleExportSelected,
+            disabled: exportingSelection,
           },
           {
             key: 'download',

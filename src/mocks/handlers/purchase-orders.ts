@@ -11,6 +11,7 @@ import {
   paginate,
 } from '../data/db'
 import type { PurchaseOrderRecord } from '../data/db'
+import { formatDate } from '#/common/util'
 import type {
   PurchaseOrderDetail,
   PurchaseOrderDetailCabecera,
@@ -180,8 +181,70 @@ function filterPurchaseOrders(url: URL): Array<PurchaseOrderRecord> {
     .sort((a, b) => b.fechaTransmision.localeCompare(a.fechaTransmision))
 }
 
-const CSV_HEADER =
-  'ordenCompra;eanPuntoEntrega;cliente;ciudadEntrega;cantidadTotOc;estado;fechaTransmision'
+// § 1.5 — matches the real `GET /ordenes-compra/export` response (sampled
+// 2026-10-14): one row per product/store line, not per order. Several
+// columns have no corresponding field anywhere in this platform's contract
+// (billing-entity EAN/name, PLU, supplier item code, unit prices, IVA %) —
+// left blank, same as every sampled real row, rather than guessing a mapping.
+const CSV_HEADER = [
+  'Numero de la Orden de Compra',
+  'EAN Entidad a Facturar',
+  'Nombre Entidad a Facturar',
+  'EAN Lugar Entrega Factura',
+  'Nombre Lugar Entrega Factura',
+  'F. Documento O/C',
+  'F. Minima Entrega',
+  'F. Maxima Entrega',
+  'F. Solicitada de Entrega',
+  'EAN del Item',
+  'PLU / SKU',
+  'Codigo Item Proveedor',
+  'Descripcion del Item',
+  'EAN Lugar Entrega Items',
+  'Nombre Lugar Entrega Items',
+  'Cantidad Total',
+  'EAN Punto de Venta',
+  'Nombre Punto de Venta',
+  'Cantidad Pto Vta',
+  'Precio Bruto',
+  'Precio Neto',
+  '% IVA',
+].join(';')
+
+/** One CSV line per product/store line of one order, in `CSV_HEADER` order.
+ *  `Cantidad Total`/`Cantidad Pto Vta` both carry the store's own quantity —
+ *  every sampled real row repeats the same value in both columns rather
+ *  than a true cross-store total, so this mirrors that instead of summing. */
+function toExportLines(order: PurchaseOrderRecord): Array<string> {
+  return order.productos.flatMap((producto) =>
+    producto.tiendas.map((tienda) =>
+      [
+        order.ordenCompra,
+        '',
+        '',
+        order.eanPuntoEntrega,
+        '',
+        formatDate(order.fechaTransmision),
+        formatDate(order.fechaMinEntrega ?? undefined),
+        formatDate(order.fechaMaxEntrega ?? undefined),
+        '',
+        producto.eanSku,
+        '',
+        '',
+        producto.descripcion,
+        order.eanPuntoEntrega,
+        '',
+        tienda.cantidad,
+        tienda.eanTienda,
+        tienda.nombreTienda,
+        tienda.cantidad,
+        '',
+        '',
+        '',
+      ].join(';'),
+    ),
+  )
+}
 
 export const purchaseOrdersHandlers = [
   // § 1.1
@@ -197,21 +260,8 @@ export const purchaseOrdersHandlers = [
   http.get(`${API}/ordenes-compra/export`, async ({ request }) => {
     await latency()
     const url = new URL(request.url)
-    const rows = filterPurchaseOrders(url).map(toSummary)
-    const body = [
-      CSV_HEADER,
-      ...rows.map((r) =>
-        [
-          r.ordenCompra,
-          r.eanPuntoEntrega,
-          r.cliente,
-          r.ciudadEntrega,
-          r.cantidadTotOc,
-          r.estado,
-          r.fechaTransmision,
-        ].join(';'),
-      ),
-    ].join('\n')
+    const orders = filterPurchaseOrders(url)
+    const body = [CSV_HEADER, ...orders.flatMap(toExportLines)].join('\n')
     return new HttpResponse(body, {
       status: 200,
       headers: {

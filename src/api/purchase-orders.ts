@@ -5,6 +5,7 @@ import {
   useMutation,
   useQueryClient,
 } from '@tanstack/react-query'
+import JSZip from 'jszip'
 import { mocksEnabled } from '#/mocks/enable'
 import { apiFetch, buildQuery } from './http'
 import { queryKeys } from './query-keys'
@@ -90,6 +91,50 @@ export function fetchPurchaseOrdersExport(
   return apiFetch<string>(`/ordenes-compra/export${buildQuery({ ...query })}`)
 }
 
+function triggerDownload(blob: Blob, filename: string): void {
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = filename
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+  URL.revokeObjectURL(url)
+}
+
+/**
+ * Triggers a browser download of the purchase-order export CSV for one or
+ * more orders. The endpoint only accepts a single `ordenCompra` per request
+ * (§ 1.5), so exporting several orders issues one request per order; each
+ * order's CSV is kept as its own file, bundled into a single zip when more
+ * than one order is exported.
+ */
+export async function downloadPurchaseOrdersCsv(
+  ordenCompras: Array<string>,
+): Promise<void> {
+  const responses = await Promise.all(
+    ordenCompras.map((ordenCompra) =>
+      fetchPurchaseOrdersExport({ ordenCompra }),
+    ),
+  )
+
+  if (ordenCompras.length === 1) {
+    triggerDownload(
+      new Blob([responses[0]], { type: 'text/csv;charset=utf-8' }),
+      `orden-${ordenCompras[0]}.csv`,
+    )
+    return
+  }
+
+  const zip = new JSZip()
+  ordenCompras.forEach((ordenCompra, index) => {
+    zip.file(`orden-${ordenCompra}.csv`, responses[index])
+  })
+  const zipBlob = await zip.generateAsync({ type: 'blob' })
+
+  triggerDownload(zipBlob, 'ordenes-compra.zip')
+}
+
 /**
  * Hits our own real server route — `/api/purchase-orders/{ordenCompra}/pdf`
  * — which proxies Homecenter's `GenerarPdf` endpoint directly. This is the
@@ -140,12 +185,5 @@ export async function downloadPurchaseOrderPdf(
     ? await fetchPdfViaHomecenterProxy(ordenCompra)
     : await fetchPdfViaBackend(ordenCompra)
 
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.href = url
-  link.download = `orden-${ordenCompra}.pdf`
-  document.body.appendChild(link)
-  link.click()
-  link.remove()
-  URL.revokeObjectURL(url)
+  triggerDownload(blob, `orden-${ordenCompra}.pdf`)
 }
