@@ -10,7 +10,7 @@ import './GenerateLabelsModal.css'
 // `YYYY-MM-DD` strings compare correctly as plain strings.
 const validateFechaRealDespacho = (value: string) => {
   if (!value) return 'Ingrese la fecha real de despacho'
-  if (value > todayIsoDate()) return 'La fecha no puede ser posterior a hoy'
+  if (value < todayIsoDate()) return 'La fecha no puede ser anterior a hoy'
   return undefined
 }
 
@@ -29,9 +29,13 @@ const GenerateDispatchNoticeModal = ({
   onSubmit,
 }: GenerateDispatchNoticeModalProps) => {
   const form = useForm({
-    // An order already dispatched keeps its date; otherwise default to today.
+    // An order that already has a date keeps it unless it is now in the past
+    // (which would fail validation); otherwise default to today.
     defaultValues: {
-      fechaRealDespacho: order?.fechaRealDespacho || todayIsoDate(),
+      fechaRealDespacho:
+        order?.fechaRealDespacho && order.fechaRealDespacho >= todayIsoDate()
+          ? order.fechaRealDespacho
+          : todayIsoDate(),
     },
     onSubmit: ({ value }) => {
       if (!order) return
@@ -78,7 +82,7 @@ const GenerateDispatchNoticeModal = ({
               fullWidth
               slotProps={{
                 inputLabel: { shrink: true },
-                htmlInput: { max: todayIsoDate() },
+                htmlInput: { min: todayIsoDate() },
               }}
               error={field.state.meta.errors.length > 0}
               helperText={field.state.meta.errors[0]}

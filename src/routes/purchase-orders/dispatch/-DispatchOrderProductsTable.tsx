@@ -35,7 +35,7 @@ const aggregationFunctions: Record<string, AggregationFunction> = {
  *  every `groupBy` field (`eanTienda`, `contenedor`) repeated on each row. */
 export interface DispatchOrderProductRow {
   id: string
-  eanTienda: string
+  nombreTienda: string
   contenedor: string
   eanSku: string
   cantidad: number
@@ -60,9 +60,11 @@ const DispatchOrderProductsTable = ({
   const rows: Array<DispatchOrderProductRow> = tiendas.flatMap((tienda) =>
     tienda.contenedores.flatMap((contenedor) =>
       contenedor.productos.map((producto) => ({
-        id: `${tienda.eanTienda}-${contenedor.contenedor}-${producto.eanSku}`,
-        eanTienda:
-          tienda.eanTienda === MISSING_STORE ? 'Sin tienda' : tienda.eanTienda,
+        id: `${tienda.nombreTienda}-${contenedor.contenedor}-${producto.eanSku}`,
+        nombreTienda:
+          tienda.nombreTienda === MISSING_STORE
+            ? 'Sin tienda'
+            : tienda.nombreTienda,
         contenedor: contenedor.contenedor,
         eanSku: producto.eanSku,
         // API sends decimal strings (`"6.000"`); the grid sums numbers.
@@ -75,7 +77,7 @@ const DispatchOrderProductsTable = ({
 
   return (
     <GroupedDataTable
-      groupBy={['eanTienda', 'contenedor']}
+      groupBy={['nombreTienda', 'contenedor']}
       aggregations={[
         { field: 'cantidad', fn: 'sum' },
         { field: 'peso', fn: 'sum' },
