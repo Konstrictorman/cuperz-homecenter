@@ -10,6 +10,16 @@
   justify-content: center;
 }
 
+.purchase-orders__error {
+  margin: 0;
+  padding: var(--space-md);
+  border-radius: var(--radius-sm, 6px);
+  background-color: var(--status-error-50);
+  color: var(--status-error-500);
+  border: 1px solid var(--status-error-300);
+  font-weight: var(--font-weight-medium) !important;
+}
+
 @container (min-width: 28rem) {
   .dashboard__grid {
     flex-direction: row;

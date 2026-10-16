@@ -1,7 +1,10 @@
 import { useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
-import Typography from '@mui/material/Typography'
+import {
+  keepPreviousData,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query'
 import type { GridPaginationModel } from '@mui/x-data-grid'
 import DispatchOrdersFilterBar, {
   DEFAULT_DISPATCH_ORDERS_FILTER_VALUES,
@@ -21,10 +24,11 @@ import {
   useSendDispatchNotice,
 } from '#/api/dispatch-notices'
 import { downloadPurchaseOrderLabels } from '#/api/purchase-orders'
-import { userFacingErrorMessage } from '#/api/http'
+import { queryKeys } from '#/api/query-keys'
 import { useFeedback } from '#/contexts/FeedbackContext'
 import { toDispatchNoticePayload } from './-dispatchNoticePayload'
 import '../PurchaseOrdersPage.css'
+import ErrorComponent from '#/components/errorComponent/ErrorComponent'
 
 const DispatchOrdersPage = () => {
   const [filters, setFilters] = useState<DispatchOrdersFilterValues>(
@@ -45,6 +49,8 @@ const DispatchOrdersPage = () => {
   const [noticeOrder, setNoticeOrder] = useState<DispatchOrder | null>(null)
 
   const feedback = useFeedback()
+
+  const queryClient = useQueryClient()
 
   const sendDispatchNotice = useSendDispatchNotice()
 
@@ -121,13 +127,17 @@ const DispatchOrdersPage = () => {
       <DispatchOrdersFilterBar onFilter={handleFilter} />
 
       {isError ? (
-        <Typography role="alert" className="purchase-orders__error">
-          No se pudieron cargar las órdenes:{' '}
-          {userFacingErrorMessage(
-            error,
-            'el servidor no respondió correctamente. Intenta de nuevo más tarde.',
-          )}
-        </Typography>
+        <ErrorComponent
+          error={error}
+          // Back to the first-load state (error cleared, table loading) and
+          // refetched with the current filters and page.
+          reset={() =>
+            void queryClient.resetQueries({
+              queryKey: queryKeys.dispatchNotices.all(),
+            })
+          }
+          fallbackMessage="El servidor no respondió correctamente. Intenta de nuevo más tarde."
+        />
       ) : (
         <DispatchOrdersTable
           rows={rows}

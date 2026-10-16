@@ -3,17 +3,31 @@ import type { ErrorComponentProps } from '@tanstack/react-router'
 import Typography from '@mui/material/Typography'
 import Button from '#/components/button/Button'
 import './ErrorComponent.css'
+import unplugged from '../../assets/Unplugged.png'
+import { userFacingErrorMessage } from '#/api/http'
 
-const ErrorComponent = ({ error, info, reset }: ErrorComponentProps) => {
+const ErrorComponent = ({
+  error,
+  info,
+  reset,
+  fallbackMessage,
+}: ErrorComponentProps) => {
   const navigate = useNavigate()
 
   return (
     <div className="error-component" role="alert">
       <Typography variant="h5" component="h1">
-        Ocurrió un error
+        ¡¡ Ocurrió un error !!
       </Typography>
+      <img
+        src={unplugged}
+        alt="Enchufe desconectado"
+        className="error-component__image"
+      />
       <Typography color="text.secondary">
-        {error.message || 'Algo salió mal al cargar esta página.'}
+        {fallbackMessage
+          ? userFacingErrorMessage(error, fallbackMessage)
+          : error.message || 'Algo salió mal al cargar esta página.'}
       </Typography>
       <div className="error-component__actions">
         <Button color="error" onClick={reset} variant="contained">
