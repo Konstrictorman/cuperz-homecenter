@@ -2,11 +2,16 @@
 // on `GroupedDataTable` (see its own doc comment: a `['tienda', 'contenedor']`
 // `groupBy` is its literal worked example for this exact tree shape).
 
+import { useCallback, useMemo } from 'react'
 import Box from '@mui/material/Box'
+import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import type { DispatchPreviewStore } from '#/api/types'
 import GroupedDataTable from '#/components/groupedDataTable/GroupedDataTable'
-import type { AggregationFunction } from '#/components/groupedDataTable/GroupedDataTable'
+import type {
+  AggregationFunction,
+  GroupRow,
+} from '#/components/groupedDataTable/GroupedDataTable'
 import { useDispatchOrderProductsColumns } from './-useDispatchOrderProductsColumns'
 import './DispatchOrderProductsTable.css'
 
@@ -17,6 +22,9 @@ interface DispatchOrderProductsTableProps {
 
 /** The backend sends a stringified Python `None` for an unknown store. */
 const MISSING_STORE = 'None'
+
+const storeName = (tienda: DispatchPreviewStore) =>
+  tienda.nombreTienda === MISSING_STORE ? 'Sin tienda' : tienda.nombreTienda
 
 /** Overrides the built-in `sum` so `peso`/`volumen` subtotals and grand
  *  totals round to 2 decimals instead of showing raw binary-float noise
@@ -36,6 +44,7 @@ const aggregationFunctions: Record<string, AggregationFunction> = {
 export interface DispatchOrderProductRow {
   id: string
   nombreTienda: string
+  eanTienda: string
   contenedor: string
   eanSku: string
   description: string
@@ -50,6 +59,30 @@ const DispatchOrderProductsTable = ({
 }: DispatchOrderProductsTableProps) => {
   const columns = useDispatchOrderProductsColumns()
 
+  const eanByStoreName = useMemo(
+    () =>
+      new Map(tiendas.map((tienda) => [storeName(tienda), tienda.eanTienda])),
+    [tiendas],
+  )
+
+  // Store group rows only carry the name; the EAN goes in the tooltip.
+  const renderGroupLabel = useCallback(
+    (group: GroupRow, label: string) => {
+      const eanTienda =
+        group.field === 'nombreTienda'
+          ? eanByStoreName.get(group.groupValue)
+          : undefined
+      return eanTienda ? (
+        <Tooltip title={`EAN tienda: ${eanTienda}`} placement="top-end" arrow>
+          <span>{label}</span>
+        </Tooltip>
+      ) : (
+        label
+      )
+    },
+    [eanByStoreName],
+  )
+
   if (tiendas.length === 0) {
     return (
       <Box className="dispatch-order-products-table__status">
@@ -62,10 +95,8 @@ const DispatchOrderProductsTable = ({
     tienda.contenedores.flatMap((contenedor) =>
       contenedor.productos.map((producto) => ({
         id: `${tienda.nombreTienda}-${contenedor.contenedor}-${producto.eanSku}`,
-        nombreTienda:
-          tienda.nombreTienda === MISSING_STORE
-            ? 'Sin tienda'
-            : tienda.nombreTienda,
+        nombreTienda: storeName(tienda),
+        eanTienda: tienda.eanTienda,
         contenedor: contenedor.contenedor,
         eanSku: producto.eanSku,
         description: producto.description,
@@ -89,6 +120,7 @@ const DispatchOrderProductsTable = ({
       columns={columns}
       aggregationFunctions={aggregationFunctions}
       exportFileName={`Detalle despacho ${ordenCompra}`}
+      renderGroupLabel={renderGroupLabel}
       tableTitle={`Detalle de productos por tienda y contenedor — Orden ${ordenCompra}`}
     />
   )

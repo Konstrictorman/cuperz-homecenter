@@ -309,6 +309,11 @@ export type GroupedDataTableProps<TRow extends GridValidRowModel> =
      *  sites keep their current (if accidental) heading unchanged.
      *  @default exportFileName */
     tableTitle?: string
+    /** Wraps a group row's label (`"<groupValue> (<count>)"`, next to its
+     *  expand/collapse chevron) — e.g. in a `Tooltip` carrying data the
+     *  group value alone doesn't show. The chevron itself stays outside it.
+     *  @default (group, label) => label */
+    renderGroupLabel?: (group: GroupRow, label: string) => ReactNode
   }
 
 /** Built-in aggregation functions, keyed by the `AggregationFn` names
@@ -931,6 +936,7 @@ function toGroupAwareColumn<TRow extends GridValidRowModel>(
   aggregatedFields: ReadonlySet<string>,
   collapsedPaths: ReadonlySet<string>,
   onToggleGroup: (key: string) => void,
+  renderGroupLabel?: (group: GroupRow, label: string) => ReactNode,
 ): GridColDef<GroupedRow<TRow>> {
   const original = column as unknown as GridColDef<GroupedRow<TRow>>
   const isGroupedField = groupByFields.includes(column.field)
@@ -1002,6 +1008,7 @@ function toGroupAwareColumn<TRow extends GridValidRowModel>(
         if (isGroupedField && column.field === group.field) {
           const key = pathKeyOf(group.path)
           const collapsed = collapsedPaths.has(key)
+          const label = `${group.groupValue} (${group.count})`
           return (
             <span
               className="grouped-data-table__group-cell"
@@ -1019,7 +1026,7 @@ function toGroupAwareColumn<TRow extends GridValidRowModel>(
                   <KeyboardArrowDownIcon fontSize="small" />
                 )}
               </IconButton>
-              {`${group.groupValue} (${group.count})`}
+              {renderGroupLabel ? renderGroupLabel(group, label) : label}
             </span>
           )
         }
@@ -2087,6 +2094,7 @@ const GroupedDataTable = <TRow extends GridValidRowModel>({
   onColumnOrderModelChange: onColumnOrderChangeProp,
   exportFileName = 'datos',
   tableTitle,
+  renderGroupLabel,
   // Bumped only while at least one column is actually aggregated (see
   // `columnHeaderHeight` below) — the extra few pixels a second header line
   // (the active-function label, `GroupedDataTableAggregationHeader`) needs
@@ -2682,6 +2690,7 @@ const GroupedDataTable = <TRow extends GridValidRowModel>({
                 aggregatedFields,
                 collapsedPaths,
                 toggleGroup,
+                renderGroupLabel,
               ),
               activeFilterFields.has(column.field),
             ),
@@ -2700,6 +2709,7 @@ const GroupedDataTable = <TRow extends GridValidRowModel>({
       aggregatedFields,
       collapsedPaths,
       toggleGroup,
+      renderGroupLabel,
       activeFilterFields,
       aggregationFnByField,
       draggedColumnField,

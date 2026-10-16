@@ -3,12 +3,15 @@
 // this is a plain MUI `Table` with a `Collapse`d nested table per store,
 // following MUI's own collapsible-table pattern instead of `DataTable`.
 
+import { useCallback, useMemo } from 'react'
 import Box from '@mui/material/Box'
 import CircularProgress from '@mui/material/CircularProgress'
+import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import type { PurchaseOrderStore } from '#/api/types'
 import './PurchaseOrderStoresTable.css'
 import GroupedDataTable from '#/components/groupedDataTable/GroupedDataTable'
+import type { GroupRow } from '#/components/groupedDataTable/GroupedDataTable'
 import { usePurchaseOrderStoresColumns } from './-usePurchaseOrderStoresColumns'
 
 interface PurchaseOrderStoresTableProps {
@@ -26,7 +29,9 @@ interface PurchaseOrderStoresTableProps {
 export interface PurchaseOrderStoreProductRow {
   id: string
   tienda: string
+  eanTienda: string
   descripcion: string
+  eanProducto: string
   cantidad: number
   valorLinea: number
 }
@@ -37,6 +42,27 @@ const PurchaseOrderStoresTable = ({
   loading,
 }: PurchaseOrderStoresTableProps) => {
   const columns = usePurchaseOrderStoresColumns()
+
+  const eanByStoreName = useMemo(
+    () =>
+      new Map(tiendas.map((tienda) => [tienda.nombreTienda, tienda.eanTienda])),
+    [tiendas],
+  )
+
+  // Store group rows only carry the name; the EAN goes in the tooltip.
+  const renderGroupLabel = useCallback(
+    (group: GroupRow, label: string) => {
+      const eanTienda = eanByStoreName.get(group.groupValue)
+      return eanTienda ? (
+        <Tooltip title={`EAN tienda: ${eanTienda}`} placement="top-end" arrow>
+          <span>{label}</span>
+        </Tooltip>
+      ) : (
+        label
+      )
+    },
+    [eanByStoreName],
+  )
 
   if (loading) {
     return (
@@ -58,7 +84,9 @@ const PurchaseOrderStoresTable = ({
     tienda.productos.map((producto) => ({
       id: `${tienda.eanTienda}-${producto.detalleId}`,
       tienda: tienda.nombreTienda,
+      eanTienda: tienda.eanTienda,
       descripcion: producto.producto,
+      eanProducto: producto.eanProducto,
       cantidad: producto.cantidad,
       valorLinea: producto.cantidad * producto.costoSku,
     })),
@@ -73,6 +101,7 @@ const PurchaseOrderStoresTable = ({
       ]}
       rows={rows}
       columns={columns}
+      renderGroupLabel={renderGroupLabel}
       exportFileName={`Detalle orden de compra ${purchaseOrderNumber}`}
       tableTitle={`Detalle de productos por tienda — OC ${purchaseOrderNumber}`}
     />

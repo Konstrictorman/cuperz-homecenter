@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import Tooltip from '@mui/material/Tooltip'
 import type { GridColDef } from '@mui/x-data-grid'
 import type { PurchaseOrderStoreProductRow } from './-PurchaseOrderStoresTable'
 
@@ -12,6 +13,16 @@ export const usePurchaseOrderStoresColumns =
           headerName: 'Producto',
           flex: 1.5,
           minWidth: 220,
+          // The EAN lives in the tooltip instead of its own column.
+          renderCell: ({ row, value }) => (
+            <Tooltip
+              title={`SKU (EAN): ${row.eanProducto}`}
+              placement="top-end"
+              arrow
+            >
+              <span>{value}</span>
+            </Tooltip>
+          ),
         },
         {
           field: 'cantidad',
