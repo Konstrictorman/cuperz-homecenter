@@ -28,9 +28,9 @@ const DispatchOrderDetailModal = ({
       <div className="dispatch-order-detail-modal__summary">
         <div>
           <Typography className="dispatch-order-detail-modal__label">
-            Orden de compra
+            Número de pedido
           </Typography>
-          <Typography>{order.ordenCompra}</Typography>
+          <Typography>{order.numpedido || '-'}</Typography>
         </div>
         <div>
           <Typography className="dispatch-order-detail-modal__label">

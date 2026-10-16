@@ -6,6 +6,9 @@ import FilterAltIcon from '@mui/icons-material/FilterAlt'
 import FilterAltOffIcon from '@mui/icons-material/FilterAltOff'
 import { validateRangeOrder } from '../-dateRange'
 import '../FilterBar.css'
+import InputAdornment from '@mui/material/InputAdornment'
+import IconButton from '@mui/material/IconButton'
+import ClearIcon from '@mui/icons-material/Clear'
 
 /** Mirrors `DispatchPreviewStatus` (`#/api/types`) — the endpoint only
  *  distinguishes ALISTADO/DESPACHADO, unlike the richer `StatusBadgeTone`
@@ -73,20 +76,6 @@ const DispatchOrdersFilterBar = ({
         void form.handleSubmit()
       }}
     >
-      <form.Field name="numpedido">
-        {(field) => (
-          <TextField
-            label="Número de pedido"
-            placeholder="Buscar pedido"
-            size="small"
-            className="filter-bar__field"
-            value={field.state.value}
-            onChange={(event) => field.handleChange(event.target.value)}
-            onBlur={field.handleBlur}
-          />
-        )}
-      </form.Field>
-
       <form.Field name="ordenCompra">
         {(field) => (
           <TextField
@@ -97,6 +86,48 @@ const DispatchOrdersFilterBar = ({
             value={field.state.value}
             onChange={(event) => field.handleChange(event.target.value)}
             onBlur={field.handleBlur}
+            slotProps={{
+              input: {
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() => field.handleChange('')}
+                      edge="end"
+                    >
+                      {field.state.value ? <ClearIcon /> : null}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              },
+            }}
+          />
+        )}
+      </form.Field>
+
+      <form.Field name="numpedido">
+        {(field) => (
+          <TextField
+            label="Número de pedido"
+            placeholder="Buscar pedido"
+            size="small"
+            className="filter-bar__field"
+            value={field.state.value}
+            onChange={(event) => field.handleChange(event.target.value)}
+            onBlur={field.handleBlur}
+            slotProps={{
+              input: {
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() => field.handleChange('')}
+                      edge="end"
+                    >
+                      {field.state.value ? <ClearIcon /> : null}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              },
+            }}
           />
         )}
       </form.Field>

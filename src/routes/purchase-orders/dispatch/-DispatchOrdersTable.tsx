@@ -8,6 +8,7 @@ export interface DispatchOrder {
   /** == `ordenCompra` — the only per-order key the API returns. */
   id: string
   ordenCompra: string
+  numpedido: string
   eanPuntoEntrega: string
   /** `''` while not yet dispatched. */
   fechaRealDespacho: string

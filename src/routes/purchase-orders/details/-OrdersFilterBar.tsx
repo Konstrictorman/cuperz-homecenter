@@ -7,6 +7,9 @@ import FilterAltIcon from '@mui/icons-material/FilterAlt'
 import FilterAltOffIcon from '@mui/icons-material/FilterAltOff'
 import { validateRangeOrder } from '../-dateRange'
 import '../FilterBar.css'
+import InputAdornment from '@mui/material/InputAdornment'
+import IconButton from '@mui/material/IconButton'
+import ClearIcon from '@mui/icons-material/Clear'
 
 export type OrdersFilterStatus = StatusBadgeTone | 'all'
 
@@ -63,6 +66,20 @@ const OrdersFilterBar = ({ onFilter }: OrdersFilterBarProps) => {
             value={field.state.value}
             onChange={(event) => field.handleChange(event.target.value)}
             onBlur={field.handleBlur}
+            slotProps={{
+              input: {
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() => field.handleChange('')}
+                      edge="end"
+                    >
+                      {field.state.value ? <ClearIcon /> : null}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              },
+            }}
           />
         )}
       </form.Field>

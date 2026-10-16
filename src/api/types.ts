@@ -499,7 +499,7 @@ export interface DispatchPreviewStore {
    *  string `"None"` (a stringified Python `None`) when the store is unknown. */
   eanTienda: string
   /** In the Postman example; absent from the captured `por-fecha` sample. */
-  nombreTienda?: string
+  nombreTienda: string
   contenedores: Array<DispatchPreviewContainer>
 }
 
