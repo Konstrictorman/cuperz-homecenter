@@ -5,7 +5,9 @@ import {
   useMutation,
   useQueryClient,
 } from '@tanstack/react-query'
+import { todayIsoDate } from '#/common/util'
 import { apiFetch, buildQuery } from './http'
+import { updatePurchaseOrder } from './purchase-orders'
 import { queryKeys } from './query-keys'
 import type {
   DispatchNoticeDetail,
@@ -14,11 +16,13 @@ import type {
   DispatchNoticeEan128Response,
   DispatchNoticeAttemptsResponse,
   DispatchNoticesQuery,
+  DispatchPreviewStatus,
   DispatchPreviewsByDateQuery,
   DispatchPreviewsByDateResponse,
   CreateDispatchNoticeRequest,
   Paginated,
   ResendDispatchNoticeRequest,
+  SendDispatchNoticeResponse,
 } from './types'
 
 export function dispatchNoticesListQueryOptions(
@@ -131,6 +135,96 @@ export function useResendDispatchNotice(avisoId: string) {
       invalidateDispatchNotice(queryClient, avisoId)
       void queryClient.invalidateQueries({
         queryKey: queryKeys.dispatchNotices.attempts(avisoId),
+      })
+    },
+  })
+}
+
+/** `estado` of a successfully sent notice — the order it belongs to is
+ *  then `DESPACHADO` (see `SEND_STATUS_TO_DISPATCH_STATUS`). */
+export const DISPATCH_NOTICE_SENT = 'ENVIADO'
+
+/** A sent notice's `estado` → its order's `por-fecha` dispatch status. */
+export const SEND_STATUS_TO_DISPATCH_STATUS: Partial<
+  Record<string, DispatchPreviewStatus>
+> = {
+  [DISPATCH_NOTICE_SENT]: 'DESPACHADO',
+}
+
+/** `POST /api/v1/avisos-despacho/{avisoId}/enviar` — sends the notice to
+ *  Homecenter. Not in the backend spec; per the Postman collection. */
+export function sendDispatchNotice(
+  avisoId: string,
+): Promise<SendDispatchNoticeResponse> {
+  return apiFetch<SendDispatchNoticeResponse>(
+    `/avisos-despacho/${encodeURIComponent(avisoId)}/enviar`,
+    { method: 'POST' },
+  )
+}
+
+export interface SendOrderDispatchNoticeVariables {
+  ordenCompra: string
+  /** The order's dispatch date before this send — restored if it fails. */
+  previousFechaDespacho: string | null
+}
+
+/**
+ * Dispatches an order: stamps today as its real dispatch date
+ * (`PATCH /ordenes-compra/{ordenCompra}`), then sends its notice to
+ * Homecenter (`POST /avisos-despacho/{ordenCompra}/enviar` — the backend keys
+ * the notice by the order number).
+ *
+ * The backend has no single endpoint covering both, so atomicity is
+ * best-effort from here: if the send fails (HTTP error, or a `200` whose
+ * `estado` isn't `ENVIADO` — i.e. the order isn't `DESPACHADO` — or carries
+ * `homecenter.isError`), the order update is rolled back before the error is
+ * rethrown. If the rollback itself fails, the thrown error says so — the
+ * order is then left dated but without a sent notice.
+ */
+export function useSendOrderDispatchNotice() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({
+      ordenCompra,
+      previousFechaDespacho,
+    }: SendOrderDispatchNoticeVariables) => {
+      await updatePurchaseOrder(ordenCompra, {
+        estado: 'ALISTADO',
+        fechaDespacho: todayIsoDate(),
+      })
+
+      let sendError: unknown
+      try {
+        const result = await sendDispatchNotice(ordenCompra)
+        const dispatched =
+          SEND_STATUS_TO_DISPATCH_STATUS[result.estado] === 'DESPACHADO'
+        if (dispatched && !result.homecenter.isError) return result
+        sendError = new Error(
+          result.homecenter.errorMessage ??
+            `Homecenter no confirmó el aviso de despacho de la orden ${ordenCompra} (estado: ${result.estado}).`,
+        )
+      } catch (error) {
+        sendError = error
+      }
+
+      try {
+        await updatePurchaseOrder(ordenCompra, {
+          estado: 'ALISTADO',
+          fechaDespacho: previousFechaDespacho,
+        })
+      } catch {
+        throw new Error(
+          `No se pudo enviar el aviso de despacho de la orden ${ordenCompra} y tampoco revertir su fecha de despacho. Revisa la orden antes de reintentar.`,
+        )
+      }
+      throw sendError
+    },
+    // Settled, not success: a failed send may still have changed the order
+    // if its rollback failed too.
+    onSettled: () => {
+      invalidateDispatchNotice(queryClient)
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.purchaseOrders.all(),
       })
     },
   })

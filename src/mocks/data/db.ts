@@ -17,11 +17,13 @@
 
 import { faker } from '@faker-js/faker'
 import { PAYMENT_CONDITIONS, SALE_UNITS } from './catalog'
+import dispatchPreviewsSeed from './dispatch-previews-seed.json'
 import purchaseOrdersSeed from './purchase-orders-seed.json'
 import type {
   DispatchNoticeAttempt,
   DispatchNoticeStatus,
   DispatchNoticeStoreInput,
+  DispatchPreviewOrder,
   HomecenterResult,
   IntegrationLogDetail,
   IsoDateTime,
@@ -135,6 +137,10 @@ export type IntegrationLogRecord = IntegrationLogDetail
 interface MockDb {
   purchaseOrders: Array<PurchaseOrderRecord>
   dispatchNotices: Array<DispatchNoticeRecord>
+  /** `GET /avisos-despacho/por-fecha` rows — a real captured response, not
+   *  faker; see `handlers/dispatch-previews.ts`. Cloned so dispatching an
+   *  order (which stamps `fechaRealDespacho`) doesn't touch the seed. */
+  dispatchPreviews: Array<DispatchPreviewOrder>
   logs: Array<IntegrationLogRecord>
   seq: {
     logByDay: Record<string, number>
@@ -580,6 +586,9 @@ function seed(): MockDb {
   const db: MockDb = {
     purchaseOrders: [],
     dispatchNotices: [],
+    dispatchPreviews: structuredClone(
+      dispatchPreviewsSeed as Array<DispatchPreviewOrder>,
+    ),
     logs: [],
     seq: { logByDay: {}, noticeByOrder: {}, sync: 90 },
   }
@@ -777,6 +786,7 @@ export function resetDb(): void {
   const fresh = seed()
   db.purchaseOrders = fresh.purchaseOrders
   db.dispatchNotices = fresh.dispatchNotices
+  db.dispatchPreviews = fresh.dispatchPreviews
   db.logs = fresh.logs
   db.seq = fresh.seq
 }

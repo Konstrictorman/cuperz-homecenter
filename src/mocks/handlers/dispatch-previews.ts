@@ -3,27 +3,36 @@
 // (see `DispatchPreviewsByDateResponse` in #/api/types).
 //
 // Backed by a real response captured from that backend (2026-10-15) rather
-// than faker — see dispatch-previews-seed.json. Read-only, so it's loaded
-// straight from the seed instead of living in the mutable `db` store. Every
+// than faker — see dispatch-previews-seed.json, cloned into `db`. Every
 // captured order still had `fechaRealDespacho: null`, so `DESPACHADO` and any
-// date range legitimately return nothing here, same as the real backend did.
+// date range return nothing here until an order is dispatched through the
+// two handlers below (also undocumented in the spec; per the Postman
+// collection): `PATCH /ordenes-compra/:ordenCompra` stamps the dispatch date
+// and `POST /avisos-despacho/:avisoId/enviar` sends the notice.
 
 import { HttpResponse, http } from 'msw'
 import { API, apiError, latency, readPageParams, withinRange } from './shared'
-import { paginate } from '../data/db'
-import dispatchPreviewsSeed from '../data/dispatch-previews-seed.json'
+import { db, paginate } from '../data/db'
 import type {
-  DispatchPreviewOrder,
   DispatchPreviewsByDateResponse,
+  SendDispatchNoticeResponse,
+  UpdatePurchaseOrderRequest,
 } from '#/api/types'
 
-const orders = dispatchPreviewsSeed as Array<DispatchPreviewOrder>
+function orderNotFound(ordenCompra: string) {
+  return apiError(
+    404,
+    'ORDEN_NO_ENCONTRADA',
+    `La orden de compra ${ordenCompra} no existe en el sistema.`,
+  )
+}
 
 export const dispatchPreviewsHandlers = [
   http.get(`${API}/avisos-despacho/por-fecha`, async ({ request }) => {
     await latency()
     const url = new URL(request.url)
     const { page, pageSize } = readPageParams(url)
+    const ordenCompra = url.searchParams.get('ordenCompra')
     const estado = url.searchParams.get('estado')
     const fechaDesde = url.searchParams.get('fechaDesde')
     const fechaHasta = url.searchParams.get('fechaHasta')
@@ -37,7 +46,8 @@ export const dispatchPreviewsHandlers = [
       )
     }
 
-    const rows = orders
+    const rows = db.dispatchPreviews
+      .filter((o) => (ordenCompra ? o.ordenCompra.includes(ordenCompra) : true))
       .filter((o) =>
         estado === 'DESPACHADO'
           ? o.fechaRealDespacho !== null
@@ -56,6 +66,51 @@ export const dispatchPreviewsHandlers = [
     return HttpResponse.json<DispatchPreviewsByDateResponse>({
       ordenes: data,
       pagination,
+    })
+  }),
+
+  // Writes through to both stores: a dispatch-preview order may or may not
+  // also exist among the faker-backed purchase orders.
+  http.patch(
+    `${API}/ordenes-compra/:ordenCompra`,
+    async ({ params, request }) => {
+      await latency()
+      const ordenCompra = String(params.ordenCompra)
+      const preview = db.dispatchPreviews.find(
+        (o) => o.ordenCompra === ordenCompra,
+      )
+      const order = db.purchaseOrders.find((o) => o.ordenCompra === ordenCompra)
+      if (!preview && !order) return orderNotFound(ordenCompra)
+
+      const body = (await request.json()) as UpdatePurchaseOrderRequest
+      if (preview) preview.fechaRealDespacho = body.fechaDespacho
+      if (order) {
+        order.estado = body.estado
+        order.fechaDespacho = body.fechaDespacho
+      }
+      return HttpResponse.json({ ordenCompra, ...body })
+    },
+  ),
+
+  // The notice is keyed by the order number, so `avisoId` == `ordenCompra`.
+  http.post(`${API}/avisos-despacho/:avisoId/enviar`, async ({ params }) => {
+    await latency()
+    const ordenCompra = String(params.avisoId)
+    const preview = db.dispatchPreviews.find(
+      (o) => o.ordenCompra === ordenCompra,
+    )
+    if (!preview) return orderNotFound(ordenCompra)
+    if (!preview.fechaRealDespacho) {
+      return apiError(
+        409,
+        'ORDEN_SIN_FECHA_DESPACHO',
+        `La orden ${ordenCompra} no tiene fecha de despacho.`,
+      )
+    }
+    return HttpResponse.json<SendDispatchNoticeResponse>({
+      avisoId: ordenCompra,
+      estado: 'ENVIADO',
+      homecenter: { isError: false, errorMessage: null },
     })
   }),
 ]

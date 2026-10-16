@@ -9,16 +9,20 @@ import DispatchOrdersFilterBar, {
 import DispatchOrdersTable from './-DispatchOrdersTable'
 import type { DispatchOrder } from './-DispatchOrdersTable'
 import DispatchOrderDetailModal from './-DispatchOrderDetailModal'
-import DispatchNoticePayloadModal from './-DispatchNoticePayloadModal'
 import GenerateLabelsModal from './-GenerateLabelsModal'
 import {
   toDispatchOrderRow,
   toDispatchOrdersQuery,
 } from './-dispatchOrderPresentation'
 import type { DispatchOrdersFilterValues } from './-DispatchOrdersFilterBar'
-import { dispatchPreviewsByDateQueryOptions } from '#/api/dispatch-notices'
+import {
+  dispatchPreviewsByDateQueryOptions,
+  useSendOrderDispatchNotice,
+} from '#/api/dispatch-notices'
 import { downloadPurchaseOrderLabels } from '#/api/purchase-orders'
 import { useFeedback } from '#/contexts/FeedbackContext'
+import { todayIsoDate } from '#/common/util'
+import { toDispatchNoticePayload } from './-dispatchNoticePayload'
 import '../PurchaseOrdersPage.css'
 
 const DispatchOrdersPage = () => {
@@ -33,15 +37,12 @@ const DispatchOrdersPage = () => {
 
   const [selectedOrder, setSelectedOrder] = useState<DispatchOrder | null>(null)
 
-  // `null` closed; otherwise the orders whose payload is being previewed.
-  const [dispatchNoticeOrders, setDispatchNoticeOrders] = useState<
-    DispatchOrder[] | null
-  >(null)
-
   // `null` closed; otherwise the order whose barcode labels are being printed.
   const [labelsOrder, setLabelsOrder] = useState<DispatchOrder | null>(null)
 
   const feedback = useFeedback()
+
+  const sendDispatchNotice = useSendOrderDispatchNotice()
 
   const handleFilter = (values: DispatchOrdersFilterValues) => {
     setFilters(values)
@@ -62,7 +63,28 @@ const DispatchOrdersPage = () => {
   const rows = (data?.ordenes ?? []).map(toDispatchOrderRow)
 
   const handleGenerateDispatchNotice = (order: DispatchOrder) => {
-    setDispatchNoticeOrders([order])
+    // TEMP(debug): the payload DispatchNoticePayloadModal used to show — remove
+    // once the /avisos-despacho/{id}/enviar failure is understood.
+    console.log(
+      '[aviso-despacho payload]',
+      JSON.stringify(
+        toDispatchNoticePayload([order.source], todayIsoDate()),
+        null,
+        2,
+      ),
+    )
+
+    return feedback.run(
+      () =>
+        sendDispatchNotice.mutateAsync({
+          ordenCompra: order.ordenCompra,
+          previousFechaDespacho: order.source.fechaRealDespacho,
+        }),
+      {
+        success: `Se envió el aviso de despacho de la orden ${order.ordenCompra}.`,
+        error: `No se pudo enviar el aviso de despacho de la orden ${order.ordenCompra}.`,
+      },
+    )
   }
 
   const handleGenerateBarCode = (order: DispatchOrder) => {
@@ -108,12 +130,6 @@ const DispatchOrdersPage = () => {
         order={selectedOrder}
         open={selectedOrder !== null}
         onClose={() => setSelectedOrder(null)}
-      />
-
-      <DispatchNoticePayloadModal
-        orders={dispatchNoticeOrders ?? []}
-        open={dispatchNoticeOrders !== null}
-        onClose={() => setDispatchNoticeOrders(null)}
       />
 
       <GenerateLabelsModal

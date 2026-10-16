@@ -16,7 +16,7 @@ export interface DispatchOrder {
   estadoTone: StatusBadgeTone
   estadoLabel: string
   /** The untouched API order — its Tienda→Contenedor→Producto tree feeds the
-   *  detail modal and the payload preview without another request. */
+   *  detail modal without another request. */
   source: DispatchPreviewOrder
 }
 

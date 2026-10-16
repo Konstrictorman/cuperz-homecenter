@@ -18,6 +18,7 @@ import type {
   ReprocessOrderResponse,
   SyncPurchaseOrdersRequest,
   SyncPurchaseOrdersResponse,
+  UpdatePurchaseOrderRequest,
 } from './types'
 
 export function purchaseOrdersListQueryOptions(
@@ -83,6 +84,21 @@ export function useReprocessOrder() {
       })
     },
   })
+}
+
+/** `PATCH /api/v1/ordenes-compra/{ordenCompra}` — not in the backend spec.
+ *  Response body unconfirmed, so it isn't typed. */
+export function updatePurchaseOrder(
+  ordenCompra: string,
+  body: UpdatePurchaseOrderRequest,
+): Promise<unknown> {
+  return apiFetch<unknown>(
+    `/ordenes-compra/${encodeURIComponent(ordenCompra)}`,
+    {
+      method: 'PATCH',
+      body,
+    },
+  )
 }
 
 /** `GET /api/v1/ordenes-compra/export` (§ 1.5) — returns CSV as text. */
@@ -209,10 +225,7 @@ export async function downloadPurchaseOrderLabels(
   request: PurchaseOrderLabelsRequest,
 ): Promise<void> {
   const blob = await fetchPurchaseOrderLabels(request)
-  triggerDownload(
-    blob,
-    `etiquetas-${request.ordenCompra}-${request.numTags}.pdf`,
-  )
+  triggerDownload(blob, `etiquetas-${request.ordenCompra}.pdf`)
 }
 
 /**

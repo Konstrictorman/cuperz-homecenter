@@ -91,7 +91,7 @@ export const useDispatchOrdersColumns = (
             icon={<LocalShippingOutlinedIcon />}
             label="Generar aviso de despacho"
             onClick={() => onGenerateDispatchNotice?.(params.row)}
-            disabled={params.row.estadoTone !== 'partial'}
+            // disabled={params.row.estadoTone !== 'partial'}
           />,
           <GridActionsCellItem
             icon={<QrCodeIcon />}

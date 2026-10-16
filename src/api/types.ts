@@ -295,6 +295,15 @@ export interface ReprocessOrderResponse {
   intentoNumero: number
 }
 
+/** Body for `PATCH /api/v1/ordenes-compra/{ordenCompra}` — not in the
+ *  backend spec. Used to stamp the real dispatch date on an order right
+ *  before its dispatch notice is sent. */
+export interface UpdatePurchaseOrderRequest {
+  estado: OrderStatus
+  /** `null` clears it — what a failed send rolls back to. */
+  fechaDespacho: IsoDate | null
+}
+
 /**
  * Path params for `GET /api/v1/ordenes-compra/{ordenCompra}/etiquetas/{numTags}`
  * — not in the backend spec; observed against the live backend (2026-10-15).
@@ -438,6 +447,17 @@ export interface ResendDispatchNoticeRequest {
   correcciones: Array<DispatchNoticeCorrection>
 }
 
+/** `200` body for `POST /api/v1/avisos-despacho/{avisoId}/enviar` — per the
+ *  Postman collection's example. `estado` is `"ENVIADO"` on success, a value
+ *  `DispatchNoticeStatus` doesn't list; other values are unconfirmed, so it
+ *  stays a plain string. A Homecenter rejection may still arrive as a `200`
+ *  with `homecenter.isError: true`. */
+export interface SendDispatchNoticeResponse {
+  avisoId: string
+  estado: string
+  homecenter: HomecenterResult
+}
+
 // --- Attempt history (§ 2.6) ---
 
 export interface DispatchNoticeAttempt {
@@ -507,6 +527,9 @@ export interface DispatchPreviewsByDateResponse {
 /** Query params. `fechaDesde`/`fechaHasta` must be sent together — either
  *  alone is rejected with `422 RANGO_FECHAS_INCOMPLETO`. */
 export interface DispatchPreviewsByDateQuery extends PaginationQuery {
+  /** Partial match on the PO number. Not yet honoured by the live backend
+   *  (checked 2026-10-15: it ignores the param and returns every order). */
+  ordenCompra?: string
   estado?: DispatchPreviewStatus
   fechaDesde?: IsoDate
   fechaHasta?: IsoDate

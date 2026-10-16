@@ -13,9 +13,10 @@ import '../FilterBar.css'
 export type DispatchOrdersFilterStatus =
   'ready' | 'dispatched' | 'all' | 'error' | 'cancelled'
 
-/** `GET /avisos-despacho/por-fecha` only filters by estado and a date range
- *  (both ends required together), so that's all this bar offers. */
+/** `GET /avisos-despacho/por-fecha` filters by PO number, estado and a date
+ *  range (both ends required together). */
 export interface DispatchOrdersFilterValues {
+  ordenCompra: string
   estado: DispatchOrdersFilterStatus
   fechaDesde: string
   fechaHasta: string
@@ -23,6 +24,7 @@ export interface DispatchOrdersFilterValues {
 
 export const DEFAULT_DISPATCH_ORDERS_FILTER_VALUES: DispatchOrdersFilterValues =
   {
+    ordenCompra: '',
     estado: 'all',
     fechaDesde: '',
     fechaHasta: '',
@@ -69,6 +71,20 @@ const DispatchOrdersFilterBar = ({
         void form.handleSubmit()
       }}
     >
+      <form.Field name="ordenCompra">
+        {(field) => (
+          <TextField
+            label="Orden de compra"
+            placeholder="Buscar OC"
+            size="small"
+            className="filter-bar__field"
+            value={field.state.value}
+            onChange={(event) => field.handleChange(event.target.value)}
+            onBlur={field.handleBlur}
+          />
+        )}
+      </form.Field>
+
       <form.Field name="estado">
         {(field) => (
           <TextField

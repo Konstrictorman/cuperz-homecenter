@@ -64,6 +64,7 @@ export function toDispatchOrdersQuery(
 ): DispatchPreviewsByDateQuery {
   const hasRange = Boolean(filters.fechaDesde && filters.fechaHasta)
   return {
+    ordenCompra: filters.ordenCompra.trim() || undefined,
     estado:
       filters.estado === 'all'
         ? undefined
