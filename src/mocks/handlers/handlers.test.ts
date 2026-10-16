@@ -122,13 +122,13 @@ describe('dispatch previews', () => {
     })
   })
 
-  it('filters by estado from fechaRealDespacho', async () => {
+  it('filters by estado', async () => {
     const pending = await json<DispatchPreviewsResponse>(
-      '/avisos-despacho?estado=NODESPACHADO&pageSize=100',
+      '/avisos-despacho?estado=ALISTADO&pageSize=100',
     )
     expect(pending.body.ordenes.length).toBeGreaterThan(0)
     for (const order of pending.body.ordenes) {
-      expect(order.fechaRealDespacho).toBeNull()
+      expect(order.estado).toBe('ALISTADO')
     }
   })
 

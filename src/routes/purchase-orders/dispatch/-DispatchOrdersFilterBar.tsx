@@ -8,7 +8,7 @@ import { validateRangeOrder } from '../-dateRange'
 import '../FilterBar.css'
 
 /** Mirrors `DispatchPreviewStatus` (`#/api/types`) — the endpoint only
- *  distinguishes NODESPACHADO/DESPACHADO, unlike the richer `StatusBadgeTone`
+ *  distinguishes ALISTADO/DESPACHADO, unlike the richer `StatusBadgeTone`
  *  union the details-route filter bar uses. */
 export type DispatchOrdersFilterStatus =
   'ready' | 'dispatched' | 'all' | 'error' | 'cancelled'

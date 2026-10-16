@@ -474,10 +474,11 @@ export interface DispatchNoticeAttemptsResponse {
 // per-row detail fetch needed.
 // ===========================================================================
 
-/** `estado` filter values the UI sends. The backend types the param as a
- *  free string (≤30 chars); Postman also shows `PENDIENTE`, so the accepted
- *  set is unconfirmed. */
-export type DispatchPreviewStatus = 'DESPACHADO' | 'NODESPACHADO'
+/** Order `estado` values the live backend returns and filters on
+ *  (observed 2026-10-16: `?estado=NODESPACHADO` matches nothing). The param
+ *  is typed as a free string (≤30 chars) and Postman also shows `PENDIENTE`,
+ *  so the full set is unconfirmed. */
+export type DispatchPreviewStatus = 'ALISTADO' | 'DESPACHADO'
 
 /** Numbers arrive as decimal strings (`"6.000"`, `"5"`), exactly as
  *  Homecenter's AvisoDespacho payload carries them. */
@@ -509,8 +510,10 @@ export interface DispatchPreviewOrder {
   numpedido?: string
   /** `null` until the PO has actually been dispatched. */
   fechaRealDespacho: IsoDate | null
-  /** The order's status (Postman shows `ALISTADO`, `DESPACHADO`). Absent
-   *  from the captured `por-fecha` sample, hence optional. */
+  /** The order's status — the source of truth for "dispatched".
+   *  `fechaRealDespacho` is not: `ALISTADO` orders have been observed with a
+   *  date set. Absent from the captured `por-fecha` sample, hence optional;
+   *  a free string since values beyond `DispatchPreviewStatus` may appear. */
   estado?: string
   tiendas: Array<DispatchPreviewStore>
 }

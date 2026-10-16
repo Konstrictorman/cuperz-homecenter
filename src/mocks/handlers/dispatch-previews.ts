@@ -3,12 +3,13 @@
 // `DispatchPreviewsResponse` in #/api/types).
 //
 // Backed by a real response captured from that backend (2026-10-15) rather
-// than faker — see dispatch-previews-seed.json, cloned into `db`. Every
-// captured order still had `fechaRealDespacho: null`, so `DESPACHADO` and any
-// date range return nothing here until an order is dispatched through the
-// handlers below (also undocumented in the spec; per the Postman collection):
-// `POST /avisos-despacho/enviar` stamps the real dispatch date and sends the
-// notice; `PATCH /ordenes-compra/:ordenCompra` can also stamp the date.
+// than faker — see dispatch-previews-seed.json, cloned into `db` as
+// `ALISTADO` with `fechaRealDespacho: null`, so `DESPACHADO` and any date
+// range return nothing here until an order is dispatched through the handlers
+// below (also undocumented in the spec; per the Postman collection):
+// `POST /avisos-despacho/enviar` marks it `DESPACHADO`, stamps the real
+// dispatch date and sends the notice; `PATCH /ordenes-compra/:ordenCompra`
+// can also set the estado and date.
 
 import { HttpResponse, http } from 'msw'
 import { API, apiError, latency, readPageParams, withinRange } from './shared'
@@ -51,13 +52,7 @@ export const dispatchPreviewsHandlers = [
     const rows = db.dispatchPreviews
       .filter((o) => (ordenCompra ? o.ordenCompra.includes(ordenCompra) : true))
       .filter((o) => (numpedido ? o.numpedido?.includes(numpedido) : true))
-      .filter((o) =>
-        estado === 'DESPACHADO'
-          ? o.fechaRealDespacho !== null
-          : estado === 'NODESPACHADO'
-            ? o.fechaRealDespacho === null
-            : true,
-      )
+      .filter((o) => (estado ? o.estado === estado : true))
       .filter((o) =>
         fechaDesde
           ? o.fechaRealDespacho !== null &&
@@ -86,7 +81,10 @@ export const dispatchPreviewsHandlers = [
       if (!preview && !order) return orderNotFound(ordenCompra)
 
       const body = (await request.json()) as UpdatePurchaseOrderRequest
-      if (preview) preview.fechaRealDespacho = body.fechaDespacho
+      if (preview) {
+        preview.estado = body.estado
+        preview.fechaRealDespacho = body.fechaDespacho
+      }
       if (order) {
         order.estado = body.estado
         order.fechaDespacho = body.fechaDespacho
@@ -113,6 +111,7 @@ export const dispatchPreviewsHandlers = [
     )
     if (!preview) return orderNotFound(ordenCompra)
 
+    preview.estado = 'DESPACHADO'
     preview.fechaRealDespacho = fechaRealDespacho
     const order = db.purchaseOrders.find((o) => o.ordenCompra === ordenCompra)
     if (order) order.fechaDespacho = fechaRealDespacho

@@ -586,9 +586,11 @@ function seed(): MockDb {
   const db: MockDb = {
     purchaseOrders: [],
     dispatchNotices: [],
+    // The captured seed predates the backend sending `estado`; every order
+    // in it is undispatched.
     dispatchPreviews: structuredClone(
       dispatchPreviewsSeed as Array<DispatchPreviewOrder>,
-    ),
+    ).map((o) => ({ ...o, estado: o.estado ?? 'ALISTADO' })),
     logs: [],
     seq: { logByDay: {}, noticeByOrder: {}, sync: 90 },
   }
