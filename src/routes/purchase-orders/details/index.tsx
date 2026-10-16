@@ -1,6 +1,10 @@
 import { useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import {
+  keepPreviousData,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query'
 import type { GridPaginationModel } from '@mui/x-data-grid'
 import OrdersFilterBar, {
   DEFAULT_ORDERS_FILTER_VALUES,
@@ -16,9 +20,10 @@ import {
   downloadPurchaseOrdersPdfZip,
   purchaseOrdersListQueryOptions,
 } from '#/api/purchase-orders'
+import { queryKeys } from '#/api/query-keys'
 import { useFeedback } from '#/contexts/FeedbackContext'
+import ErrorComponent from '#/components/errorComponent/ErrorComponent'
 import '../PurchaseOrdersPage.css'
-import Typography from '@mui/material/Typography'
 
 const PurchaseOrdersPage = () => {
   const [filters, setFilters] = useState<OrdersFilterValues>(
@@ -31,6 +36,8 @@ const PurchaseOrdersPage = () => {
   const [selectedOrder, setSelectedOrder] = useState<PurchaseOrder | null>(null)
 
   const feedback = useFeedback()
+
+  const queryClient = useQueryClient()
 
   const handleFilter = (values: OrdersFilterValues) => {
     setFilters(values)
@@ -83,9 +90,17 @@ const PurchaseOrdersPage = () => {
       <OrdersFilterBar onFilter={handleFilter} />
 
       {isError ? (
-        <Typography role="alert" className="purchase-orders__error">
-          No se pudieron cargar las órdenes: {error.message}
-        </Typography>
+        <ErrorComponent
+          error={error}
+          // Back to the first-load state (error cleared, table loading) and
+          // refetched with the current filters and page.
+          reset={() =>
+            void queryClient.resetQueries({
+              queryKey: queryKeys.purchaseOrders.all(),
+            })
+          }
+          fallbackMessage="El servidor no respondió correctamente. Intenta de nuevo más tarde."
+        />
       ) : (
         <PurchaseOrdersTable
           rows={rows}
