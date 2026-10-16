@@ -1,20 +1,21 @@
-// Handler for `GET /avisos-despacho/por-fecha` — not in
-// docs/especificacion-endpoints-backend; mirrors the live FastAPI backend
-// (see `DispatchPreviewsByDateResponse` in #/api/types).
+// Handler for `GET /avisos-despacho` — the live FastAPI backend's preview
+// tree, not the § 2.2 list in docs/especificacion-endpoints-backend (see
+// `DispatchPreviewsResponse` in #/api/types).
 //
 // Backed by a real response captured from that backend (2026-10-15) rather
 // than faker — see dispatch-previews-seed.json, cloned into `db`. Every
 // captured order still had `fechaRealDespacho: null`, so `DESPACHADO` and any
 // date range return nothing here until an order is dispatched through the
-// two handlers below (also undocumented in the spec; per the Postman
-// collection): `PATCH /ordenes-compra/:ordenCompra` stamps the dispatch date
-// and `POST /avisos-despacho/:avisoId/enviar` sends the notice.
+// handlers below (also undocumented in the spec; per the Postman collection):
+// `POST /avisos-despacho/enviar` stamps the real dispatch date and sends the
+// notice; `PATCH /ordenes-compra/:ordenCompra` can also stamp the date.
 
 import { HttpResponse, http } from 'msw'
 import { API, apiError, latency, readPageParams, withinRange } from './shared'
 import { db, paginate } from '../data/db'
 import type {
-  DispatchPreviewsByDateResponse,
+  DispatchPreviewsResponse,
+  SendDispatchNoticeRequest,
   SendDispatchNoticeResponse,
   UpdatePurchaseOrderRequest,
 } from '#/api/types'
@@ -28,11 +29,12 @@ function orderNotFound(ordenCompra: string) {
 }
 
 export const dispatchPreviewsHandlers = [
-  http.get(`${API}/avisos-despacho/por-fecha`, async ({ request }) => {
+  http.get(`${API}/avisos-despacho`, async ({ request }) => {
     await latency()
     const url = new URL(request.url)
     const { page, pageSize } = readPageParams(url)
     const ordenCompra = url.searchParams.get('ordenCompra')
+    const numpedido = url.searchParams.get('numpedido')
     const estado = url.searchParams.get('estado')
     const fechaDesde = url.searchParams.get('fechaDesde')
     const fechaHasta = url.searchParams.get('fechaHasta')
@@ -48,6 +50,7 @@ export const dispatchPreviewsHandlers = [
 
     const rows = db.dispatchPreviews
       .filter((o) => (ordenCompra ? o.ordenCompra.includes(ordenCompra) : true))
+      .filter((o) => (numpedido ? o.numpedido?.includes(numpedido) : true))
       .filter((o) =>
         estado === 'DESPACHADO'
           ? o.fechaRealDespacho !== null
@@ -63,7 +66,7 @@ export const dispatchPreviewsHandlers = [
       )
 
     const { data, pagination } = paginate(rows, page, pageSize)
-    return HttpResponse.json<DispatchPreviewsByDateResponse>({
+    return HttpResponse.json<DispatchPreviewsResponse>({
       ordenes: data,
       pagination,
     })
@@ -92,24 +95,31 @@ export const dispatchPreviewsHandlers = [
     },
   ),
 
-  // The notice is keyed by the order number, so `avisoId` == `ordenCompra`.
-  http.post(`${API}/avisos-despacho/:avisoId/enviar`, async ({ params }) => {
+  // Stamps the real dispatch date on both stores (like the PATCH above),
+  // then "sends" the notice — which always succeeds here.
+  http.post(`${API}/avisos-despacho/enviar`, async ({ request }) => {
     await latency()
-    const ordenCompra = String(params.avisoId)
+    const body = (await request.json()) as SendDispatchNoticeRequest
+    const { ordenCompra, fechaRealDespacho } = body
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(fechaRealDespacho)) {
+      return apiError(
+        422,
+        'PARAMETRO_INVALIDO',
+        'fechaRealDespacho debe tener formato YYYY-MM-DD.',
+      )
+    }
     const preview = db.dispatchPreviews.find(
       (o) => o.ordenCompra === ordenCompra,
     )
     if (!preview) return orderNotFound(ordenCompra)
-    if (!preview.fechaRealDespacho) {
-      return apiError(
-        409,
-        'ORDEN_SIN_FECHA_DESPACHO',
-        `La orden ${ordenCompra} no tiene fecha de despacho.`,
-      )
-    }
+
+    preview.fechaRealDespacho = fechaRealDespacho
+    const order = db.purchaseOrders.find((o) => o.ordenCompra === ordenCompra)
+    if (order) order.fechaDespacho = fechaRealDespacho
+
     return HttpResponse.json<SendDispatchNoticeResponse>({
-      avisoId: ordenCompra,
-      estado: 'ENVIADO',
+      ordenCompra,
+      estado: 'EXITOSO',
       homecenter: { isError: false, errorMessage: null },
     })
   }),

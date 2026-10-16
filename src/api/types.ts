@@ -383,16 +383,6 @@ export interface DispatchNoticeResult {
   intentos?: number
 }
 
-/** Row shape for `GET /api/v1/avisos-despacho` (§ 2.2). */
-export interface DispatchNoticeSummary {
-  avisoId: string
-  ordenCompra: string
-  fechaRealDespacho: IsoDate
-  cantidadContenedores: number
-  estado: DispatchNoticeStatus
-  fechaEnvio: IsoDateTime | null
-}
-
 /** Full shape for `GET /api/v1/avisos-despacho/{avisoId}` (§ 2.3). */
 export interface DispatchNoticeDetail {
   avisoId: string
@@ -407,14 +397,6 @@ export interface DispatchNoticeDetail {
 }
 
 /** Query params for `GET /api/v1/avisos-despacho` (§ 2.2). */
-export interface DispatchNoticesQuery extends PaginationQuery {
-  ordenCompra?: string
-  numPedido?: string
-  estado?: DispatchNoticeStatus
-  fechaDesde?: IsoDate
-  fechaHasta?: IsoDate
-}
-
 // --- EAN128 (§ 2.4) ---
 
 export interface Ean128Container {
@@ -447,13 +429,20 @@ export interface ResendDispatchNoticeRequest {
   correcciones: Array<DispatchNoticeCorrection>
 }
 
-/** `200` body for `POST /api/v1/avisos-despacho/{avisoId}/enviar` — per the
- *  Postman collection's example. `estado` is `"ENVIADO"` on success, a value
- *  `DispatchNoticeStatus` doesn't list; other values are unconfirmed, so it
- *  stays a plain string. A Homecenter rejection may still arrive as a `200`
- *  with `homecenter.isError: true`. */
+/** Body for `POST /api/v1/avisos-despacho/enviar` — not in the backend spec;
+ *  per the Postman collection. The backend stamps `fechaRealDespacho` on the
+ *  order and sends its notice to Homecenter in one call. */
+export interface SendDispatchNoticeRequest {
+  ordenCompra: string
+  fechaRealDespacho: IsoDate
+}
+
+/** `200` body for `POST /api/v1/avisos-despacho/enviar` — per the Postman
+ *  collection's example. `estado` is `"EXITOSO"` on success; other values are
+ *  unconfirmed, so it stays a plain string. A Homecenter rejection may still
+ *  arrive as a `200` with `homecenter.isError: true`. */
 export interface SendDispatchNoticeResponse {
-  avisoId: string
+  ordenCompra: string
   estado: string
   homecenter: HomecenterResult
 }
@@ -474,18 +463,20 @@ export interface DispatchNoticeAttemptsResponse {
 }
 
 // ===========================================================================
-// Dispatch previews by date — `GET /api/v1/avisos-despacho/por-fecha`.
-// Not in docs/especificacion-endpoints-backend; shape taken from the live
-// FastAPI backend (its OpenAPI leaves the 200 body untyped) and a sample
-// response the user supplied (2026-10-15). One entry per PO, already in the
+// Dispatch previews — `GET /api/v1/avisos-despacho`.
+// Not the § 2.2 list in docs/especificacion-endpoints-backend: the live
+// FastAPI backend serves this preview tree on that route instead (its OpenAPI
+// leaves the 200 body untyped). Shape from the Postman collection and a
+// response captured from the former `/avisos-despacho/por-fecha` route
+// (2026-10-15), which now answers 405. One entry per PO, already in the
 // Orden→Tienda→Contenedor→Producto shape Homecenter's AvisoDespacho payload
 // uses — so the list alone feeds both the table and the payload preview, no
 // per-row detail fetch needed.
 // ===========================================================================
 
-/** `estado` filter values the backend accepts. Not echoed back per order —
- *  the UI derives it from `fechaRealDespacho` (see
- *  `-dispatchOrderPresentation.ts`). */
+/** `estado` filter values the UI sends. The backend types the param as a
+ *  free string (≤30 chars); Postman also shows `PENDIENTE`, so the accepted
+ *  set is unconfirmed. */
 export type DispatchPreviewStatus = 'DESPACHADO' | 'NODESPACHADO'
 
 /** Numbers arrive as decimal strings (`"6.000"`, `"5"`), exactly as
@@ -506,30 +497,36 @@ export interface DispatchPreviewStore {
   /** Data-quality caveat: the backend has been observed sending the literal
    *  string `"None"` (a stringified Python `None`) when the store is unknown. */
   eanTienda: string
+  /** In the Postman example; absent from the captured `por-fecha` sample. */
+  nombreTienda?: string
   contenedores: Array<DispatchPreviewContainer>
 }
 
 export interface DispatchPreviewOrder {
   eanPuntoEntrega: string
   ordenCompra: string
+  /** In the Postman example; absent from the captured `por-fecha` sample. */
+  numpedido?: string
   /** `null` until the PO has actually been dispatched. */
   fechaRealDespacho: IsoDate | null
+  /** The order's status (Postman shows `ALISTADO`, `DESPACHADO`). Absent
+   *  from the captured `por-fecha` sample, hence optional. */
+  estado?: string
   tiendas: Array<DispatchPreviewStore>
 }
 
 /** `200` body — note the list lives under `ordenes`, not the usual `data`
  *  of `Paginated<T>`. */
-export interface DispatchPreviewsByDateResponse {
+export interface DispatchPreviewsResponse {
   ordenes: Array<DispatchPreviewOrder>
   pagination: Pagination
 }
 
 /** Query params. `fechaDesde`/`fechaHasta` must be sent together — either
  *  alone is rejected with `422 RANGO_FECHAS_INCOMPLETO`. */
-export interface DispatchPreviewsByDateQuery extends PaginationQuery {
-  /** Partial match on the PO number. Not yet honoured by the live backend
-   *  (checked 2026-10-15: it ignores the param and returns every order). */
+export interface DispatchPreviewsQuery extends PaginationQuery {
   ordenCompra?: string
+  numpedido?: string
   estado?: DispatchPreviewStatus
   fechaDesde?: IsoDate
   fechaHasta?: IsoDate

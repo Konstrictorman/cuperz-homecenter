@@ -5,50 +5,32 @@ import {
   useMutation,
   useQueryClient,
 } from '@tanstack/react-query'
-import { todayIsoDate } from '#/common/util'
 import { apiFetch, buildQuery } from './http'
-import { updatePurchaseOrder } from './purchase-orders'
 import { queryKeys } from './query-keys'
 import type {
   DispatchNoticeDetail,
   DispatchNoticeResult,
-  DispatchNoticeSummary,
   DispatchNoticeEan128Response,
   DispatchNoticeAttemptsResponse,
-  DispatchNoticesQuery,
-  DispatchPreviewStatus,
-  DispatchPreviewsByDateQuery,
-  DispatchPreviewsByDateResponse,
+  DispatchPreviewsQuery,
+  DispatchPreviewsResponse,
   CreateDispatchNoticeRequest,
-  Paginated,
   ResendDispatchNoticeRequest,
+  SendDispatchNoticeRequest,
   SendDispatchNoticeResponse,
 } from './types'
 
-export function dispatchNoticesListQueryOptions(
-  query: DispatchNoticesQuery = {},
+/** `GET /api/v1/avisos-despacho` — one Orden→Tienda→Contenedor→Producto
+ *  tree per PO, ready to drop into an AvisoDespacho payload. Not the § 2.2
+ *  list of the backend spec; see the type's doc comment in `./types`. */
+export function dispatchPreviewsQueryOptions(
+  query: DispatchPreviewsQuery = {},
 ) {
   return queryOptions({
-    queryKey: queryKeys.dispatchNotices.list(query),
+    queryKey: queryKeys.dispatchNotices.previews(query),
     queryFn: ({ signal }) =>
-      apiFetch<Paginated<DispatchNoticeSummary>>(
+      apiFetch<DispatchPreviewsResponse>(
         `/avisos-despacho${buildQuery({ ...query })}`,
-        { signal },
-      ),
-  })
-}
-
-/** `GET /api/v1/avisos-despacho/por-fecha` — one Orden→Tienda→Contenedor→
- *  Producto tree per PO, ready to drop into an AvisoDespacho payload. Not in
- *  the backend spec; see the type's doc comment in `./types`. */
-export function dispatchPreviewsByDateQueryOptions(
-  query: DispatchPreviewsByDateQuery = {},
-) {
-  return queryOptions({
-    queryKey: queryKeys.dispatchNotices.previewsByDate(query),
-    queryFn: ({ signal }) =>
-      apiFetch<DispatchPreviewsByDateResponse>(
-        `/avisos-despacho/por-fecha${buildQuery({ ...query })}`,
         { signal },
       ),
   })
@@ -140,87 +122,39 @@ export function useResendDispatchNotice(avisoId: string) {
   })
 }
 
-/** `estado` of a successfully sent notice — the order it belongs to is
- *  then `DESPACHADO` (see `SEND_STATUS_TO_DISPATCH_STATUS`). */
-export const DISPATCH_NOTICE_SENT = 'ENVIADO'
+/** `estado` of a notice Homecenter accepted. */
+export const DISPATCH_NOTICE_SENT = 'EXITOSO'
 
-/** A sent notice's `estado` → its order's `por-fecha` dispatch status. */
-export const SEND_STATUS_TO_DISPATCH_STATUS: Partial<
-  Record<string, DispatchPreviewStatus>
-> = {
-  [DISPATCH_NOTICE_SENT]: 'DESPACHADO',
-}
-
-/** `POST /api/v1/avisos-despacho/{avisoId}/enviar` — sends the notice to
- *  Homecenter. Not in the backend spec; per the Postman collection. */
+/** `POST /api/v1/avisos-despacho/enviar` — stamps the order's real dispatch
+ *  date and sends its notice to Homecenter. Not in the backend spec; per the
+ *  Postman collection. */
 export function sendDispatchNotice(
-  avisoId: string,
+  body: SendDispatchNoticeRequest,
 ): Promise<SendDispatchNoticeResponse> {
-  return apiFetch<SendDispatchNoticeResponse>(
-    `/avisos-despacho/${encodeURIComponent(avisoId)}/enviar`,
-    { method: 'POST' },
-  )
-}
-
-export interface SendOrderDispatchNoticeVariables {
-  ordenCompra: string
-  /** The order's dispatch date before this send — restored if it fails. */
-  previousFechaDespacho: string | null
+  return apiFetch<SendDispatchNoticeResponse>('/avisos-despacho/enviar', {
+    method: 'POST',
+    body,
+  })
 }
 
 /**
- * Dispatches an order: stamps today as its real dispatch date
- * (`PATCH /ordenes-compra/{ordenCompra}`), then sends its notice to
- * Homecenter (`POST /avisos-despacho/{ordenCompra}/enviar` — the backend keys
- * the notice by the order number).
- *
- * The backend has no single endpoint covering both, so atomicity is
- * best-effort from here: if the send fails (HTTP error, or a `200` whose
- * `estado` isn't `ENVIADO` — i.e. the order isn't `DESPACHADO` — or carries
- * `homecenter.isError`), the order update is rolled back before the error is
- * rethrown. If the rollback itself fails, the thrown error says so — the
- * order is then left dated but without a sent notice.
+ * Dispatches an order via `sendDispatchNotice`. A `200` whose `estado` isn't
+ * `EXITOSO`, or that carries `homecenter.isError`, is turned into an error so
+ * callers only see success when Homecenter actually accepted the notice.
  */
-export function useSendOrderDispatchNotice() {
+export function useSendDispatchNotice() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async ({
-      ordenCompra,
-      previousFechaDespacho,
-    }: SendOrderDispatchNoticeVariables) => {
-      await updatePurchaseOrder(ordenCompra, {
-        estado: 'ALISTADO',
-        fechaDespacho: todayIsoDate(),
-      })
-
-      let sendError: unknown
-      try {
-        const result = await sendDispatchNotice(ordenCompra)
-        const dispatched =
-          SEND_STATUS_TO_DISPATCH_STATUS[result.estado] === 'DESPACHADO'
-        if (dispatched && !result.homecenter.isError) return result
-        sendError = new Error(
-          result.homecenter.errorMessage ??
-            `Homecenter no confirmó el aviso de despacho de la orden ${ordenCompra} (estado: ${result.estado}).`,
-        )
-      } catch (error) {
-        sendError = error
-      }
-
-      try {
-        await updatePurchaseOrder(ordenCompra, {
-          estado: 'ALISTADO',
-          fechaDespacho: previousFechaDespacho,
-        })
-      } catch {
-        throw new Error(
-          `No se pudo enviar el aviso de despacho de la orden ${ordenCompra} y tampoco revertir su fecha de despacho. Revisa la orden antes de reintentar.`,
-        )
-      }
-      throw sendError
+    mutationFn: async (body: SendDispatchNoticeRequest) => {
+      const result = await sendDispatchNotice(body)
+      if (result.estado === DISPATCH_NOTICE_SENT && !result.homecenter.isError)
+        return result
+      throw new Error(
+        result.homecenter.errorMessage ??
+          `Homecenter no confirmó el aviso de despacho de la orden ${body.ordenCompra} (estado: ${result.estado}).`,
+      )
     },
-    // Settled, not success: a failed send may still have changed the order
-    // if its rollback failed too.
+    // Settled, not success: a rejected send may still have stamped the date.
     onSettled: () => {
       invalidateDispatchNotice(queryClient)
       void queryClient.invalidateQueries({

@@ -2,7 +2,7 @@
 // endpoint expects — the same shape as the real sample payloads under
 // `docs/avisos_despacho/*.json`.
 //
-// `GET /avisos-despacho/por-fecha` already returns each order in exactly
+// `GET /avisos-despacho` already returns each order in exactly
 // this shape (string `cantidad`/`peso`/`volumen` included), so the only work
 // left is stamping `fechaRealDespacho`, which the API leaves `null` until the
 // PO is dispatched.

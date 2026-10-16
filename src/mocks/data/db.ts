@@ -137,7 +137,7 @@ export type IntegrationLogRecord = IntegrationLogDetail
 interface MockDb {
   purchaseOrders: Array<PurchaseOrderRecord>
   dispatchNotices: Array<DispatchNoticeRecord>
-  /** `GET /avisos-despacho/por-fecha` rows — a real captured response, not
+  /** `GET /avisos-despacho` rows — a real captured response, not
    *  faker; see `handlers/dispatch-previews.ts`. Cloned so dispatching an
    *  order (which stamps `fechaRealDespacho`) doesn't touch the seed. */
   dispatchPreviews: Array<DispatchPreviewOrder>

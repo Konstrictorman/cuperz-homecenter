@@ -6,7 +6,7 @@ import { handlers } from './registry'
 import { resetDb } from '../data/db'
 import type {
   DispatchNoticeResult,
-  DispatchPreviewsByDateResponse,
+  DispatchPreviewsResponse,
   Paginated,
   PurchaseOrderSummary,
 } from '#/api/types'
@@ -98,10 +98,10 @@ describe('purchase orders', () => {
   })
 })
 
-describe('dispatch previews by date', () => {
+describe('dispatch previews', () => {
   it('lists under `ordenes` with the pagination envelope', async () => {
-    const { status, body } = await json<DispatchPreviewsByDateResponse>(
-      '/avisos-despacho/por-fecha?pageSize=5',
+    const { status, body } = await json<DispatchPreviewsResponse>(
+      '/avisos-despacho?pageSize=5',
     )
     expect(status).toBe(200)
     expect(body.ordenes).toHaveLength(5)
@@ -109,8 +109,8 @@ describe('dispatch previews by date', () => {
   })
 
   it('returns the Orden→Tienda→Contenedor→Producto tree with string numbers', async () => {
-    const { body } = await json<DispatchPreviewsByDateResponse>(
-      '/avisos-despacho/por-fecha?pageSize=1',
+    const { body } = await json<DispatchPreviewsResponse>(
+      '/avisos-despacho?pageSize=1',
     )
     const [order] = body.ordenes
     expect(order.ordenCompra).toBe('15925353')
@@ -123,8 +123,8 @@ describe('dispatch previews by date', () => {
   })
 
   it('filters by estado from fechaRealDespacho', async () => {
-    const pending = await json<DispatchPreviewsByDateResponse>(
-      '/avisos-despacho/por-fecha?estado=NODESPACHADO&pageSize=100',
+    const pending = await json<DispatchPreviewsResponse>(
+      '/avisos-despacho?estado=NODESPACHADO&pageSize=100',
     )
     expect(pending.body.ordenes.length).toBeGreaterThan(0)
     for (const order of pending.body.ordenes) {
@@ -133,68 +133,58 @@ describe('dispatch previews by date', () => {
   })
 
   it('filters by partial ordenCompra', async () => {
-    const { body } = await json<DispatchPreviewsByDateResponse>(
-      '/avisos-despacho/por-fecha?ordenCompra=592535',
+    const { body } = await json<DispatchPreviewsResponse>(
+      '/avisos-despacho?ordenCompra=592535',
     )
     expect(body.ordenes.map((o) => o.ordenCompra)).toEqual(['15925353'])
   })
 
   it('422s a half-open date range', async () => {
     const { status, body } = await json<{ error: { code: string } }>(
-      '/avisos-despacho/por-fecha?fechaDesde=2026-10-01',
+      '/avisos-despacho?fechaDesde=2026-10-01',
     )
     expect(status).toBe(422)
     expect(body.error.code).toBe('RANGO_FECHAS_INCOMPLETO')
   })
-
-  it('is not swallowed by GET /avisos-despacho/:avisoId', async () => {
-    const { status } = await json<unknown>('/avisos-despacho/por-fecha')
-    expect(status).toBe(200)
-  })
 })
 
 describe('dispatching an order', () => {
-  const patch = (body: unknown): RequestInit => ({
-    method: 'PATCH',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify(body),
-  })
-
-  it('stamps the dispatch date, then sends the notice', async () => {
-    const updated = await json<unknown>(
-      '/ordenes-compra/15925353',
-      patch({ estado: 'ALISTADO', fechaDespacho: '2026-10-15' }),
-    )
-    expect(updated.status).toBe(200)
-
-    const sent = await json<{ avisoId: string; estado: string }>(
-      '/avisos-despacho/15925353/enviar',
-      { method: 'POST' },
+  it('stamps the real dispatch date and sends the notice', async () => {
+    const sent = await json<{ ordenCompra: string; estado: string }>(
+      '/avisos-despacho/enviar',
+      post({ ordenCompra: '15925353', fechaRealDespacho: '2026-10-15' }),
     )
     expect(sent.status).toBe(200)
-    expect(sent.body).toMatchObject({ avisoId: '15925353', estado: 'ENVIADO' })
-
-    const dispatched = await json<DispatchPreviewsByDateResponse>(
-      '/avisos-despacho/por-fecha?estado=DESPACHADO',
-    )
-    expect(dispatched.body.ordenes.map((o) => o.ordenCompra)).toEqual([
-      '15925353',
-    ])
-  })
-
-  it('409s sending a notice for an order without a dispatch date', async () => {
-    const { status } = await json<unknown>('/avisos-despacho/15925353/enviar', {
-      method: 'POST',
+    expect(sent.body).toMatchObject({
+      ordenCompra: '15925353',
+      estado: 'EXITOSO',
     })
-    expect(status).toBe(409)
+
+    const dispatched = await json<DispatchPreviewsResponse>(
+      '/avisos-despacho?estado=DESPACHADO',
+    )
+    expect(dispatched.body.ordenes).toEqual([
+      expect.objectContaining({
+        ordenCompra: '15925353',
+        fechaRealDespacho: '2026-10-15',
+      }),
+    ])
   })
 
   it('404s an unknown order', async () => {
     const { status } = await json<unknown>(
-      '/ordenes-compra/nope',
-      patch({ estado: 'ALISTADO', fechaDespacho: '2026-10-15' }),
+      '/avisos-despacho/enviar',
+      post({ ordenCompra: 'nope', fechaRealDespacho: '2026-10-15' }),
     )
     expect(status).toBe(404)
+  })
+
+  it('422s a malformed fechaRealDespacho', async () => {
+    const { status } = await json<unknown>(
+      '/avisos-despacho/enviar',
+      post({ ordenCompra: '15925353', fechaRealDespacho: '15/10/2026' }),
+    )
+    expect(status).toBe(422)
   })
 })
 

@@ -1,7 +1,7 @@
 // Handlers for § 2 — Dispatch Notices (Platform → Homecenter).
 
 import { HttpResponse, http } from 'msw'
-import { API, apiError, latency, readPageParams, withinRange } from './shared'
+import { API, apiError, latency } from './shared'
 import {
   db,
   dispatchNoticeToHomecenterRequest,
@@ -9,7 +9,6 @@ import {
   nextDispatchNoticeId,
   nextLogId,
   nowIso,
-  paginate,
 } from '../data/db'
 import type { DispatchNoticeRecord, PurchaseOrderRecord } from '../data/db'
 import type {
@@ -19,26 +18,10 @@ import type {
   DispatchNoticeEan128Response,
   DispatchNoticeResult,
   DispatchNoticeStatus,
-  DispatchNoticeSummary,
   Ean128Container,
   HomecenterResult,
   ResendDispatchNoticeRequest,
 } from '#/api/types'
-
-function containerCount(notice: DispatchNoticeRecord): number {
-  return notice.tiendas.reduce((sum, t) => sum + t.contenedores.length, 0)
-}
-
-function toSummary(notice: DispatchNoticeRecord): DispatchNoticeSummary {
-  return {
-    avisoId: notice.avisoId,
-    ordenCompra: notice.ordenCompra,
-    fechaRealDespacho: notice.fechaRealDespacho,
-    cantidadContenedores: containerCount(notice),
-    estado: notice.estado,
-    fechaEnvio: notice.fechaEnvio,
-  }
-}
 
 function toDetail(notice: DispatchNoticeRecord): DispatchNoticeDetail {
   return {
@@ -197,30 +180,6 @@ function recordAttempt(
 }
 
 export const dispatchNoticesHandlers = [
-  // § 2.2
-  http.get(`${API}/avisos-despacho`, async ({ request }) => {
-    await latency()
-    const url = new URL(request.url)
-    const { page, pageSize } = readPageParams(url)
-    const ordenCompra = url.searchParams.get('ordenCompra')
-    const estado = url.searchParams.get('estado')
-    const fechaDesde = url.searchParams.get('fechaDesde')
-    const fechaHasta = url.searchParams.get('fechaHasta')
-
-    const rows = db.dispatchNotices
-      .filter((a) => (ordenCompra ? a.ordenCompra.includes(ordenCompra) : true))
-      .filter((a) => (estado ? a.estado === estado : true))
-      .filter((a) => withinRange(a.fechaRealDespacho, fechaDesde, fechaHasta))
-      .sort((a, b) =>
-        (b.fechaEnvio ?? b.fechaRealDespacho).localeCompare(
-          a.fechaEnvio ?? a.fechaRealDespacho,
-        ),
-      )
-      .map(toSummary)
-
-    return HttpResponse.json(paginate(rows, page, pageSize))
-  }),
-
   // § 2.1
   http.post(`${API}/avisos-despacho`, async ({ request }) => {
     await latency()

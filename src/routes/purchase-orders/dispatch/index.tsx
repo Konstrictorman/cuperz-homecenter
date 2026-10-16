@@ -10,18 +10,19 @@ import DispatchOrdersTable from './-DispatchOrdersTable'
 import type { DispatchOrder } from './-DispatchOrdersTable'
 import DispatchOrderDetailModal from './-DispatchOrderDetailModal'
 import GenerateLabelsModal from './-GenerateLabelsModal'
+import GenerateDispatchNoticeModal from './-GenerateDispatchNoticeModal'
 import {
   toDispatchOrderRow,
   toDispatchOrdersQuery,
 } from './-dispatchOrderPresentation'
 import type { DispatchOrdersFilterValues } from './-DispatchOrdersFilterBar'
 import {
-  dispatchPreviewsByDateQueryOptions,
-  useSendOrderDispatchNotice,
+  dispatchPreviewsQueryOptions,
+  useSendDispatchNotice,
 } from '#/api/dispatch-notices'
 import { downloadPurchaseOrderLabels } from '#/api/purchase-orders'
+import { userFacingErrorMessage } from '#/api/http'
 import { useFeedback } from '#/contexts/FeedbackContext'
-import { todayIsoDate } from '#/common/util'
 import { toDispatchNoticePayload } from './-dispatchNoticePayload'
 import '../PurchaseOrdersPage.css'
 
@@ -40,9 +41,12 @@ const DispatchOrdersPage = () => {
   // `null` closed; otherwise the order whose barcode labels are being printed.
   const [labelsOrder, setLabelsOrder] = useState<DispatchOrder | null>(null)
 
+  // `null` closed; otherwise the order whose dispatch notice is being sent.
+  const [noticeOrder, setNoticeOrder] = useState<DispatchOrder | null>(null)
+
   const feedback = useFeedback()
 
-  const sendDispatchNotice = useSendOrderDispatchNotice()
+  const sendDispatchNotice = useSendDispatchNotice()
 
   const handleFilter = (values: DispatchOrdersFilterValues) => {
     setFilters(values)
@@ -51,7 +55,7 @@ const DispatchOrdersPage = () => {
   }
 
   const { data, isError, error, isFetching } = useQuery({
-    ...dispatchPreviewsByDateQueryOptions({
+    ...dispatchPreviewsQueryOptions({
       ...toDispatchOrdersQuery(filters),
       page: paginationModel.page + 1,
       pageSize: paginationModel.pageSize,
@@ -63,12 +67,19 @@ const DispatchOrdersPage = () => {
   const rows = (data?.ordenes ?? []).map(toDispatchOrderRow)
 
   const handleGenerateDispatchNotice = (order: DispatchOrder) => {
+    setNoticeOrder(order)
+  }
+
+  const handleSendDispatchNotice = (
+    order: DispatchOrder,
+    fechaRealDespacho: string,
+  ) => {
     // TEMP(debug): the payload DispatchNoticePayloadModal used to show — remove
     // once the /avisos-despacho/{id}/enviar failure is understood.
     console.log(
       '[aviso-despacho payload]',
       JSON.stringify(
-        toDispatchNoticePayload([order.source], todayIsoDate()),
+        toDispatchNoticePayload([order.source], fechaRealDespacho),
         null,
         2,
       ),
@@ -78,7 +89,7 @@ const DispatchOrdersPage = () => {
       () =>
         sendDispatchNotice.mutateAsync({
           ordenCompra: order.ordenCompra,
-          previousFechaDespacho: order.source.fechaRealDespacho,
+          fechaRealDespacho,
         }),
       {
         success: `Se envió el aviso de despacho de la orden ${order.ordenCompra}.`,
@@ -111,7 +122,11 @@ const DispatchOrdersPage = () => {
 
       {isError ? (
         <Typography role="alert" className="purchase-orders__error">
-          No se pudieron cargar las órdenes: {error.message}
+          No se pudieron cargar las órdenes:{' '}
+          {userFacingErrorMessage(
+            error,
+            'el servidor no respondió correctamente. Intenta de nuevo más tarde.',
+          )}
         </Typography>
       ) : (
         <DispatchOrdersTable
@@ -136,6 +151,12 @@ const DispatchOrdersPage = () => {
         order={labelsOrder}
         onClose={() => setLabelsOrder(null)}
         onSubmit={handleGenerateLabels}
+      />
+
+      <GenerateDispatchNoticeModal
+        order={noticeOrder}
+        onClose={() => setNoticeOrder(null)}
+        onSubmit={handleSendDispatchNotice}
       />
     </div>
   )

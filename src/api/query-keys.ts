@@ -1,8 +1,7 @@
 // Centralised TanStack Query keys so invalidation stays consistent.
 
 import type {
-  DispatchNoticesQuery,
-  DispatchPreviewsByDateQuery,
+  DispatchPreviewsQuery,
   IntegrationLogQuery,
   PurchaseOrdersQuery,
 } from './types'
@@ -17,10 +16,8 @@ export const queryKeys = {
   },
   dispatchNotices: {
     all: () => ['dispatch-notices'] as const,
-    list: (query: DispatchNoticesQuery) =>
-      ['dispatch-notices', 'list', query] as const,
-    previewsByDate: (query: DispatchPreviewsByDateQuery) =>
-      ['dispatch-notices', 'previews-by-date', query] as const,
+    previews: (query: DispatchPreviewsQuery) =>
+      ['dispatch-notices', 'previews', query] as const,
     detail: (avisoId: string) =>
       ['dispatch-notices', 'detail', avisoId] as const,
     ean128: (avisoId: string) =>

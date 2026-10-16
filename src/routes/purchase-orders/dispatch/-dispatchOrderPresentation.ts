@@ -5,7 +5,7 @@ import type { StatusBadgeTone } from '#/components/statusBadge/StatusBadge'
 import type {
   DispatchPreviewOrder,
   DispatchPreviewStatus,
-  DispatchPreviewsByDateQuery,
+  DispatchPreviewsQuery,
 } from '#/api/types'
 import type { DispatchOrdersFilterValues } from './-DispatchOrdersFilterBar'
 import type { DispatchOrder } from './-DispatchOrdersTable'
@@ -61,9 +61,10 @@ export function toDispatchOrderRow(o: DispatchPreviewOrder): DispatchOrder {
  *  enforces that before submitting. */
 export function toDispatchOrdersQuery(
   filters: DispatchOrdersFilterValues,
-): DispatchPreviewsByDateQuery {
+): DispatchPreviewsQuery {
   const hasRange = Boolean(filters.fechaDesde && filters.fechaHasta)
   return {
+    numpedido: filters.numpedido.trim() || undefined,
     ordenCompra: filters.ordenCompra.trim() || undefined,
     estado:
       filters.estado === 'all'

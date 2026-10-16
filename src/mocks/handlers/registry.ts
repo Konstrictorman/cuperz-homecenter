@@ -5,9 +5,8 @@ import { purchaseOrdersHandlers } from './purchase-orders'
 
 export const handlers = [
   ...purchaseOrdersHandlers,
-  // Must precede dispatchNoticesHandlers — otherwise its
-  // `GET /avisos-despacho/:avisoId` would swallow `/avisos-despacho/por-fecha`
-  // by matching "por-fecha" as the :avisoId param.
+  // Kept ahead of dispatchNoticesHandlers so its fixed `/avisos-despacho/*`
+  // routes (e.g. `POST /avisos-despacho/enviar`) win over `:avisoId` ones.
   ...dispatchPreviewsHandlers,
   ...dispatchNoticesHandlers,
   ...integrationLogHandlers,
