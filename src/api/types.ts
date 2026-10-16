@@ -484,6 +484,7 @@ export type DispatchPreviewStatus = 'ALISTADO' | 'DESPACHADO'
  *  Homecenter's AvisoDespacho payload carries them. */
 export interface DispatchPreviewProduct {
   eanSku: string
+  description: string
   cantidad: string
   peso: string
   volumen: string

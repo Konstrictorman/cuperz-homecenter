@@ -13,7 +13,8 @@ export const useDispatchOrderProductsColumns =
           flex: 1,
           minWidth: 140,
         },
-        { field: 'eanSku', headerName: 'SKU (EAN)', flex: 1, minWidth: 160 },
+        { field: 'eanSku', headerName: 'SKU (EAN)', flex: 1, minWidth: 200 },
+        { field: 'description', headerName: 'Producto', flex: 1, minWidth: 200 },
         {
           field: 'cantidad',
           headerName: 'Cantidad',

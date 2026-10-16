@@ -38,6 +38,7 @@ export interface DispatchOrderProductRow {
   nombreTienda: string
   contenedor: string
   eanSku: string
+  description: string
   cantidad: number
   peso: number
   volumen: number
@@ -67,6 +68,7 @@ const DispatchOrderProductsTable = ({
             : tienda.nombreTienda,
         contenedor: contenedor.contenedor,
         eanSku: producto.eanSku,
+        description: producto.description,
         // API sends decimal strings (`"6.000"`); the grid sums numbers.
         cantidad: Number(producto.cantidad),
         peso: Number(producto.peso),

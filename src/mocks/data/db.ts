@@ -270,6 +270,10 @@ interface SeedOrder {
 
 const SEED_ORDERS = purchaseOrdersSeed as Array<SeedOrder>
 
+const SEED_DESCRIPTIONS = new Map(
+  SEED_ORDERS.flatMap((o) => o.productos).map((p) => [p.eanSku, p.descripcion]),
+)
+
 /** Every order in the seed is a Cross-Docking replenishment delivered to the
  *  same CEDI (see `scripts/generate-purchase-orders-seed.ts`'s doc comment)
  *  — these header fields are genuinely constant across all 67 real orders,
@@ -586,11 +590,28 @@ function seed(): MockDb {
   const db: MockDb = {
     purchaseOrders: [],
     dispatchNotices: [],
-    // The captured seed predates the backend sending `estado`; every order
-    // in it is undispatched.
+    // The captured seed predates the backend sending `estado` and product
+    // `description`; every order in it is undispatched, and descriptions are
+    // borrowed from the PO seed where the EAN overlaps.
     dispatchPreviews: structuredClone(
       dispatchPreviewsSeed as Array<DispatchPreviewOrder>,
-    ).map((o) => ({ ...o, estado: o.estado ?? 'ALISTADO' })),
+    ).map((o) => ({
+      ...o,
+      estado: o.estado ?? 'ALISTADO',
+      tiendas: o.tiendas.map((t) => ({
+        ...t,
+        contenedores: t.contenedores.map((c) => ({
+          ...c,
+          productos: c.productos.map((p) => ({
+            ...p,
+            description:
+              p.description ??
+              SEED_DESCRIPTIONS.get(p.eanSku) ??
+              `PRODUCTO ${p.eanSku}`,
+          })),
+        })),
+      })),
+    })),
     logs: [],
     seq: { logByDay: {}, noticeByOrder: {}, sync: 90 },
   }
