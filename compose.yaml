@@ -1,0 +1,33 @@
+# Platform frontend behind a reverse proxy (see README.md, "Docker").
+#
+#   cp .env.example .env   # then fill in the values
+#   docker compose up --build
+#
+# Values are read from `.env` (git-ignored) via interpolation — only the
+# variables each service needs are passed into it.
+
+services:
+  app:
+    build: .
+    image: cuperz-homecenter:latest
+    restart: unless-stopped
+    environment:
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?set BETTER_AUTH_SECRET in .env}
+      BETTER_AUTH_URL: ${BETTER_AUTH_URL:?set BETTER_AUTH_URL in .env}
+    # Not published: only reachable through the proxy.
+    expose:
+      - '3000'
+
+  proxy:
+    image: nginx:1.30-alpine
+    restart: unless-stopped
+    depends_on:
+      app:
+        condition: service_healthy
+    environment:
+      BACKEND_URL: ${BACKEND_URL:?set BACKEND_URL in .env}
+      NGINX_ENVSUBST_FILTER: ^BACKEND_URL$$
+    volumes:
+      - ./docker/nginx/default.conf.template:/etc/nginx/templates/default.conf.template:ro
+    ports:
+      - '${HTTP_PORT:-8080}:80'

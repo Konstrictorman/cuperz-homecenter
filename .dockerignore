@@ -1,0 +1,35 @@
+# Keep the build context to what `npm ci && npm run build` needs.
+
+# Secrets — Vite would otherwise read .env.local during `docker build` and bake
+# its VITE_* values (e.g. a dev ngrok URL) into the bundle.
+.env
+.env.*
+!.env.example
+
+# Installed / generated (rebuilt inside the image)
+node_modules
+.output
+.nitro
+.tanstack
+dist
+storybook-static
+coverage
+*.tsbuildinfo
+
+# Reference material (real Homecenter data, Postman exports) — not needed to build
+docs
+specs
+
+# Tooling / VCS / editor
+.git
+.claude
+.vscode
+.idea
+.DS_Store
+*.log
+
+# Docker files themselves
+Dockerfile
+.dockerignore
+compose.yaml
+docker

@@ -120,7 +120,7 @@ Principio de diseño: la mayoría de campos se heredan de la orden y del catálo
 
 ## Variables de entorno
 
-Validadas en `src/env.ts`. En desarrollo se leen de `.env.local` (no versionado).
+Validadas en `src/env.ts`. Plantilla: `.env.example` (copiar a `.env.local` para desarrollo o a `.env` para Docker; ambos no versionados).
 
 | Variable             | Tipo     | Descripción                                                                                                                      |
 | -------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------- |
@@ -133,6 +133,31 @@ Validadas en `src/env.ts`. En desarrollo se leen de `.env.local` (no versionado)
 | `VITE_OCI_IAM_*`     | build    | Configuración del cliente SSO (endpoint de autorización, client id) — **pendiente de definir con los valores reales de OCI IAM** |
 
 Las variables `VITE_*` se incrustan en el bundle **al compilar**; cambiarlas exige reconstruir. Las de servidor se leen en tiempo de ejecución.
+
+## Docker
+
+Una sola imagen sirve para todos los ambientes: se construye **sin** variables `VITE_*`, así que el navegador llama siempre a `/api/v1` en el mismo origen, y un proxy inverso enruta esa ruta al backend FastAPI. La configuración por ambiente es solo de tiempo de ejecución.
+
+```
+navegador ──> proxy (nginx) ──┬── /api/v1/*  ──> backend FastAPI (BACKEND_URL)
+                              └── todo lo demás ──> app (Nitro, puerto 3000)
+```
+
+```bash
+cp .env.example .env      # completar BETTER_AUTH_SECRET, BETTER_AUTH_URL, BACKEND_URL
+docker compose up --build # http://localhost:8080 (HTTP_PORT)
+```
+
+| Archivo                              | Contenido                                                                                            |
+| ------------------------------------ | ---------------------------------------------------------------------------------------------------- |
+| `Dockerfile`                         | Build multi-etapa; la imagen final solo contiene `.output/` (servidor autocontenido), usuario `node` |
+| `compose.yaml`                       | Servicios `app` y `proxy`; solo el proxy publica puerto                                              |
+| `docker/nginx/default.conf.template` | Enrutamiento del proxy (`BACKEND_URL` se sustituye al arrancar)                                      |
+| `.dockerignore`                      | Excluye `.env*` (evita incrustar valores locales en el bundle), `docs/`, `node_modules`, etc.        |
+
+- No pasar `VITE_*` en tiempo de ejecución (`docker run -e VITE_…`): el navegador seguiría usando el valor compilado.
+- Los secretos (`BETTER_AUTH_SECRET`) nunca van en `ARG`/`ENV` del `Dockerfile`; se inyectan al contenedor.
+- En QA/Producción el proxy puede ser otro (p. ej. el balanceador de OCI) siempre que enrute `/api/v1/*` al backend y el resto a la app.
 
 ## Estado
 
