@@ -1,28 +1,14 @@
 // Thin fetch wrapper for the platform's own backend (`/api/v1`).
 // Every non-2xx response is normalised into an `ApiError`.
 
-import { env } from '#/env'
 import type { ApiErrorBody } from './types'
 
-const API_PATH = '/api/v1'
-
 /**
- * Same-origin `/api/v1` unless `VITE_API_BASE_URL` points at a real backend
- * (e.g. an ngrok tunnel in dev, or the deployed QA/Production host).
+ * Always same-origin: a reverse proxy forwards `/api/v1/*` to the FastAPI
+ * backend at `BACKEND_URL` — the Vite dev server's proxy under `npm run dev`
+ * (vite.config.ts), nginx in Docker (docker/nginx/default.conf.template).
  */
-const API_BASE_URL = env.VITE_API_BASE_URL
-  ? `${env.VITE_API_BASE_URL}${API_PATH}`
-  : API_PATH
-
-/**
- * ngrok's free tier serves an HTML interstitial to browser-looking requests
- * instead of proxying straight through, which would break JSON parsing here.
- * This header opts the tunnel out of that page — harmless against anything
- * else.
- */
-const EXTRA_HEADERS: Record<string, string> = API_BASE_URL.includes('ngrok')
-  ? { 'ngrok-skip-browser-warning': 'true' }
-  : {}
+const API_BASE_URL = '/api/v1'
 
 /**
  * Dev-only readiness gate. When the MSW mock layer is enabled it registers a
@@ -101,7 +87,6 @@ export async function apiFetch<T>(
     headers: {
       Accept: 'application/json',
       ...(body !== undefined ? { 'Content-Type': 'application/json' } : {}),
-      ...EXTRA_HEADERS,
       ...headers,
     },
     body: body !== undefined ? JSON.stringify(body) : undefined,

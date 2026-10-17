@@ -8,7 +8,10 @@
 
 services:
   app:
-    build: .
+    build:
+      context: .
+      args:
+        VITE_APP_TITLE: ${VITE_APP_TITLE:-}
     image: cuperz-homecenter:latest
     restart: unless-stopped
     environment:

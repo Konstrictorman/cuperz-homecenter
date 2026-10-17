@@ -2,7 +2,7 @@
 
 # One image for every environment: the browser calls the backend on the same
 # origin (`/api/v1`, routed by the reverse proxy — see compose.yaml), so no
-# VITE_* variable is set at build time. Runtime config (BETTER_AUTH_*) comes
+# backend URL is baked into the build. Runtime config (BETTER_AUTH_*) comes
 # from the container environment. See README.md, "Docker".
 
 ARG NODE_VERSION=24
@@ -15,6 +15,9 @@ COPY package.json package-lock.json ./
 RUN npm ci --no-audit --no-fund
 
 COPY . .
+# Not secret, same in every environment — baked into the bundle like any
+# VITE_* variable. Optional: the app falls back to its own default title.
+ARG VITE_APP_TITLE
 RUN npm run build
 
 # --- runtime -----------------------------------------------------------------

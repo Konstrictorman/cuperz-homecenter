@@ -1,10 +1,11 @@
 # Single public origin for the platform: `/api/v1/*` goes to the FastAPI
-# backend, everything else to the TanStack Start (Nitro) server. This is what
-# lets the image be built without VITE_API_BASE_URL — the browser always calls
-# same-origin `/api/v1`.
+# backend, everything else to the TanStack Start (Nitro) server. The browser
+# always calls same-origin `/api/v1` (src/api/http.ts), so no backend URL is
+# baked into the image. Under `npm run dev` the Vite dev server does the same
+# routing (vite.config.ts).
 #
 # The official nginx image renders this template with envsubst at startup;
-# only ${BACKEND_URL} is substituted (see NGINX_ENVSUBST_FILTER in
+# only the BACKEND_URL variable is substituted (see NGINX_ENVSUBST_FILTER in
 # compose.yaml) — plain `$var`s below are nginx's own variables.
 
 server {
@@ -23,9 +24,6 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
-        # Skips ngrok's browser interstitial when the backend is tunneled;
-        # ignored by anything else.
-        proxy_set_header ngrok-skip-browser-warning true;
         # PDF generation waits on Homecenter.
         proxy_read_timeout 120s;
     }

@@ -19,6 +19,7 @@ import { FeedbackProvider } from '#/contexts/FeedbackContext'
 import Breadcrumbs from '#/components/breadcrumbs/Breadcrumbs'
 import NotFound from '#/components/notFound/NotFound'
 import ErrorComponent from '#/components/errorComponent/ErrorComponent'
+import { env } from '#/env'
 
 const themeInitScript = `
 (function () {
@@ -49,7 +50,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: 'TanStack Start Starter',
+        title: env.VITE_APP_TITLE ?? 'Cuperz Homecenter',
       },
     ],
     links: [

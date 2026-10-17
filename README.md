@@ -24,8 +24,21 @@ Aplicación React (TanStack Start, con SSR sobre Nitro) que consume la API REST 
 
 ```bash
 npm install
-npm run dev          # http://localhost:3000
+cp .env.example .env.local   # completar BACKEND_URL y BETTER_AUTH_SECRET
+npm run dev                  # http://localhost:3000
 ```
+
+El navegador llama siempre a `/api/v1` en el mismo origen. En desarrollo, el servidor de `npm run dev` reenvía `/api/v1/**` al backend FastAPI indicado en `BACKEND_URL` (p. ej. un túnel ngrok), igual que hace nginx en Docker:
+
+```
+navegador ──> npm run dev (:3000) ──┬── /api/v1/**  ──> backend FastAPI (BACKEND_URL)
+                                    └── todo lo demás ──> la app
+```
+
+- El proxy de desarrollo es el `devProxy` de Nitro, configurado en `vite.config.ts`. **No** usar `server.proxy` de Vite: el servidor de TanStack Start (Nitro) responde antes y ese proxy nunca se ejecuta (devuelve 404).
+- `BACKEND_URL` es solo el origen (esquema + host[:puerto]), sin ruta ni `/` final.
+- Los cambios en `.env.local` o `vite.config.ts` requieren reiniciar `npm run dev`.
+- Sin backend disponible: `VITE_ENABLE_MOCKS=true` sirve datos simulados (MSW, ver `docs/mock-api.md`). Sin `BACKEND_URL` y sin mocks, las llamadas a `/api/v1` devuelven 404.
 
 | Script                    | Uso                                |
 | ------------------------- | ---------------------------------- |
@@ -60,7 +73,10 @@ Si cambian los tokens, actualizar `src/tokens.css` **y** los mapas de color de `
 
 ```
 Frontend (React, SSR)
-   │  REST/JSON + Bearer token
+   │  REST/JSON + Bearer token, siempre a /api/v1 en el mismo origen
+   ▼
+Proxy (dev: Nitro devProxy · Docker: nginx)
+   │
    ▼
 Backend propio (Python) ──> API REST Homecenter
    │
@@ -78,7 +94,7 @@ El frontend nunca llama a Homecenter directamente. Todo el contrato de datos que
 
 ## Consumo de API
 
-- Base URL configurable por ambiente (ver Variables de entorno).
+- Ruta fija `/api/v1` en el mismo origen (`src/api/http.ts`); ninguna URL de backend se incrusta en el bundle. El destino se configura solo en el proxy con `BACKEND_URL` (ver Desarrollo y Docker).
 - Todas las respuestas de listado usan el sobre `{ data: [...], pagination: {...} }`.
 - Todos los errores usan el formato `{ error: { code, message, details } }` — mapear a mensajes de UI por `code`, no por `message` (el texto puede cambiar).
 - Fechas: la API expone/recibe ISO 8601 (`YYYY-MM-DD`); el formato `DD/MM/AAAA` es exclusivo del contrato con Homecenter y lo traduce el backend — el frontend no debe reimplementar esa conversión.
@@ -122,21 +138,21 @@ Principio de diseño: la mayoría de campos se heredan de la orden y del catálo
 
 Validadas en `src/env.ts`. Plantilla: `.env.example` (copiar a `.env.local` para desarrollo o a `.env` para Docker; ambos no versionados).
 
-| Variable             | Tipo     | Descripción                                                                                                                      |
-| -------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `VITE_API_BASE_URL`  | build    | Origen del backend propio (se le añade `/api/v1`). Sin definir → mismo origen (`/api/v1`)                                        |
-| `VITE_ENABLE_MOCKS`  | build    | `true`/`1` activa el mock MSW en lugar del backend real                                                                          |
-| `VITE_APP_TITLE`     | build    | Opcional                                                                                                                         |
-| `BETTER_AUTH_URL`    | servidor | URL base para Better Auth                                                                                                        |
-| `BETTER_AUTH_SECRET` | servidor | Secreto de Better Auth                                                                                                           |
-| `SERVER_URL`         | servidor | Opcional                                                                                                                         |
-| `VITE_OCI_IAM_*`     | build    | Configuración del cliente SSO (endpoint de autorización, client id) — **pendiente de definir con los valores reales de OCI IAM** |
+| Variable             | Tipo     | Descripción                                                                                                                                                                                                        |
+| -------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `BACKEND_URL`        | proxy    | Origen del backend FastAPI (sin ruta ni `/` final). El navegador siempre llama a `/api/v1` en el mismo origen y el proxy lo reenvía aquí: `devProxy` de Nitro en `npm run dev` (`vite.config.ts`), nginx en Docker |
+| `VITE_ENABLE_MOCKS`  | build    | `true`/`1` activa el mock MSW en lugar del backend real                                                                                                                                                            |
+| `VITE_APP_TITLE`     | build    | Opcional                                                                                                                                                                                                           |
+| `BETTER_AUTH_URL`    | servidor | URL base para Better Auth                                                                                                                                                                                          |
+| `BETTER_AUTH_SECRET` | servidor | Secreto de Better Auth                                                                                                                                                                                             |
+| `SERVER_URL`         | servidor | Opcional                                                                                                                                                                                                           |
+| `VITE_OCI_IAM_*`     | build    | Configuración del cliente SSO (endpoint de autorización, client id) — **pendiente de definir con los valores reales de OCI IAM**                                                                                   |
 
 Las variables `VITE_*` se incrustan en el bundle **al compilar**; cambiarlas exige reconstruir. Las de servidor se leen en tiempo de ejecución.
 
 ## Docker
 
-Una sola imagen sirve para todos los ambientes: se construye **sin** variables `VITE_*`, así que el navegador llama siempre a `/api/v1` en el mismo origen, y un proxy inverso enruta esa ruta al backend FastAPI. La configuración por ambiente es solo de tiempo de ejecución.
+Una sola imagen sirve para todos los ambientes: no lleva ninguna URL de backend incrustada; el navegador llama siempre a `/api/v1` en el mismo origen, y un proxy inverso enruta esa ruta al backend FastAPI (igual que el proxy de desarrollo en `npm run dev`). La configuración por ambiente es solo de tiempo de ejecución.
 
 ```
 navegador ──> proxy (nginx) ──┬── /api/v1/*  ──> backend FastAPI (BACKEND_URL)
@@ -155,6 +171,7 @@ docker compose up --build # http://localhost:8080 (HTTP_PORT)
 | `docker/nginx/default.conf.template` | Enrutamiento del proxy (`BACKEND_URL` se sustituye al arrancar)                                      |
 | `.dockerignore`                      | Excluye `.env*` (evita incrustar valores locales en el bundle), `docs/`, `node_modules`, etc.        |
 
+- `VITE_APP_TITLE` (opcional, en `.env`) se pasa como argumento de build; cambiarlo exige `docker compose up -d --build`.
 - No pasar `VITE_*` en tiempo de ejecución (`docker run -e VITE_…`): el navegador seguiría usando el valor compilado.
 - Los secretos (`BETTER_AUTH_SECRET`) nunca van en `ARG`/`ENV` del `Dockerfile`; se inyectan al contenedor.
 - En QA/Producción el proxy puede ser otro (p. ej. el balanceador de OCI) siempre que enrute `/api/v1/*` al backend y el resto a la app.
