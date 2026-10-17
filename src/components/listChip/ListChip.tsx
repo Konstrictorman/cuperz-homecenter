@@ -17,7 +17,12 @@ export interface ListChipProps extends Omit<
   items: string[]
 }
 
-const ListChip = ({ items, color = 'info', className, ...props }: ListChipProps) => {
+const ListChip = ({
+  items,
+  color = 'info',
+  className,
+  ...props
+}: ListChipProps) => {
   const chipRef = useRef<HTMLDivElement>(null)
   const [open, setOpen] = useState(false)
   const label = items.length > 9 ? '9+' : String(items.length)

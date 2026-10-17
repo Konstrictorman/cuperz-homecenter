@@ -2154,7 +2154,7 @@ describe('GroupedDataTable — aggregation header menu', () => {
     ).not.toBeInTheDocument()
   })
 
-  it("only folds an \"Agregación\" dropdown into the numeric, non-groupBy columns' own menu", async () => {
+  it('only folds an "Agregación" dropdown into the numeric, non-groupBy columns\' own menu', async () => {
     const user = userEvent.setup()
     render(
       <GroupedDataTable

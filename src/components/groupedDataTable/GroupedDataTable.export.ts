@@ -120,7 +120,12 @@ export function buildPdfSummaryRow<TRow extends GridValidRowModel>(
     const headerName = column.headerName ?? column.field
     const rawValue = grandTotals[column.field]
     const formatted = column.valueFormatter
-      ? column.valueFormatter(rawValue as never, undefined as never, column, EXPORT_API_REF)
+      ? column.valueFormatter(
+          rawValue as never,
+          undefined as never,
+          column,
+          EXPORT_API_REF,
+        )
       : rawValue
     return `Total ${headerName}: ${formatExportValue(formatted)}`
   })

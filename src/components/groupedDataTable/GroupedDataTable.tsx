@@ -904,7 +904,12 @@ function formatAggregateValue<TRow extends GridValidRowModel>(
     return ''
   }
   return column.valueFormatter
-    ? column.valueFormatter(value as never, row as never, column, AGGREGATE_API_REF)
+    ? column.valueFormatter(
+        value as never,
+        row as never,
+        column,
+        AGGREGATE_API_REF,
+      )
     : value
 }
 
@@ -1031,7 +1036,11 @@ function toGroupAwareColumn<TRow extends GridValidRowModel>(
           )
         }
         if (isAggregatedField) {
-          return formatAggregateValue(column, group, group.aggregates[column.field])
+          return formatAggregateValue(
+            column,
+            group,
+            group.aggregates[column.field],
+          )
         }
         return ''
       }

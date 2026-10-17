@@ -7,7 +7,7 @@
 // `scripts/generate-purchase-orders-seed.ts` (see that script's doc comment
 // for why it's scoped to Cross-Docking orders only). `faker` only fills the
 // gaps that export doesn't carry at all (per-line payment/unit terms) and
-// drives the order-status variety (PROCESANDO/CON_ERROR/DESPACHADA split)
+// drives the order-status variety (PROCESANDO/CON_ERROR/DESPACHADO split)
 // the export's own 3-value ESTADO can't express — see `buildPurchaseOrder`
 // below for exactly which fields are real vs. synthetic.
 //
@@ -23,7 +23,10 @@ import type {
   DispatchNoticeAttempt,
   DispatchNoticeStatus,
   DispatchNoticeStoreInput,
+  DispatchPreviewContainer,
   DispatchPreviewOrder,
+  DispatchPreviewProduct,
+  DispatchPreviewStore,
   HomecenterResult,
   IntegrationLogDetail,
   IsoDateTime,
@@ -299,12 +302,12 @@ const BUYER_ENTITY = {
  *  "4-ESTADO FINAL" — that single value can't tell a cleanly dispatched
  *  order from one still in transit or one that errored out, so this mock
  *  splits them (seeded, so repeatable) in roughly the same proportions the
- *  old faker-only generator used (2 DESPACHADA : 1 PROCESANDO : 1 CON_ERROR)
+ *  old faker-only generator used (2 DESPACHADO : 1 PROCESANDO : 1 CON_ERROR)
  *  purely so the dispatch-notice and integration-log screens still have
  *  something of each status to render. Not derived from the export. */
 const FINAL_STATUS_SPLIT: Array<OrderStatus> = [
-  'DESPACHADA',
-  'DESPACHADA',
+  'DESPACHADO',
+  'DESPACHADO',
   'PROCESANDO',
   'CON_ERROR',
 ]
@@ -328,7 +331,7 @@ function buildLineItem(
       : 0
 
   let estadoLinea: OrderLineStatus = 'PENDIENTE'
-  if (estado === 'DESPACHADA') estadoLinea = 'DESPACHADA'
+  if (estado === 'DESPACHADO') estadoLinea = 'DESPACHADO'
   else if (estado === 'PROCESANDO') estadoLinea = 'PARCIAL'
   else if (estado === 'CON_ERROR') {
     estadoLinea = faker.datatype.boolean(0.5)
@@ -395,9 +398,9 @@ function buildPurchaseOrder(seedOrder: SeedOrder): PurchaseOrderRecord {
   // inventing a code.
   const estadoOc =
     seedOrder.estadoRaw === 'FINAL' ? '4-ESTADO FINAL' : '1-PENDIENTE'
-  const fechaDespacho = estado === 'DESPACHADA' ? ultimaActualizacionDate : null
+  const fechaDespacho = estado === 'DESPACHADO' ? ultimaActualizacionDate : null
   const codigoSesionRecibo =
-    estado === 'DESPACHADA' && faker.datatype.boolean(0.5)
+    estado === 'DESPACHADO' && faker.datatype.boolean(0.5)
       ? `REC-${ultimaActualizacionDate.slice(0, 10).replace(/-/g, '')}-${faker.number.int({ min: 1, max: 9 })}`
       : null
 
@@ -476,7 +479,7 @@ function purchaseOrderToHomecenterRequest(order: PurchaseOrderRecord) {
  *  docs/especificacion-endpoints-backend (2).md, "Convenciones generales"). */
 export const MOCK_ESTADO_SKU_CODE: Record<OrderLineStatus, string> = {
   PENDIENTE: '1-PENDIENTE',
-  DESPACHADA: '2-DESPACHADA',
+  DESPACHADO: '2-DESPACHADO',
   PARCIAL: '3-PARCIAL',
   CANCELADA: '4-CANCELADA',
   SUPERA_SOLICITADO: '5-SUPERA_SOLICITADO',
@@ -585,6 +588,24 @@ function dispatchNoticeToHomecenterRequest(notice: DispatchNoticeRecord) {
   }
 }
 
+/** `DispatchPreviewOrder` as captured in `dispatch-previews-seed.json` —
+ *  products may lack `description` (filled in by `seed()`). */
+type DispatchPreviewSeedOrder = Omit<DispatchPreviewOrder, 'tiendas'> & {
+  tiendas: Array<
+    Omit<DispatchPreviewStore, 'contenedores'> & {
+      contenedores: Array<
+        Omit<DispatchPreviewContainer, 'productos'> & {
+          productos: Array<
+            Omit<DispatchPreviewProduct, 'description'> & {
+              description?: string
+            }
+          >
+        }
+      >
+    }
+  >
+}
+
 function seed(): MockDb {
   faker.seed(8467343)
   const db: MockDb = {
@@ -594,8 +615,8 @@ function seed(): MockDb {
     // `description`; every order in it is undispatched, and descriptions are
     // borrowed from the PO seed where the EAN overlaps.
     dispatchPreviews: structuredClone(
-      dispatchPreviewsSeed as Array<DispatchPreviewOrder>,
-    ).map((o) => ({
+      dispatchPreviewsSeed as Array<DispatchPreviewSeedOrder>,
+    ).map((o): DispatchPreviewOrder => ({
       ...o,
       estado: o.estado ?? 'ALISTADO',
       tiendas: o.tiendas.map((t) => ({
@@ -687,16 +708,16 @@ function seed(): MockDb {
 
   // Dispatch notices for a slice of the dispatched / processing orders.
   const candidates = db.purchaseOrders.filter(
-    (o) => o.estado === 'DESPACHADA' || o.estado === 'PROCESANDO',
+    (o) => o.estado === 'DESPACHADO' || o.estado === 'PROCESANDO',
   )
   for (const order of faker.helpers.arrayElements(
     candidates,
     Math.min(candidates.length, 12),
   )) {
     const status = faker.helpers.arrayElement<DispatchNoticeStatus>([
-      'BORRADOR',
-      'ENVIADO',
-      'ENVIADO',
+      'PENDIENTE',
+      'DESPACHADA',
+      'DESPACHADA',
       'CON_NOVEDAD',
       'ERROR_ENVIO',
     ])
@@ -733,7 +754,7 @@ function seed(): MockDb {
       avisoId,
       ordenCompra: order.ordenCompra,
       fechaRealDespacho: isoDate(dispatchedOn),
-      enviarInmediatamente: status !== 'BORRADOR',
+      enviarInmediatamente: status !== 'PENDIENTE',
       tiendas: stores,
       estado: status,
       intentos: 0,
@@ -743,7 +764,7 @@ function seed(): MockDb {
       historialIntentos: [],
     }
 
-    if (status !== 'BORRADOR') {
+    if (status !== 'PENDIENTE') {
       const when = dispatchedOn
       const logId = nextLogId(db, when)
       notice.intentos = 1
@@ -782,7 +803,7 @@ function seed(): MockDb {
         tipo: 'AVISO_DESPACHO',
         fecha: isoDateTime(when),
         estado:
-          status === 'ENVIADO'
+          status === 'DESPACHADA'
             ? 'EXITOSO'
             : status === 'CON_NOVEDAD'
               ? 'CON_NOVEDAD'

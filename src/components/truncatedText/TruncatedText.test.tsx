@@ -60,9 +60,7 @@ describe('TruncatedText', () => {
 
     render(<TruncatedText text="Fits within its container" />)
 
-    expect(
-      screen.getByText('Fits within its container'),
-    ).toBeInTheDocument()
+    expect(screen.getByText('Fits within its container')).toBeInTheDocument()
   })
 
   it('clips to a single line with a CSS ellipsis by default when the text overflows horizontally', () => {
@@ -70,9 +68,7 @@ describe('TruncatedText', () => {
 
     render(<TruncatedText text="A very long line of text that overflows" />)
 
-    const element = screen.getByText(
-      'A very long line of text that overflows',
-    )
+    const element = screen.getByText('A very long line of text that overflows')
     expect(element).toHaveClass('truncated-text', 'truncated-text--single-line')
     expect(element).not.toHaveClass('truncated-text--multi-line')
   })
@@ -85,7 +81,7 @@ describe('TruncatedText', () => {
     const element = screen.getByText('A tall block of wrapped text')
     expect(element).toHaveClass('truncated-text', 'truncated-text--multi-line')
     expect(element).not.toHaveClass('truncated-text--single-line')
-    expect(element.style.WebkitLineClamp).toBe('3')
+    expect(element.style.webkitLineClamp).toBe('3')
   })
 
   it('shows a tooltip with the full text when hovering a truncated element', async () => {

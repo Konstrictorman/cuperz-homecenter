@@ -95,7 +95,7 @@ function validateQuantities(
   return errors
 }
 
-/** Homecenter "replies": ENVIADO unless a line reaches 100% of what was ordered. */
+/** Homecenter "replies": DESPACHADA unless a line reaches 100% of what was ordered. */
 function simulateHomecenter(
   notice: DispatchNoticeRecord,
   order: PurchaseOrderRecord,
@@ -142,7 +142,7 @@ function simulateHomecenter(
     }
   }
   return {
-    estado: 'ENVIADO',
+    estado: 'DESPACHADA',
     homecenter: { isError: false, errorMessage: null },
   }
 }
@@ -167,7 +167,7 @@ function recordAttempt(
     tipo: 'AVISO_DESPACHO',
     fecha: nowIso(),
     estado:
-      status === 'ENVIADO'
+      status === 'DESPACHADA'
         ? 'EXITOSO'
         : status === 'CON_NOVEDAD'
           ? 'CON_NOVEDAD'
@@ -211,7 +211,7 @@ export const dispatchNoticesHandlers = [
       fechaRealDespacho: body.fechaRealDespacho,
       enviarInmediatamente: body.enviarInmediatamente,
       tiendas: body.tiendas,
-      estado: 'BORRADOR',
+      estado: 'PENDIENTE',
       intentos: 0,
       integracionLogId: null,
       fechaEnvio: null,
@@ -325,7 +325,7 @@ export const dispatchNoticesHandlers = [
           'Aviso de despacho no encontrado.',
         )
       }
-      if (notice.estado === 'ENVIADO' || notice.estado === 'BORRADOR') {
+      if (notice.estado === 'DESPACHADA' || notice.estado === 'PENDIENTE') {
         return apiError(
           409,
           'AVISO_NO_REENVIABLE',
@@ -354,7 +354,7 @@ export const dispatchNoticesHandlers = [
       const { estado, homecenter } = order
         ? simulateHomecenter(notice, order)
         : {
-            estado: 'ENVIADO' as DispatchNoticeStatus,
+            estado: 'DESPACHADA' as DispatchNoticeStatus,
             homecenter: notice.homecenter,
           }
       notice.homecenter = homecenter

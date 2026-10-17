@@ -223,7 +223,7 @@ describe('dispatch notices', () => {
     expect(body.error.details.length).toBeGreaterThan(0)
   })
 
-  it('creates and sends a notice (201 ENVIADO)', async () => {
+  it('creates and sends a notice (201 DESPACHADA)', async () => {
     const { status, body } = await json<DispatchNoticeResult>(
       '/avisos-despacho',
       post({
@@ -251,7 +251,7 @@ describe('dispatch notices', () => {
       }),
     )
     expect(status).toBe(201)
-    expect(body.estado).toBe('ENVIADO')
+    expect(body.estado).toBe('DESPACHADA')
     expect(body.homecenter.isError).toBe(false)
   })
 
@@ -282,7 +282,7 @@ describe('dispatch notices', () => {
         ],
       }),
     )
-    expect(body.estado).toBe('BORRADOR')
+    expect(body.estado).toBe('PENDIENTE')
   })
 })
 

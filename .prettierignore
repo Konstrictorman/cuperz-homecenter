@@ -1,3 +1,5 @@
 package-lock.json
 pnpm-lock.yaml
 yarn.lock
+# Third-party reference material (Postman/swagger exports, specs, wireframes)
+docs/

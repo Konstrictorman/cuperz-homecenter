@@ -23,7 +23,10 @@
   background-color: var(--line) !important;
 }
 
-.data-table .MuiDataGrid-actionsCell .MuiIconButton-root.Mui-disabled .MuiSvgIcon-root {
+.data-table
+  .MuiDataGrid-actionsCell
+  .MuiIconButton-root.Mui-disabled
+  .MuiSvgIcon-root {
   opacity: 0.35;
 }
 
@@ -98,11 +101,15 @@
  * while putting the ellipsis back on the right, consistent with every
  * other column. `justify-content: flex-end` re-creates the flush-right
  * text position the container's own reversal used to give it for free. */
-.data-table .MuiDataGrid-columnHeader--alignRight .MuiDataGrid-columnHeaderDraggableContainer {
+.data-table
+  .MuiDataGrid-columnHeader--alignRight
+  .MuiDataGrid-columnHeaderDraggableContainer {
   flex-direction: row !important;
 }
 
-.data-table .MuiDataGrid-columnHeader--alignRight .MuiDataGrid-columnHeaderTitleContainer {
+.data-table
+  .MuiDataGrid-columnHeader--alignRight
+  .MuiDataGrid-columnHeaderTitleContainer {
   justify-content: flex-end !important;
 }
 

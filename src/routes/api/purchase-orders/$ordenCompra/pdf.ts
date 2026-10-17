@@ -10,9 +10,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { env } from '#/env'
 
-export const Route = createFileRoute(
-  '/api/purchase-orders/$ordenCompra/pdf',
-)({
+export const Route = createFileRoute('/api/purchase-orders/$ordenCompra/pdf')({
   server: {
     handlers: {
       GET: async ({ params }) => {
@@ -39,7 +37,8 @@ export const Route = createFileRoute(
             {
               error: {
                 code: 'HOMECENTER_NO_DISPONIBLE',
-                message: 'No se pudo contactar a Homecenter para generar el PDF.',
+                message:
+                  'No se pudo contactar a Homecenter para generar el PDF.',
                 details: [],
               },
             },
