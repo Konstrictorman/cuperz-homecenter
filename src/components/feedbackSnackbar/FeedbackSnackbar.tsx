@@ -3,7 +3,7 @@ import type { AlertColor } from '@mui/material/Alert'
 import Snackbar from '@mui/material/Snackbar'
 import './FeedbackSnackbar.css'
 
-export interface FeedbackSnackbarProps {
+interface FeedbackSnackbarProps {
   open: boolean
   message: string
   severity: AlertColor

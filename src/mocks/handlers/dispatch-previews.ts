@@ -8,8 +8,7 @@
 // range return nothing here until an order is dispatched through the handlers
 // below (also undocumented in the spec; per the Postman collection):
 // `POST /avisos-despacho/enviar` marks it `DESPACHADO`, stamps the real
-// dispatch date and sends the notice; `PATCH /ordenes-compra/:ordenCompra`
-// can also set the estado and date.
+// dispatch date and sends the notice.
 
 import { HttpResponse, http } from 'msw'
 import { API, apiError, latency, readPageParams, withinRange } from './shared'
@@ -18,7 +17,6 @@ import type {
   DispatchPreviewsResponse,
   SendDispatchNoticeRequest,
   SendDispatchNoticeResponse,
-  UpdatePurchaseOrderRequest,
 } from '#/api/types'
 
 function orderNotFound(ordenCompra: string) {
@@ -67,34 +65,8 @@ export const dispatchPreviewsHandlers = [
     })
   }),
 
-  // Writes through to both stores: a dispatch-preview order may or may not
-  // also exist among the faker-backed purchase orders.
-  http.patch(
-    `${API}/ordenes-compra/:ordenCompra`,
-    async ({ params, request }) => {
-      await latency()
-      const ordenCompra = String(params.ordenCompra)
-      const preview = db.dispatchPreviews.find(
-        (o) => o.ordenCompra === ordenCompra,
-      )
-      const order = db.purchaseOrders.find((o) => o.ordenCompra === ordenCompra)
-      if (!preview && !order) return orderNotFound(ordenCompra)
-
-      const body = (await request.json()) as UpdatePurchaseOrderRequest
-      if (preview) {
-        preview.estado = body.estado
-        preview.fechaRealDespacho = body.fechaDespacho
-      }
-      if (order) {
-        order.estado = body.estado
-        order.fechaDespacho = body.fechaDespacho
-      }
-      return HttpResponse.json({ ordenCompra, ...body })
-    },
-  ),
-
-  // Stamps the real dispatch date on both stores (like the PATCH above),
-  // then "sends" the notice — which always succeeds here.
+  // Stamps the real dispatch date on both stores, then "sends" the notice —
+  // which always succeeds here.
   http.post(`${API}/avisos-despacho/enviar`, async ({ request }) => {
     await latency()
     const body = (await request.json()) as SendDispatchNoticeRequest

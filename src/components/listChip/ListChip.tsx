@@ -9,7 +9,7 @@ import Typography from '@mui/material/Typography'
 import clsx from 'clsx'
 import './ListChip.css'
 
-export interface ListChipProps extends Omit<
+interface ListChipProps extends Omit<
   ChipProps,
   'label' | 'onClick' | 'disabled'
 > {

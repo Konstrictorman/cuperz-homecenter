@@ -8,7 +8,7 @@
 // ===========================================================================
 
 /** Paging metadata returned inside every list envelope. */
-export interface Pagination {
+interface Pagination {
   page: number
   pageSize: number
   total: number
@@ -31,14 +31,14 @@ export interface ApiErrorBody {
 }
 
 /** Query params shared by every list endpoint. */
-export interface PaginationQuery {
+interface PaginationQuery {
   page?: number
   /** Default 20, max 100. */
   pageSize?: number
 }
 
 /** ISO-8601 calendar date, `YYYY-MM-DD` (the API's own format). */
-export type IsoDate = string
+type IsoDate = string
 
 /** ISO-8601 timestamp, `YYYY-MM-DDTHH:mm:ssZ`. */
 export type IsoDateTime = string
@@ -118,7 +118,7 @@ export interface PurchaseOrderSummary {
  *  `cantidadDevuelta`→`cantidadDevueltaSku`, `costoUnitario`→`costoSku`);
  *  `condicionPago`/`descuentoSku` don't appear on the wire at all. Treat this
  *  shape as the real contract for this endpoint. */
-export interface PurchaseOrderStoreLine {
+interface PurchaseOrderStoreLine {
   /** Platform-only internal id, not part of Homecenter's contract. */
   productoId: number
   /** Platform-only internal id, not part of Homecenter's contract. */
@@ -159,7 +159,7 @@ export interface PurchaseOrderStore {
 
 /** Raw `NEGOCIACION`/`*_VE`/`NIT_CONSTRUCTOR` project-sale block. Not yet
  *  surfaced in any screen — see SPEC 02. */
-export interface PurchaseOrderNegotiation {
+interface PurchaseOrderNegotiation {
   negociacion: string
   valorNegociacionVe: string
   tipoEntregaVe: string
@@ -275,7 +275,7 @@ export interface PurchaseOrdersQuery extends PaginationQuery {
   tienda?: string
 }
 
-export type SyncMode = 'INCREMENTAL' | 'COMPLETA'
+type SyncMode = 'INCREMENTAL' | 'COMPLETA'
 
 /** Body for `POST /api/v1/ordenes-compra/sincronizar` (§ 1.3). */
 export interface SyncPurchaseOrdersRequest {
@@ -293,15 +293,6 @@ export interface ReprocessOrderResponse {
   ordenCompra: string
   estado: 'PROCESANDO'
   intentoNumero: number
-}
-
-/** Body for `PATCH /api/v1/ordenes-compra/{ordenCompra}` — not in the
- *  backend spec. Used to stamp the real dispatch date on an order right
- *  before its dispatch notice is sent. */
-export interface UpdatePurchaseOrderRequest {
-  estado: OrderStatus
-  /** `null` clears it — what a failed send rolls back to. */
-  fechaDespacho: IsoDate | null
 }
 
 /**
@@ -326,7 +317,7 @@ export type DispatchNoticeStatus =
 
 // --- Hierarchy Order → Store → Container → Product (request payload) ---
 
-export interface DispatchNoticeProductInput {
+interface DispatchNoticeProductInput {
   eanSku: string
   cantidad: number
   /** Required per product. */
@@ -335,7 +326,7 @@ export interface DispatchNoticeProductInput {
   volumen: number
 }
 
-export interface DispatchNoticeContainerInput {
+interface DispatchNoticeContainerInput {
   /** Alphanumeric / consecutive code, e.g. `CONT001`. */
   contenedor: string
   productos: Array<DispatchNoticeProductInput>
@@ -357,7 +348,7 @@ export interface CreateDispatchNoticeRequest {
 
 // --- Homecenter's response, as interpreted by the backend ---
 
-export interface HomecenterIssueItem {
+interface HomecenterIssueItem {
   eanSku: string
   eanTienda: string
   mensaje: string
@@ -417,7 +408,7 @@ export interface DispatchNoticeEan128Response {
 
 // --- Resend (§ 2.5) ---
 
-export interface DispatchNoticeCorrection {
+interface DispatchNoticeCorrection {
   eanSku: string
   eanTienda: string
   contenedor: string
@@ -540,10 +531,10 @@ export interface DispatchPreviewsQuery extends PaginationQuery {
 // Integration Log (shared across all 3 processes) · § 3
 // ===========================================================================
 
-export type IntegrationLogType =
+type IntegrationLogType =
   'ORDEN_COMPRA_SYNC' | 'AVISO_DESPACHO' | 'AVISO_RECIBO'
 
-export type IntegrationLogStatus = 'EXITOSO' | 'CON_NOVEDAD' | 'FALLIDO'
+type IntegrationLogStatus = 'EXITOSO' | 'CON_NOVEDAD' | 'FALLIDO'
 
 /** Row shape for `GET /api/v1/integracion-log` (§ 3.2). */
 export interface IntegrationLogSummary {

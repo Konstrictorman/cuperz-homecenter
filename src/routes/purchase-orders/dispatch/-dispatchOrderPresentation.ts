@@ -11,7 +11,7 @@ import type { DispatchOrdersFilterValues } from './-DispatchOrdersFilterBar'
 import type { DispatchOrder } from './-DispatchOrdersTable'
 
 /** API dispatch status → badge tone + Spanish label. */
-export const DISPATCH_ORDER_STATUS_UI: Record<
+const DISPATCH_ORDER_STATUS_UI: Record<
   DispatchPreviewStatus,
   { tone: StatusBadgeTone; label: string }
 > = {

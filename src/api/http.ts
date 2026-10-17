@@ -10,7 +10,7 @@ const API_PATH = '/api/v1'
  * Same-origin `/api/v1` unless `VITE_API_BASE_URL` points at a real backend
  * (e.g. an ngrok tunnel in dev, or the deployed QA/Production host).
  */
-export const API_BASE_URL = env.VITE_API_BASE_URL
+const API_BASE_URL = env.VITE_API_BASE_URL
   ? `${env.VITE_API_BASE_URL}${API_PATH}`
   : API_PATH
 
@@ -34,7 +34,7 @@ export function setMockGate(promise: Promise<unknown>): void {
   mockGate = promise
 }
 
-export class ApiError extends Error {
+class ApiError extends Error {
   readonly status: number
   readonly code: string
   readonly details: Array<unknown>

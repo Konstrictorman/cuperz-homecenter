@@ -11,7 +11,7 @@ import InputAdornment from '@mui/material/InputAdornment'
 import IconButton from '@mui/material/IconButton'
 import ClearIcon from '@mui/icons-material/Clear'
 
-export type OrdersFilterStatus = StatusBadgeTone | 'all'
+type OrdersFilterStatus = StatusBadgeTone | 'all'
 
 export interface OrdersFilterValues {
   ordenCompra: string

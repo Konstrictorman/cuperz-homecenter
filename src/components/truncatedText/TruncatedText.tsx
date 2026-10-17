@@ -4,7 +4,7 @@ import clsx from 'clsx'
 import './TruncatedText.css'
 import Typography from '@mui/material/Typography'
 
-export interface TruncatedTextProps {
+interface TruncatedTextProps {
   /** Full text to render, truncate, and show in the tooltip. */
   text: string
   /** Number of lines before truncating. Default: 1 (single-line ellipsis). */

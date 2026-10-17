@@ -13,7 +13,7 @@
 
 import type { DispatchPreviewOrder } from '#/api/types'
 
-export interface DispatchNoticePayloadOrder extends Omit<
+interface DispatchNoticePayloadOrder extends Omit<
   DispatchPreviewOrder,
   'fechaRealDespacho'
 > {
@@ -24,16 +24,12 @@ export interface DispatchNoticePayload {
   ordenes: Array<DispatchNoticePayloadOrder>
 }
 
-/** `YYYY-MM-DD` — the date the notice is actually being generated/sent, not
- *  the PO's originally committed delivery window. */
-export const todayIsoDate = (): string => new Date().toISOString().slice(0, 10)
-
 /** One or more API orders → the full `{ ordenes: [...] }` payload, in the
  *  order given. An order that already has a real dispatch date keeps it;
  *  the rest get `fechaRealDespacho`. */
 export function toDispatchNoticePayload(
   orders: Array<DispatchPreviewOrder>,
-  fechaRealDespacho: string = todayIsoDate(),
+  fechaRealDespacho: string,
 ): DispatchNoticePayload {
   return {
     ordenes: orders.map((order) => ({

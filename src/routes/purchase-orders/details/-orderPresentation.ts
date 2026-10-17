@@ -3,7 +3,6 @@
 
 import type { StatusBadgeTone } from '#/components/statusBadge/StatusBadge'
 import type {
-  OrderLineStatus,
   OrderStatus,
   PurchaseOrderSummary,
   PurchaseOrdersQuery,
@@ -12,7 +11,7 @@ import type { OrdersFilterValues } from './-OrdersFilterBar'
 import type { PurchaseOrder } from './-PurchaseOrdersTable'
 
 /** API order status → badge tone + Spanish label. */
-export const ORDER_STATUS_UI: Record<
+const ORDER_STATUS_UI: Record<
   OrderStatus,
   { tone: StatusBadgeTone; label: string }
 > = {
@@ -23,18 +22,6 @@ export const ORDER_STATUS_UI: Record<
   PROCESANDO: { tone: 'processing', label: 'Procesando' },
   ALISTADO: { tone: 'partial', label: 'Alistada' },
   RECIBIDO: { tone: 'processing', label: 'Recibido' },
-}
-
-/** API line status → badge tone + Spanish label. */
-export const ORDER_LINE_STATUS_UI: Record<
-  OrderLineStatus,
-  { tone: StatusBadgeTone; label: string }
-> = {
-  PENDIENTE: { tone: 'pending', label: 'Pendiente' },
-  DESPACHADO: { tone: 'dispatched', label: 'Despachada' },
-  PARCIAL: { tone: 'partial', label: 'Parcial' },
-  CANCELADA: { tone: 'cancelled', label: 'Cancelada' },
-  SUPERA_SOLICITADO: { tone: 'exceeded', label: 'Supera solicitado' },
 }
 
 /** Filter bar uses badge tones; the API query wants the enum.

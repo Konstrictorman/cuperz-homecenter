@@ -90,16 +90,16 @@ declare module '@mui/x-data-grid' {
 }
 
 /** Field(s) to group rows by — see `GroupedDataTableProps['groupBy']`. */
-export type GroupByField<TRow> = keyof TRow & string
+type GroupByField<TRow> = keyof TRow & string
 
-export type AggregationFn = 'sum' | 'count' | 'avg' | 'min' | 'max'
+type AggregationFn = 'sum' | 'count' | 'avg' | 'min' | 'max'
 
 /** A pluggable aggregation function: reduces one column's numeric values
  *  (already filtered to finite numbers — see `numericFieldValues`) for one
  *  group down to a single number. */
 export type AggregationFunction = (values: ReadonlyArray<number>) => number
 
-export interface ColumnAggregation<TRow> {
+interface ColumnAggregation<TRow> {
   field: keyof TRow & string
   /** One of the built-in `AggregationFn` names, or a key of the consumer's
    *  own `aggregationFunctions` prop. Widened to accept any string so a
@@ -117,7 +117,7 @@ export interface ColumnAggregation<TRow> {
  *    a separate subtotal row is appended as that group's last row instead,
  *    shown regardless of collapse state (same precedent as the dataset-wide
  *    grand-total footer always being visible). */
-export type AggregationPosition = 'inline' | 'footer'
+type AggregationPosition = 'inline' | 'footer'
 
 /** One active column sort — the single-field reduction of a `GridSortModel`
  *  this component actually supports (multi-column sort via shift-click isn't
@@ -125,7 +125,7 @@ export type AggregationPosition = 'inline' | 'footer'
  *  with — that's Pro/Premium). `field` is whatever `GridColDef.field` the
  *  user clicked the header of; `sortGroupTree` is what turns this into an
  *  actual row order. */
-export interface SortModel {
+interface SortModel {
   field: string
   sort: 'asc' | 'desc'
 }
@@ -203,9 +203,9 @@ export function isGroupFooterRow(row: unknown): row is GroupFooterRow {
 
 /** A row rendered by the underlying grid: a real `TRow`, or a synthetic
  *  `GroupRow`/`GroupFooterRow` standing in for one of its groups. */
-export type GroupedRow<TRow> = TRow | GroupRow | GroupFooterRow
+type GroupedRow<TRow> = TRow | GroupRow | GroupFooterRow
 
-export type GroupedDataTableProps<TRow extends GridValidRowModel> =
+type GroupedDataTableProps<TRow extends GridValidRowModel> =
   DataTableProps<TRow> & {
     /** Field(s) to group rows by, outer to inner. A single field keeps the
      *  original single-level behavior; an array nests a group per field
@@ -319,7 +319,7 @@ export type GroupedDataTableProps<TRow extends GridValidRowModel> =
 /** Built-in aggregation functions, keyed by the `AggregationFn` names
  *  `aggregations[].fn` accepts out of the box. Spread into a custom
  *  `aggregationFunctions` prop to extend rather than replace this set. */
-export const DEFAULT_AGGREGATION_FUNCTIONS: Record<
+const DEFAULT_AGGREGATION_FUNCTIONS: Record<
   AggregationFn,
   AggregationFunction
 > = {
@@ -383,7 +383,7 @@ function computeAggregates<TRow extends GridValidRowModel>(
  *  leaf rows belonging to this node (the last `groupBy` field was just
  *  applied) — tagged rather than a plain union so `flattenGroupTree` can
  *  tell them apart without relying on shape-sniffing `TRow`. */
-export interface GroupTreeNode<TRow extends GridValidRowModel> {
+interface GroupTreeNode<TRow extends GridValidRowModel> {
   path: ReadonlyArray<string>
   depth: number
   field: string
@@ -402,7 +402,7 @@ export interface GroupTreeNode<TRow extends GridValidRowModel> {
  *  recursive leaf count and configured `aggregations` directly from the row
  *  slice it owns before partitioning further. Nodes keep the order their
  *  value first appears among their siblings. */
-export function buildGroupTree<TRow extends GridValidRowModel>(
+function buildGroupTree<TRow extends GridValidRowModel>(
   rows: ReadonlyArray<TRow>,
   groupByFields: ReadonlyArray<string>,
   aggregations: ReadonlyArray<ColumnAggregation<TRow>> = [],
@@ -467,7 +467,7 @@ export function buildGroupTree<TRow extends GridValidRowModel>(
 /** Walks every node of a `buildGroupTree` tree, collecting each node's
  *  `pathKeyOf` key — used both to seed "every group starts collapsed" and
  *  to implement collapse-all, independent of what's currently expanded. */
-export function collectGroupPaths<TRow extends GridValidRowModel>(
+function collectGroupPaths<TRow extends GridValidRowModel>(
   nodes: ReadonlyArray<GroupTreeNode<TRow>>,
   into: Array<string> = [],
 ): Array<string> {
@@ -483,7 +483,7 @@ export function collectGroupPaths<TRow extends GridValidRowModel>(
 /** Flattens a `buildGroupTree` tree into the array the underlying grid
  *  renders, applying `collapsedPaths` (a node's children are omitted while
  *  its `pathKeyOf` key is in this set) and `aggregationPosition`. */
-export function flattenGroupTree<TRow extends GridValidRowModel>(
+function flattenGroupTree<TRow extends GridValidRowModel>(
   nodes: ReadonlyArray<GroupTreeNode<TRow>>,
   collapsedPaths: ReadonlySet<string>,
   aggregationPosition: AggregationPosition = 'inline',
@@ -588,7 +588,7 @@ function sortLeafRows<TRow extends GridValidRowModel>(
  *  node's children are still recursed into regardless, since a deeper level
  *  might group by that same field, or bottom out at real rows carrying it
  *  (handled by `sortLeafRows`). */
-export function sortGroupTree<TRow extends GridValidRowModel>(
+function sortGroupTree<TRow extends GridValidRowModel>(
   nodes: ReadonlyArray<GroupTreeNode<TRow>>,
   sortModel: SortModel | null,
   aggregatedFields: ReadonlySet<string>,
@@ -636,7 +636,7 @@ function isTopLevelGroupRow(row: unknown): boolean {
   return isGroupRow(row) && row.depth === 0
 }
 
-export interface PaginationRowRange {
+interface PaginationRowRange {
   firstRowIndex: number
   lastRowIndex: number
 }
@@ -650,7 +650,7 @@ export interface PaginationRowRange {
  *  group shifts page boundaries and eats into the budget meant for sibling
  *  top-level groups — the bug this ports Premium's fix for. Returns `null`
  *  when there is nothing to show (matching Premium's own selector). */
-export function computeTopLevelPaginationRange<TRow extends GridValidRowModel>(
+function computeTopLevelPaginationRange<TRow extends GridValidRowModel>(
   flattenedRows: ReadonlyArray<GroupedRow<TRow>>,
   topLevelRowCount: number,
   page: number,
@@ -870,7 +870,7 @@ function rowMatchesFilterModel<TRow extends GridValidRowModel>(
  *  `filterRowTreeFromGroupingColumns`/`shouldApplyFilterItemOnGroup`, which
  *  exists specifically to paper over its synthetic grouping column not
  *  being a real field). */
-export function filterRowsByModel<TRow extends GridValidRowModel>(
+function filterRowsByModel<TRow extends GridValidRowModel>(
   rows: ReadonlyArray<TRow>,
   filterModel: GridFilterModel | undefined,
 ): Array<TRow> {
@@ -1606,8 +1606,7 @@ function GroupedDataTableToolbar({
  *  `GroupedDataTableFilterPanel` offers for it. Derived from `GridColDef['type']`
  *  the same way MUI's own column-type-to-operator-defaults resolution is,
  *  just with a closed set of outcomes instead of arbitrary custom types. */
-export type FilterColumnKind =
-  'string' | 'number' | 'date' | 'dateTime' | 'boolean'
+type FilterColumnKind = 'string' | 'number' | 'date' | 'dateTime' | 'boolean'
 
 function filterColumnKind(column: GridColDef): FilterColumnKind {
   switch (column.type) {

@@ -42,13 +42,13 @@ import type {
  *  (`PurchaseOrderDetail.tiendas`, see `#/api/types`) inverts this to
  *  store-first; that inversion happens at the response boundary in
  *  `mocks/handlers/purchase-orders.ts` (`toStoreGroupedProducts`), not here. */
-export interface PurchaseOrderRecordStore {
+interface PurchaseOrderRecordStore {
   eanTienda: string
   nombreTienda: string
   cantidad: number
 }
 
-export interface PurchaseOrderLineItem {
+interface PurchaseOrderLineItem {
   eanSku: string
   /** Homecenter's own internal product code (raw `SKU`), distinct from eanSku. */
   skuHomecenter: string
@@ -135,7 +135,7 @@ export interface DispatchNoticeRecord {
   historialIntentos: Array<DispatchNoticeAttempt>
 }
 
-export type IntegrationLogRecord = IntegrationLogDetail
+type IntegrationLogRecord = IntegrationLogDetail
 
 interface MockDb {
   purchaseOrders: Array<PurchaseOrderRecord>

@@ -17,7 +17,6 @@ import type {
   ReprocessOrderResponse,
   SyncPurchaseOrdersRequest,
   SyncPurchaseOrdersResponse,
-  UpdatePurchaseOrderRequest,
 } from './types'
 
 export function purchaseOrdersListQueryOptions(
@@ -85,23 +84,8 @@ export function useReprocessOrder() {
   })
 }
 
-/** `PATCH /api/v1/ordenes-compra/{ordenCompra}` — not in the backend spec.
- *  Response body unconfirmed, so it isn't typed. */
-export function updatePurchaseOrder(
-  ordenCompra: string,
-  body: UpdatePurchaseOrderRequest,
-): Promise<unknown> {
-  return apiFetch<unknown>(
-    `/ordenes-compra/${encodeURIComponent(ordenCompra)}`,
-    {
-      method: 'PATCH',
-      body,
-    },
-  )
-}
-
 /** `GET /api/v1/ordenes-compra/export` (§ 1.5) — returns CSV as text. */
-export function fetchPurchaseOrdersExport(
+function fetchPurchaseOrdersExport(
   query: PurchaseOrdersQuery = {},
 ): Promise<string> {
   return apiFetch<string>(`/ordenes-compra/export${buildQuery({ ...query })}`)
@@ -155,7 +139,7 @@ export async function downloadPurchaseOrdersCsv(
  *  Not in the backend spec; the backend wraps Homecenter's `GenerarPdf` and
  *  answers `502 HOMECENTER_PDF_NO_DISPONIBLE` when Homecenter fails (observed
  *  2026-10-16 — a successful response hasn't been observed yet). */
-export function fetchPurchaseOrderPdf(ordenCompra: string): Promise<Blob> {
+function fetchPurchaseOrderPdf(ordenCompra: string): Promise<Blob> {
   return apiFetch<Blob>(
     `/ordenes-compra/${encodeURIComponent(ordenCompra)}/pdf`,
     { headers: { Accept: 'application/pdf' } },
@@ -172,7 +156,7 @@ export async function downloadPurchaseOrderPdf(
 
 /** `GET /api/v1/ordenes-compra/{ordenCompra}/etiquetas/{numTags}` — the
  *  barcode labels PDF for an order, `numTags` copies. */
-export function fetchPurchaseOrderLabels({
+function fetchPurchaseOrderLabels({
   ordenCompra,
   numTags,
 }: PurchaseOrderLabelsRequest): Promise<Blob> {

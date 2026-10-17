@@ -21,7 +21,7 @@ import Typography from '@mui/material/Typography'
  */
 const COMPACT_QUERY = '(max-width: 640px)'
 
-export interface ToolBarAction {
+interface ToolBarAction {
   key: string
   label: string
   icon?: ReactNode
@@ -31,7 +31,7 @@ export interface ToolBarAction {
   iconOnly?: boolean
 }
 
-export interface ToolBarProps {
+interface ToolBarProps {
   open: boolean
   selected: number
   actions: ToolBarAction[]

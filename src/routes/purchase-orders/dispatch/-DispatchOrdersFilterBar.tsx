@@ -13,7 +13,7 @@ import ClearIcon from '@mui/icons-material/Clear'
 /** Mirrors `DispatchPreviewStatus` (`#/api/types`) — the endpoint only
  *  distinguishes ALISTADO/DESPACHADO, unlike the richer `StatusBadgeTone`
  *  union the details-route filter bar uses. */
-export type DispatchOrdersFilterStatus =
+type DispatchOrdersFilterStatus =
   'ready' | 'dispatched' | 'all' | 'error' | 'cancelled'
 
 /** `GET /avisos-despacho` filters by order number (`numpedido`), PO number,

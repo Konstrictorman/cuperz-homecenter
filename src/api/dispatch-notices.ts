@@ -123,12 +123,12 @@ export function useResendDispatchNotice(avisoId: string) {
 }
 
 /** `estado` of a notice Homecenter accepted. */
-export const DISPATCH_NOTICE_SENT = 'EXITOSO'
+const DISPATCH_NOTICE_SENT = 'EXITOSO'
 
 /** `POST /api/v1/avisos-despacho/enviar` — stamps the order's real dispatch
  *  date and sends its notice to Homecenter. Not in the backend spec; per the
  *  Postman collection. */
-export function sendDispatchNotice(
+function sendDispatchNotice(
   body: SendDispatchNoticeRequest,
 ): Promise<SendDispatchNoticeResponse> {
   return apiFetch<SendDispatchNoticeResponse>('/avisos-despacho/enviar', {

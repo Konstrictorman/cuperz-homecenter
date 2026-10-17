@@ -7,7 +7,7 @@ import './Button.css'
 export type ButtonColor =
   'info' | 'success' | 'error' | 'warning' | 'default' | 'neutral'
 
-export interface ButtonProps extends Omit<MuiButtonProps, 'color'> {
+interface ButtonProps extends Omit<MuiButtonProps, 'color'> {
   color?: ButtonColor
 }
 
