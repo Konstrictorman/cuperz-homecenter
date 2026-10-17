@@ -6,13 +6,16 @@ import './ErrorComponent.css'
 import unplugged from '../../assets/Unplugged.png'
 import { userFacingErrorMessage } from '#/api/http'
 
-const ErrorComponent = ({
-  error,
-  info,
-  reset,
-  fallbackMessage,
-}: ErrorComponentProps) => {
+type Props = ErrorComponentProps & {
+  /** Shown instead of the raw error message for non-API errors (see
+   *  `userFacingErrorMessage`). */
+  fallbackMessage?: string
+}
+
+const ErrorComponent = ({ error, info, reset, fallbackMessage }: Props) => {
   const navigate = useNavigate()
+  // The router types boundary errors as `unknown` — anything can be thrown.
+  const { message, stack } = error instanceof Error ? error : {}
 
   return (
     <div className="error-component" role="alert">
@@ -27,7 +30,7 @@ const ErrorComponent = ({
       <Typography color="text.secondary">
         {fallbackMessage
           ? userFacingErrorMessage(error, fallbackMessage)
-          : error.message || 'Algo salió mal al cargar esta página.'}
+          : message || 'Algo salió mal al cargar esta página.'}
       </Typography>
       <div className="error-component__actions">
         <Button color="error" onClick={reset} variant="contained">
@@ -42,14 +45,14 @@ const ErrorComponent = ({
         </Button>
       </div>
 
-      {import.meta.env.DEV && (error.stack || info?.componentStack) && (
+      {import.meta.env.DEV && (stack || info?.componentStack) && (
         <details className="error-component__details">
           <summary>Detalles técnicos (solo en desarrollo)</summary>
 
           <textarea
             className="error-component__stack"
             readOnly
-            value={[error.stack, info?.componentStack]
+            value={[stack, info?.componentStack]
               .filter(Boolean)
               .join('\n\nComponent stack:\n')}
           />
