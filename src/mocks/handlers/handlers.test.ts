@@ -96,6 +96,23 @@ describe('purchase orders', () => {
     const res = await fetch(`${BASE}/ordenes-compra/abc/etiquetas/1`)
     expect(res.status).toBe(422)
   })
+
+  it('generates the purchase order PDF', async () => {
+    const res = await fetch(`${BASE}/ordenes-compra/8467343/pdf`)
+    expect(res.status).toBe(200)
+    expect(res.headers.get('content-type')).toBe('application/pdf')
+    const pdf = await res.text()
+    expect(pdf.startsWith('%PDF-1.4')).toBe(true)
+    expect(pdf).toContain('Orden de compra 8467343')
+  })
+
+  it('answers 502 when the PDF of an unknown order cannot be generated', async () => {
+    const { status, body } = await json<{ error: { code: string } }>(
+      '/ordenes-compra/999999999/pdf',
+    )
+    expect(status).toBe(502)
+    expect(body.error.code).toBe('HOMECENTER_PDF_NO_DISPONIBLE')
+  })
 })
 
 describe('dispatch previews', () => {

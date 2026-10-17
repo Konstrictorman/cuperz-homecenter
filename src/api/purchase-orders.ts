@@ -6,7 +6,6 @@ import {
   useQueryClient,
 } from '@tanstack/react-query'
 import JSZip from 'jszip'
-import { mocksEnabled } from '#/mocks/enable'
 import { apiFetch, buildQuery } from './http'
 import { queryKeys } from './query-keys'
 import type {
@@ -152,52 +151,15 @@ export async function downloadPurchaseOrdersCsv(
   triggerDownload(zipBlob, 'ordenes-compra.zip')
 }
 
-/**
- * Hits our own real server route — `/api/purchase-orders/{ordenCompra}/pdf`
- * — which proxies Homecenter's `GenerarPdf` endpoint directly. This is the
- * mock-era path: it bypasses the `/api/v1` mock layer entirely (see
- * `src/routes/api/purchase-orders/$ordenCompra/pdf.ts`), since there's no
- * useful way to fake PDF bytes, so it always makes a real call to Homecenter
- * even while the rest of the app runs against MSW.
- */
-async function fetchPdfViaHomecenterProxy(ordenCompra: string): Promise<Blob> {
-  const response = await fetch(
-    `/api/purchase-orders/${encodeURIComponent(ordenCompra)}/pdf`,
+/** `GET /api/v1/ordenes-compra/{ordenCompra}/pdf` — the purchase order PDF.
+ *  Not in the backend spec; the backend wraps Homecenter's `GenerarPdf` and
+ *  answers `502 HOMECENTER_PDF_NO_DISPONIBLE` when Homecenter fails (observed
+ *  2026-10-16 — a successful response hasn't been observed yet). */
+export function fetchPurchaseOrderPdf(ordenCompra: string): Promise<Blob> {
+  return apiFetch<Blob>(
+    `/ordenes-compra/${encodeURIComponent(ordenCompra)}/pdf`,
+    { headers: { Accept: 'application/pdf' } },
   )
-
-  if (!response.ok) {
-    let message = `No se pudo generar el PDF de la orden ${ordenCompra}.`
-    try {
-      const body = (await response.json()) as {
-        error?: { message?: string }
-      }
-      message = body.error?.message ?? message
-    } catch {
-      // response wasn't JSON — fall back to the generic message above
-    }
-    throw new Error(message)
-  }
-
-  return response.blob()
-}
-
-/**
- * Once the platform's own FastAPI backend is live (`VITE_ENABLE_MOCKS=false`,
- * see [[homecenter-fastapi-backend]] / CLAUDE.md), the backend generates the
- * PDF itself via its own `POST /api/v1/ordenes-compra/generar-pdf` — no need
- * for our Homecenter-proxying server route in that mode.
- */
-function fetchPdfViaBackend(ordenCompra: string): Promise<Blob> {
-  return apiFetch<Blob>('/ordenes-compra/generar-pdf', {
-    method: 'POST',
-    body: { ordenes: [ordenCompra] },
-  })
-}
-
-function fetchPurchaseOrderPdf(ordenCompra: string): Promise<Blob> {
-  return mocksEnabled()
-    ? fetchPdfViaHomecenterProxy(ordenCompra)
-    : fetchPdfViaBackend(ordenCompra)
 }
 
 /** Triggers a browser download of the generated PDF for a purchase order. */

@@ -11,7 +11,7 @@ import {
   paginate,
 } from '../data/db'
 import type { PurchaseOrderRecord } from '../data/db'
-import { buildLabelsPdf } from '../data/labels-pdf'
+import { buildLabelsPdf, buildPurchaseOrderPdf } from '../data/mock-pdf'
 import { formatDate } from '#/common/util'
 import type {
   PurchaseOrderDetail,
@@ -362,6 +362,29 @@ export const purchaseOrdersHandlers = [
       })
     },
   ),
+
+  // Not in the spec — the live backend wraps Homecenter's `GenerarPdf` and
+  // answered `502 HOMECENTER_PDF_NO_DISPONIBLE` for every order when sampled
+  // (2026-10-16), existing or not. Here unknown orders get that 502 so the
+  // error path can be exercised; known ones get a stand-in PDF.
+  http.get(`${API}/ordenes-compra/:ordenCompra/pdf`, async ({ params }) => {
+    await latency()
+    const ordenCompra = String(params.ordenCompra)
+    if (!db.purchaseOrders.some((o) => o.ordenCompra === ordenCompra)) {
+      return apiError(
+        502,
+        'HOMECENTER_PDF_NO_DISPONIBLE',
+        `Homecenter no pudo generar el PDF de la orden ${ordenCompra}.`,
+      )
+    }
+    return new HttpResponse(buildPurchaseOrderPdf(ordenCompra), {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="orden-${ordenCompra}.pdf"`,
+      },
+    })
+  }),
 
   // § 1.2
   http.get(`${API}/ordenes-compra/:ordenCompra`, async ({ params }) => {

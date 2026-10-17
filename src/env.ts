@@ -4,11 +4,6 @@ import { z } from 'zod'
 export const env = createEnv({
   server: {
     SERVER_URL: z.string().url().optional(),
-    /** Homecenter's `GenerarPdf` endpoint (server-only — proxied from
-     *  `src/routes/api/purchase-orders/$ordenCompra/pdf.ts`, never exposed to
-     *  the browser). */
-    HOMECENTER_PDF_API_URL: z.string().url(),
-    HOMECENTER_PDF_BEARER_TOKEN: z.string().min(1),
   },
 
   /**
@@ -36,7 +31,7 @@ export const env = createEnv({
    *
    * `import.meta.env` only carries `VITE_`-prefixed vars (Vite's client
    * exposure rule applies even in SSR/server code) — server-only vars like
-   * `HOMECENTER_PDF_API_URL` live in `process.env` instead, which Vite's
+   * `SERVER_URL` live in `process.env` instead, which Vite's
    * `loadEnv` populates from `.env*` files for every var regardless of
    * prefix. `process` doesn't exist in the browser, so guard for that.
    */

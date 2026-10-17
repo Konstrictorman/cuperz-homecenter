@@ -7,7 +7,7 @@ from fake-but-realistic in-memory data. This lets the React app run against a
 
 **Language note:** identifiers (types, functions, variables) are English. The
 JSON keys and enum string values (`ordenCompra`, `estado`, `'PENDIENTE'`,
-`'BORRADOR'`, `ORDEN_NO_ENCONTRADA`, …) stay Spanish because they mirror
+`'DESPACHADO'`, `ORDEN_NO_ENCONTRADA`, …) stay Spanish because they mirror
 Homecenter's real contract — no translation layer.
 
 ## How it's wired
@@ -71,11 +71,11 @@ the client fetches on hydration.
   `scripts/generate-purchase-orders-seed.ts` — re-run that script if the
   source `.xlsx` is replaced. The export's own 3-value `ESTADO` only
   distinguishes pending / cancelled / "final"; `db.ts` splits the "final"
-  orders (seeded, so repeatable) across `PROCESANDO / DESPACHADA /
+  orders (seeded, so repeatable) across `PROCESANDO / DESPACHADO /
 CON_ERROR` so those screens still have variety to render — see
   `buildPurchaseOrder`'s doc comment for exactly which fields are real vs.
   synthetic.
-- **~12 dispatch notices** in `BORRADOR / ENVIADO / CON_NOVEDAD / ERROR_ENVIO`.
+- **~12 dispatch notices** in `PENDIENTE / DESPACHADA / CON_NOVEDAD / ERROR_ENVIO`.
 - **36 dispatch previews** for `GET /avisos-despacho` (the preview tree the
   live backend serves there, not the spec's § 2.2 list), served from `src/mocks/data/dispatch-previews-seed.json` — a real
   response captured from the FastAPI backend on 2026-10-15. Every order there
@@ -95,6 +95,9 @@ entries; a full page reload resets everything.
 - A line whose `cantidad` reaches 100% of what was requested comes back as
   `CON_NOVEDAD` (the `isError:false` + `errorMessage` pattern).
 - Name any container `*ERR*` to force `502 HOMECENTER_NO_DISPONIBLE`.
+- `GET /ordenes-compra/{ordenCompra}/pdf` returns a stand-in PDF for seeded
+  orders and `502 HOMECENTER_PDF_NO_DISPONIBLE` for unknown ones (the live
+  backend answered that 502 for every order when sampled on 2026-10-16).
 - Reprocess only works on `CON_ERROR` orders and respects a 3-attempt cap
   (`409 REINTENTO_NO_PERMITIDO`).
 - Resend only works on `CON_NOVEDAD` / `ERROR_ENVIO` (`409 AVISO_NO_REENVIABLE`).

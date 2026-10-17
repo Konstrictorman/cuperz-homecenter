@@ -15,7 +15,6 @@ import { Route as PurchaseOrdersIndexRouteImport } from './routes/purchase-order
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as PurchaseOrdersDetailsIndexRouteImport } from './routes/purchase-orders/details/index'
 import { Route as PurchaseOrdersDispatchIndexRouteImport } from './routes/purchase-orders/dispatch/index'
-import { Route as ApiPurchaseOrdersOrdenCompraPdfRouteImport } from './routes/api/purchase-orders/$ordenCompra/pdf'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -49,12 +48,6 @@ const PurchaseOrdersDispatchIndexRoute =
     path: '/dispatch/',
     getParentRoute: () => PurchaseOrdersRouteRoute,
   } as any)
-const ApiPurchaseOrdersOrdenCompraPdfRoute =
-  ApiPurchaseOrdersOrdenCompraPdfRouteImport.update({
-    id: '/api/purchase-orders/$ordenCompra/pdf',
-    path: '/api/purchase-orders/$ordenCompra/pdf',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -63,7 +56,6 @@ export interface FileRoutesByFullPath {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/purchase-orders/details/': typeof PurchaseOrdersDetailsIndexRoute
   '/purchase-orders/dispatch/': typeof PurchaseOrdersDispatchIndexRoute
-  '/api/purchase-orders/$ordenCompra/pdf': typeof ApiPurchaseOrdersOrdenCompraPdfRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -71,7 +63,6 @@ export interface FileRoutesByTo {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/purchase-orders/details': typeof PurchaseOrdersDetailsIndexRoute
   '/purchase-orders/dispatch': typeof PurchaseOrdersDispatchIndexRoute
-  '/api/purchase-orders/$ordenCompra/pdf': typeof ApiPurchaseOrdersOrdenCompraPdfRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -81,7 +72,6 @@ export interface FileRoutesById {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/purchase-orders/details/': typeof PurchaseOrdersDetailsIndexRoute
   '/purchase-orders/dispatch/': typeof PurchaseOrdersDispatchIndexRoute
-  '/api/purchase-orders/$ordenCompra/pdf': typeof ApiPurchaseOrdersOrdenCompraPdfRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -92,7 +82,6 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/purchase-orders/details/'
     | '/purchase-orders/dispatch/'
-    | '/api/purchase-orders/$ordenCompra/pdf'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -100,7 +89,6 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/purchase-orders/details'
     | '/purchase-orders/dispatch'
-    | '/api/purchase-orders/$ordenCompra/pdf'
   id:
     | '__root__'
     | '/'
@@ -109,14 +97,12 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/purchase-orders/details/'
     | '/purchase-orders/dispatch/'
-    | '/api/purchase-orders/$ordenCompra/pdf'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   PurchaseOrdersRouteRoute: typeof PurchaseOrdersRouteRouteWithChildren
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
-  ApiPurchaseOrdersOrdenCompraPdfRoute: typeof ApiPurchaseOrdersOrdenCompraPdfRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -163,13 +149,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PurchaseOrdersDispatchIndexRouteImport
       parentRoute: typeof PurchaseOrdersRouteRoute
     }
-    '/api/purchase-orders/$ordenCompra/pdf': {
-      id: '/api/purchase-orders/$ordenCompra/pdf'
-      path: '/api/purchase-orders/$ordenCompra/pdf'
-      fullPath: '/api/purchase-orders/$ordenCompra/pdf'
-      preLoaderRoute: typeof ApiPurchaseOrdersOrdenCompraPdfRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -192,7 +171,6 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   PurchaseOrdersRouteRoute: PurchaseOrdersRouteRouteWithChildren,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
-  ApiPurchaseOrdersOrdenCompraPdfRoute: ApiPurchaseOrdersOrdenCompraPdfRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
