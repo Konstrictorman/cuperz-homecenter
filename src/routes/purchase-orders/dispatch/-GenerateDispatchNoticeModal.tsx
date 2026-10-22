@@ -11,6 +11,7 @@ import Button from '#/components/button/Button'
 import { formatDate, todayIsoDate } from '#/common/util'
 import { purchaseOrderDetailQueryOptions } from '#/api/purchase-orders'
 import type { DispatchOrder } from './-DispatchOrdersTable'
+import WarningAmberIcon from '@mui/icons-material/WarningAmber'
 import './GenerateLabelsModal.css'
 
 /** Allowed `YYYY-MM-DD` range for the real dispatch date; `undefined` leaves
@@ -211,14 +212,17 @@ const DispatchNoticeConfirmation = ({
   onConfirm,
 }: DispatchNoticeConfirmationProps) => (
   <div className="generate-labels-modal">
-    <Typography>
-      Está a punto de formalizar el despacho correspondiente a la orden{' '}
-      <b>{order.ordenCompra}</b> por un valor de{' '}
-      <b>${formatNumber(Math.round(order.valorTotal))}</b>, son{' '}
-      <b>{formatNumber(order.cantidadTotal)} </b>unidades distribuidas en{' '}
-      <b>{formatNumber(order.cantidadContenedores)}</b> paquetes para{' '}
-      <b>{formatNumber(order.cantidadTiendas)}</b> tiendas.
-    </Typography>
+    <div>
+      <WarningAmberIcon color="warning" fontSize="large" />
+      <Typography>
+        Está a punto de formalizar el despacho correspondiente a la orden{' '}
+        <b>{order.ordenCompra}</b> por un valor de{' '}
+        <b>${formatNumber(Math.round(order.valorTotal))}</b>, son{' '}
+        <b>{formatNumber(order.cantidadTotal)} </b>unidades distribuidas en{' '}
+        <b>{formatNumber(order.cantidadContenedores)}</b> paquetes para{' '}
+        <b>{formatNumber(order.cantidadTiendas)}</b> tiendas.
+      </Typography>
+    </div>
     <div className="generate-labels-modal__actions">
       <Button color="neutral" variant="outlined" onClick={onCancel}>
         Cancelar
