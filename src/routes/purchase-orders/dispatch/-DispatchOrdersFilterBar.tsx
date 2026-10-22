@@ -11,7 +11,7 @@ import IconButton from '@mui/material/IconButton'
 import ClearIcon from '@mui/icons-material/Clear'
 
 /** Mirrors `DispatchPreviewStatus` (`#/api/types`) — the endpoint only
- *  distinguishes ALISTADO/DESPACHADO, unlike the richer `StatusBadgeTone`
+ *  distinguishes PREPARADO/DESPACHADO, unlike the richer `StatusBadgeTone`
  *  union the details-route filter bar uses. */
 type DispatchOrdersFilterStatus =
   'ready' | 'dispatched' | 'all' | 'error' | 'cancelled'
@@ -40,7 +40,7 @@ const STATUS_OPTIONS: Array<{
   label: string
 }> = [
   { value: 'all', label: 'Todos' },
-  { value: 'ready', label: 'Alistada' },
+  { value: 'ready', label: 'Preparada' },
   { value: 'dispatched', label: 'Despachada' },
   { value: 'error', label: 'Error' },
   { value: 'cancelled', label: 'Cancelada' },

@@ -6,6 +6,7 @@ import {
   useQueryClient,
 } from '@tanstack/react-query'
 import { apiFetch, buildQuery } from './http'
+import { normalizeOrderStatus } from './order-status'
 import { queryKeys } from './query-keys'
 import type {
   DispatchNoticeDetail,
@@ -32,7 +33,13 @@ export function dispatchPreviewsQueryOptions(
       apiFetch<DispatchPreviewsResponse>(
         `/avisos-despacho${buildQuery({ ...query })}`,
         { signal },
-      ),
+      ).then((res) => ({
+        ...res,
+        ordenes: res.ordenes.map((o) => ({
+          ...o,
+          estado: normalizeOrderStatus(o.estado),
+        })),
+      })),
   })
 }
 

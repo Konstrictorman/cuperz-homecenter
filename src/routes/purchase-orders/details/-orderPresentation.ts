@@ -20,7 +20,7 @@ const ORDER_STATUS_UI: Record<
   CON_ERROR: { tone: 'error', label: 'Error' },
   CANCELADA: { tone: 'cancelled', label: 'Cancelada' },
   PROCESANDO: { tone: 'processing', label: 'Procesando' },
-  ALISTADO: { tone: 'partial', label: 'Alistada' },
+  PREPARADO: { tone: 'partial', label: 'Preparada' },
   RECIBIDO: { tone: 'processing', label: 'Recibido' },
 }
 
@@ -37,14 +37,19 @@ const TONE_TO_ORDER_STATUS: Record<StatusBadgeTone, OrderStatus> = {
   dispatched: 'DESPACHADO',
   error: 'CON_ERROR',
   processing: 'PROCESANDO',
-  partial: 'PROCESANDO',
-  cancelled: 'CON_ERROR',
+  partial: 'PREPARADO',
+  cancelled: 'CANCELADA',
   exceeded: 'CON_ERROR',
 }
 
 /** API list row → the shape `PurchaseOrdersTable` renders. */
 export function toPurchaseOrderRow(o: PurchaseOrderSummary): PurchaseOrder {
-  const ui = ORDER_STATUS_UI[o.estado]
+  // Unknown values (e.g. a backend rename that hasn't landed here yet) show
+  // raw instead of crashing the table.
+  const ui = (ORDER_STATUS_UI as Partial<typeof ORDER_STATUS_UI>)[o.estado] ?? {
+    tone: 'pending',
+    label: o.estado,
+  }
   return {
     id: o.ordenCompra,
     ordenCompra: o.ordenCompra,

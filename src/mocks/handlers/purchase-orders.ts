@@ -40,7 +40,8 @@ function toSummary(order: PurchaseOrderRecord): PurchaseOrderSummary {
     fechaTransmision: order.fechaTransmision,
     fechaMinEntrega: order.fechaMinEntrega,
     fechaMaxEntrega: order.fechaMaxEntrega,
-    fechaDespacho: order.fechaDespacho,
+    fechaDespacho: order.fechaDespacho?.slice(0, 10) ?? null,
+    exportada: order.exportada,
     sticker: order.sticker ?? '-1',
     observaciones: order.observaciones,
     numeroPedido: order.numPedido,
@@ -262,6 +263,8 @@ export const purchaseOrdersHandlers = [
     await latency()
     const url = new URL(request.url)
     const orders = filterPurchaseOrders(url)
+    // Assumed trigger for `exportada` — see `PurchaseOrderSummary.exportada`.
+    for (const order of orders) order.exportada = true
     const body = [CSV_HEADER, ...orders.flatMap(toExportLines)].join('\n')
     return new HttpResponse(body, {
       status: 200,

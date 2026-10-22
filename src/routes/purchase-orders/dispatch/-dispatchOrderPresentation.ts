@@ -15,7 +15,7 @@ const DISPATCH_ORDER_STATUS_UI: Record<
   DispatchPreviewStatus,
   { tone: StatusBadgeTone; label: string }
 > = {
-  ALISTADO: { tone: 'partial', label: 'Alistada' },
+  PREPARADO: { tone: 'partial', label: 'Preparada' },
   DESPACHADO: { tone: 'dispatched', label: 'Despachada' },
 }
 
@@ -24,18 +24,18 @@ const TONE_TO_DISPATCH_ORDER_STATUS: Record<
   Exclude<DispatchOrdersFilterValues['estado'], 'all'>,
   DispatchPreviewStatus
 > = {
-  ready: 'ALISTADO',
+  ready: 'PREPARADO',
   dispatched: 'DESPACHADO',
   error: 'DESPACHADO',
   cancelled: 'DESPACHADO',
 }
 
 /** Trusts the backend's `estado`; a set `fechaRealDespacho` doesn't imply
- *  dispatched (`ALISTADO` orders carry one too). Only when `estado` is
+ *  dispatched (`PREPARADO` orders carry one too). Only when `estado` is
  *  missing or unrecognised does the date serve as a best-effort fallback. */
 const dispatchStatusOf = (o: DispatchPreviewOrder): DispatchPreviewStatus => {
-  if (o.estado === 'ALISTADO' || o.estado === 'DESPACHADO') return o.estado
-  return o.fechaRealDespacho ? 'DESPACHADO' : 'ALISTADO'
+  if (o.estado === 'PREPARADO' || o.estado === 'DESPACHADO') return o.estado
+  return o.fechaRealDespacho ? 'DESPACHADO' : 'PREPARADO'
 }
 
 /** API order → the shape `DispatchOrdersTable` renders. */

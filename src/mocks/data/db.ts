@@ -96,6 +96,8 @@ export interface PurchaseOrderRecord {
    *  `/api/v1/ordenes-compra` response (2026-10-13). */
   estadoOc: string
   fechaDespacho: IsoDateTime | null
+  /** Platform-only flag; flipped by the mock export handler (§ 1.5). */
+  exportada: boolean
   sticker: string | null
   tipoOc: string
   tipoDocumento: string | null
@@ -429,6 +431,10 @@ function buildPurchaseOrder(seedOrder: SeedOrder): PurchaseOrderRecord {
     fechaCancelacion,
     estadoOc,
     fechaDespacho,
+    // Derived rather than drawn from faker so the seeded sequence (and every
+    // value generated after this one) stays unchanged.
+    exportada:
+      estado !== 'PENDIENTE' && Number(seedOrder.ordenCompra) % 2 === 0,
     sticker: faker.datatype.boolean(0.85) ? faker.string.numeric(12) : null,
     // Raw `TIPO_DE_OC` is always "RETAIL" for this slice of the export —
     // doesn't match the numeric-prefixed `TIPO_OC` format the backend spec

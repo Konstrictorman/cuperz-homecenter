@@ -47,6 +47,19 @@ describe('purchase orders', () => {
     expect(body.pagination.total).toBeGreaterThan(40)
   })
 
+  it('flags an order as exportada once it has been exported', async () => {
+    const before = await json<Paginated<PurchaseOrderSummary>>(
+      '/ordenes-compra?ordenCompra=8467343',
+    )
+    expect(typeof before.body.data[0].exportada).toBe('boolean')
+
+    await fetch(`${BASE}/ordenes-compra/export?ordenCompra=8467343`)
+    const after = await json<Paginated<PurchaseOrderSummary>>(
+      '/ordenes-compra?ordenCompra=8467343',
+    )
+    expect(after.body.data[0].exportada).toBe(true)
+  })
+
   it('returns the canonical order detail grouped by store', async () => {
     const { status, body } = await json<{
       cabecera: { ordenCompra: string }

@@ -7,6 +7,7 @@ import {
 } from '@tanstack/react-query'
 import JSZip from 'jszip'
 import { apiFetch, buildQuery } from './http'
+import { normalizeOrderStatus } from './order-status'
 import { queryKeys } from './query-keys'
 import type {
   PurchaseOrderDetail,
@@ -28,7 +29,13 @@ export function purchaseOrdersListQueryOptions(
       apiFetch<Paginated<PurchaseOrderSummary>>(
         `/ordenes-compra${buildQuery({ ...query })}`,
         { signal },
-      ),
+      ).then((page) => ({
+        ...page,
+        data: page.data.map((o) => ({
+          ...o,
+          estado: normalizeOrderStatus(o.estado),
+        })),
+      })),
   })
 }
 
@@ -39,7 +46,13 @@ export function purchaseOrderDetailQueryOptions(ordenCompra: string) {
       apiFetch<PurchaseOrderDetail>(
         `/ordenes-compra/${encodeURIComponent(ordenCompra)}`,
         { signal },
-      ),
+      ).then((detail) => ({
+        ...detail,
+        cabecera: {
+          ...detail.cabecera,
+          estado: normalizeOrderStatus(detail.cabecera.estado),
+        },
+      })),
     enabled: ordenCompra.length > 0,
   })
 }

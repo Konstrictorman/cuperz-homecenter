@@ -53,7 +53,9 @@ export type OrderStatus =
   | 'CON_ERROR'
   | 'PROCESANDO'
   | 'CANCELADA'
-  | 'ALISTADO'
+  /** Formerly `ALISTADO` — still received from the backend until its rename
+   *  ships; mapped by `normalizeOrderStatus` (`./order-status`). */
+  | 'PREPARADO'
   | 'RECIBIDO'
 
 export type OrderLineStatus =
@@ -86,9 +88,16 @@ export interface PurchaseOrderSummary {
   fechaMinEntrega: IsoDateTime | null
   /** Raw `FECHA_MAX_ENTREGA`, normalised — see `PurchaseOrderDetail.fechaMaxEntrega`. */
   fechaMaxEntrega: IsoDateTime | null
-  /** Seen `null` on every sampled row so far — when this gets set is
+  /** Date-only (`"2026-10-23"`), unlike the other timestamps on this row —
+   *  seen set on a `DESPACHADO` order, `null` on a `PENDIENTE` one
+   *  (2026-10-22). Presumably the `fechaRealDespacho` the dispatch notice was
+   *  sent with. */
+  fechaDespacho: IsoDate | null
+  /** Platform-only flag (not part of Homecenter's contract), added to the
+   *  response 2026-10-22. Seen `false` on every sampled row so far — what
+   *  sets it (presumably `GET /ordenes-compra/export`, § 1.5) is
    *  unconfirmed. */
-  fechaDespacho: IsoDateTime | null
+  exportada: boolean
   /** Raw `STICKER`; Homecenter's `"-1"` "not assigned" sentinel is seen
    *  un-translated here (contrast `PurchaseOrderDetail.sticker`, which the
    *  doc says translates it to `null`). */
@@ -469,7 +478,7 @@ export interface DispatchNoticeAttemptsResponse {
  *  (observed 2026-10-16: `?estado=NODESPACHADO` matches nothing). The param
  *  is typed as a free string (≤30 chars) and Postman also shows `PENDIENTE`,
  *  so the full set is unconfirmed. */
-export type DispatchPreviewStatus = 'ALISTADO' | 'DESPACHADO'
+export type DispatchPreviewStatus = 'PREPARADO' | 'DESPACHADO'
 
 /** Numbers arrive as decimal strings (`"6.000"`, `"5"`), exactly as
  *  Homecenter's AvisoDespacho payload carries them. */
@@ -503,8 +512,8 @@ export interface DispatchPreviewOrder {
   /** `null` until the PO has actually been dispatched. */
   fechaRealDespacho: IsoDate | null
   /** The order's status — the source of truth for "dispatched".
-   *  `fechaRealDespacho` is not: `ALISTADO` orders have been observed with a
-   *  date set. Absent from the captured `por-fecha` sample, hence optional;
+   *  `fechaRealDespacho` is not: `PREPARADO` (formerly `ALISTADO`) orders
+   *  have been observed with a date set. Absent from the captured `por-fecha` sample, hence optional;
    *  a free string since values beyond `DispatchPreviewStatus` may appear. */
   estado?: string
   tiendas: Array<DispatchPreviewStore>
