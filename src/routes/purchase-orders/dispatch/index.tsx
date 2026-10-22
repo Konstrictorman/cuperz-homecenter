@@ -26,7 +26,6 @@ import {
 import { downloadPurchaseOrderLabels } from '#/api/purchase-orders'
 import { queryKeys } from '#/api/query-keys'
 import { useFeedback } from '#/contexts/FeedbackContext'
-import { toDispatchNoticePayload } from './-dispatchNoticePayload'
 import '../PurchaseOrdersPage.css'
 import ErrorComponent from '#/components/errorComponent/ErrorComponent'
 
@@ -80,17 +79,6 @@ const DispatchOrdersPage = () => {
     order: DispatchOrder,
     fechaRealDespacho: string,
   ) => {
-    // TEMP(debug): the payload DispatchNoticePayloadModal used to show — remove
-    // once the /avisos-despacho/{id}/enviar failure is understood.
-    console.log(
-      '[aviso-despacho payload]',
-      JSON.stringify(
-        toDispatchNoticePayload([order.source], fechaRealDespacho),
-        null,
-        2,
-      ),
-    )
-
     return feedback.run(
       () =>
         sendDispatchNotice.mutateAsync({

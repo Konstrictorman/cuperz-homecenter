@@ -7,7 +7,7 @@ export const useDispatchOrderProductsColumns =
   (): GridColDef<DispatchOrderProductRow>[] =>
     useMemo(
       () => [
-        { field: 'nombreTienda', headerName: 'Tienda', flex: 1, minWidth: 160 },
+        { field: 'tienda', headerName: 'Tienda', flex: 1, minWidth: 200 },
         {
           field: 'contenedor',
           headerName: 'Contenedor',

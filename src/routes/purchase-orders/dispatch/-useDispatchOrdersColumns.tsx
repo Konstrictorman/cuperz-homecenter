@@ -33,6 +33,26 @@ export const useDispatchOrdersColumns = (
         headerAlign: 'center',
       },
       {
+        field: 'cantidadTotal',
+        headerName: 'Cantidad total',
+        type: 'number',
+        flex: 0.6,
+        minWidth: 90,
+        align: 'center',
+        headerAlign: 'center',
+      },
+      {
+        field: 'valorTotal',
+        headerName: 'Valor total',
+        type: 'number',
+        flex: 0.6,
+        minWidth: 90,
+        align: 'center',
+        headerAlign: 'center',
+        valueFormatter: (value: DispatchOrder['valorTotal']) =>
+          `$${Math.round(value).toLocaleString('es-CO')}`,
+      },
+      {
         field: 'cantidadTiendas',
         headerName: 'Tiendas',
         type: 'number',
@@ -50,6 +70,16 @@ export const useDispatchOrdersColumns = (
         align: 'center',
         headerAlign: 'center',
       },
+      // {
+      //   field: 'fechaRealDespacho',
+      //   headerName: 'Fecha transmisión',
+      //   flex: 1,
+      //   minWidth: 130,
+      //   align: 'center',
+      //   headerAlign: 'center',
+      //   valueFormatter: (value: DispatchOrder['fechaRealDespacho']) =>
+      //     formatDate(value) || '—',
+      // },
       {
         field: 'fechaRealDespacho',
         headerName: 'Fecha despacho',

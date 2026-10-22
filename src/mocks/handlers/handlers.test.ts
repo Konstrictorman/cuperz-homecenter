@@ -165,7 +165,19 @@ describe('dispatch previews', () => {
       '/avisos-despacho?pageSize=1',
     )
     const [order] = body.ordenes
-    expect(order.ordenCompra).toBe('15925353')
+    expect(order).toMatchObject({
+      ordenCompra: '15925353',
+      valorTotal: expect.stringMatching(/^\d+\.\d{2}$/),
+      cantidadTotal: expect.stringMatching(/^\d+\.\d{2}$/),
+      numpedido: null,
+      fechaTransmision: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
+      minimaFechaEntrega: expect.any(String),
+      maximaFechaEntrega: expect.any(String),
+    })
+    expect(order.tiendas[0]).toMatchObject({
+      codTienda: '95',
+      nombreTienda: 'Bucaramanga La Rosita',
+    })
     expect(order.tiendas[0].contenedores[0].productos[0]).toMatchObject({
       eanSku: expect.any(String),
       cantidad: expect.any(String),

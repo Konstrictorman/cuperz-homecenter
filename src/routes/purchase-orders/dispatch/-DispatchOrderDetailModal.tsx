@@ -28,12 +28,6 @@ const DispatchOrderDetailModal = ({
       <div className="dispatch-order-detail-modal__summary">
         <div>
           <Typography className="dispatch-order-detail-modal__label">
-            Número de pedido
-          </Typography>
-          <Typography>{order.numpedido || '-'}</Typography>
-        </div>
-        <div>
-          <Typography className="dispatch-order-detail-modal__label">
             EAN punto de entrega
           </Typography>
           <Typography>{order.eanPuntoEntrega}</Typography>
@@ -43,6 +37,18 @@ const DispatchOrderDetailModal = ({
             Fecha de despacho
           </Typography>
           <Typography>{formatDate(order.fechaRealDespacho) || '—'}</Typography>
+        </div>
+        <div>
+          <Typography className="dispatch-order-detail-modal__label">
+            Cantidad total
+          </Typography>
+          <Typography>{order.cantidadTotal}</Typography>
+        </div>
+        <div>
+          <Typography className="dispatch-order-detail-modal__label">
+            Valor total
+          </Typography>
+          <Typography>{`$${Math.round(order.valorTotal).toLocaleString('es-CO')}`}</Typography>
         </div>
         <div>
           <Typography className="dispatch-order-detail-modal__label">

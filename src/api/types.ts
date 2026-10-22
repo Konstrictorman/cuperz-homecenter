@@ -475,9 +475,9 @@ export interface DispatchNoticeAttemptsResponse {
 // Dispatch previews — `GET /api/v1/avisos-despacho`.
 // Not the § 2.2 list in docs/especificacion-endpoints-backend: the live
 // FastAPI backend serves this preview tree on that route instead (its OpenAPI
-// leaves the 200 body untyped). Shape from the Postman collection and a
-// response captured from the former `/avisos-despacho/por-fecha` route
-// (2026-10-15), which now answers 405. One entry per PO, already in the
+// leaves the 200 body untyped). Shape from a live response (2026-10-22),
+// which added the order totals/dates and per-store `codTienda`. One entry per
+// PO, already in the
 // Orden→Tienda→Contenedor→Producto shape Homecenter's AvisoDespacho payload
 // uses — so the list alone feeds both the table and the payload preview, no
 // per-row detail fetch needed.
@@ -489,7 +489,7 @@ export interface DispatchNoticeAttemptsResponse {
  *  so the full set is unconfirmed. */
 export type DispatchPreviewStatus = 'PREPARADO' | 'DESPACHADO'
 
-/** Numbers arrive as decimal strings (`"6.000"`, `"5"`), exactly as
+/** Numbers arrive as decimal strings (`"6.00"`, `"0.0280"`), exactly as
  *  Homecenter's AvisoDespacho payload carries them. */
 export interface DispatchPreviewProduct {
   eanSku: string
@@ -508,7 +508,8 @@ export interface DispatchPreviewStore {
   /** Data-quality caveat: the backend has been observed sending the literal
    *  string `"None"` (a stringified Python `None`) when the store is unknown. */
   eanTienda: string
-  /** In the Postman example; absent from the captured `por-fecha` sample. */
+  /** Homecenter's short store code (`"10"`, `"53"`). */
+  codTienda: string
   nombreTienda: string
   contenedores: Array<DispatchPreviewContainer>
 }
@@ -516,15 +517,25 @@ export interface DispatchPreviewStore {
 export interface DispatchPreviewOrder {
   eanPuntoEntrega: string
   ordenCompra: string
-  /** In the Postman example; absent from the captured `por-fecha` sample. */
-  numpedido?: string
+  /** Decimal string (`"39210300.00"`) — the order's total cost after
+   *  cross-docking, i.e. of what is actually dispatched. Can be lower than
+   *  the original PO's cost (`PurchaseOrder.costoTotOc`). */
+  valorTotal: string
+  /** Decimal string — sum of every product's `cantidad`. */
+  cantidadTotal: string
   /** `null` until the PO has actually been dispatched. */
   fechaRealDespacho: IsoDate | null
   /** The order's status — the source of truth for "dispatched".
    *  `fechaRealDespacho` is not: `PREPARADO` (formerly `ALISTADO`) orders
-   *  have been observed with a date set. Absent from the captured `por-fecha` sample, hence optional;
-   *  a free string since values beyond `DispatchPreviewStatus` may appear. */
-  estado?: string
+   *  have been observed with a date set. A free string since values beyond
+   *  `DispatchPreviewStatus` may appear. */
+  estado: string
+  numpedido: string | null
+  /** Offset-less datetimes (`"2026-10-12T00:00:00"`), time always midnight
+   *  so far. */
+  fechaTransmision: IsoDateTime
+  minimaFechaEntrega: IsoDateTime
+  maximaFechaEntrega: IsoDateTime
   tiendas: Array<DispatchPreviewStore>
 }
 

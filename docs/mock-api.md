@@ -78,7 +78,11 @@ CON_ERROR` so those screens still have variety to render — see
 - **~12 dispatch notices** in `PENDIENTE / DESPACHADA / CON_NOVEDAD / ERROR_ENVIO`.
 - **36 dispatch previews** for `GET /avisos-despacho` (the preview tree the
   live backend serves there, not the spec's § 2.2 list), served from `src/mocks/data/dispatch-previews-seed.json` — a real
-  response captured from the FastAPI backend on 2026-10-15. Every order there
+  response captured from the FastAPI backend on 2026-10-15, migrated to the
+  2026-10-22 shape (`valorTotal`, `cantidadTotal`, `numpedido`,
+  `fechaTransmision`, `minima`/`maximaFechaEntrega`, per-store `codTienda` and
+  `nombreTienda`) — those fields are real where the PO seed or a live sample
+  had them and synthetic otherwise. Every order there
   still has `fechaRealDespacho: null`, so `estado=DESPACHADO` or any date range
   returns nothing (same as the real backend at capture time), and a half-open
   range returns `422 RANGO_FECHAS_INCOMPLETO`.

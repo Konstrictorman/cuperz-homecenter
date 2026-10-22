@@ -23,10 +23,7 @@ import type {
   DispatchNoticeAttempt,
   DispatchNoticeStatus,
   DispatchNoticeStoreInput,
-  DispatchPreviewContainer,
   DispatchPreviewOrder,
-  DispatchPreviewProduct,
-  DispatchPreviewStore,
   HomecenterResult,
   IntegrationLogDetail,
   IsoDateTime,
@@ -274,10 +271,6 @@ interface SeedOrder {
 }
 
 const SEED_ORDERS = purchaseOrdersSeed as Array<SeedOrder>
-
-const SEED_DESCRIPTIONS = new Map(
-  SEED_ORDERS.flatMap((o) => o.productos).map((p) => [p.eanSku, p.descripcion]),
-)
 
 /** Every order in the seed is a Cross-Docking replenishment delivered to the
  *  same CEDI (see `scripts/generate-purchase-orders-seed.ts`'s doc comment)
@@ -594,51 +587,14 @@ function dispatchNoticeToHomecenterRequest(notice: DispatchNoticeRecord) {
   }
 }
 
-/** `DispatchPreviewOrder` as captured in `dispatch-previews-seed.json` —
- *  products may lack `description` (filled in by `seed()`). */
-type DispatchPreviewSeedOrder = Omit<DispatchPreviewOrder, 'tiendas'> & {
-  tiendas: Array<
-    Omit<DispatchPreviewStore, 'contenedores'> & {
-      contenedores: Array<
-        Omit<DispatchPreviewContainer, 'productos'> & {
-          productos: Array<
-            Omit<DispatchPreviewProduct, 'description'> & {
-              description?: string
-            }
-          >
-        }
-      >
-    }
-  >
-}
-
 function seed(): MockDb {
   faker.seed(8467343)
   const db: MockDb = {
     purchaseOrders: [],
     dispatchNotices: [],
-    // The captured seed predates the backend sending `estado` and product
-    // `description`; every order in it is undispatched, and descriptions are
-    // borrowed from the PO seed where the EAN overlaps.
     dispatchPreviews: structuredClone(
-      dispatchPreviewsSeed as Array<DispatchPreviewSeedOrder>,
-    ).map((o): DispatchPreviewOrder => ({
-      ...o,
-      estado: o.estado ?? 'ALISTADO',
-      tiendas: o.tiendas.map((t) => ({
-        ...t,
-        contenedores: t.contenedores.map((c) => ({
-          ...c,
-          productos: c.productos.map((p) => ({
-            ...p,
-            description:
-              p.description ??
-              SEED_DESCRIPTIONS.get(p.eanSku) ??
-              `PRODUCTO ${p.eanSku}`,
-          })),
-        })),
-      })),
-    })),
+      dispatchPreviewsSeed as Array<DispatchPreviewOrder>,
+    ),
     logs: [],
     seq: { logByDay: {}, noticeByOrder: {}, sync: 90 },
   }

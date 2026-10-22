@@ -12,8 +12,11 @@ export interface DispatchOrder {
   eanPuntoEntrega: string
   /** `''` while not yet dispatched. */
   fechaRealDespacho: string
+  fechaTransmision: string
   cantidadTiendas: number
   cantidadContenedores: number
+  cantidadTotal: number
+  valorTotal: number
   estadoTone: StatusBadgeTone
   estadoLabel: string
   /** The untouched API order — its Tienda→Contenedor→Producto tree feeds the
