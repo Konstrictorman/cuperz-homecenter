@@ -779,9 +779,124 @@ function seed(): MockDb {
     db.dispatchNotices.push(notice)
   }
 
+  // Runs last so the faker draws above (and the data they produce) don't move.
+  completeDispatchPreviews(db)
+
   // Sort logs newest-first for the integration-log screen.
   db.logs.sort((a, b) => b.fecha.localeCompare(a.fecha))
   return db
+}
+
+/** Rebuilds a `SeedOrder` from a dispatch preview whose PO isn't in
+ *  `purchase-orders-seed.json` — the capture covers newer orders than that
+ *  export. Products are the preview's containers summed per SKU; the unit
+ *  cost (absent from the preview) is taken from the PO seed when the EAN is
+ *  there, otherwise the preview's average (`valorTotal / cantidadTotal`). */
+function seedOrderFromPreview(
+  preview: DispatchPreviewOrder,
+  knownProducts: Map<string, SeedProduct>,
+): SeedOrder {
+  const products = new Map<string, SeedProduct>()
+  const averageCost = Math.round(
+    Number(preview.valorTotal) / Math.max(Number(preview.cantidadTotal), 1),
+  )
+  for (const tienda of preview.tiendas) {
+    for (const contenedor of tienda.contenedores) {
+      for (const p of contenedor.productos) {
+        const known = knownProducts.get(p.eanSku)
+        const product = products.get(p.eanSku) ?? {
+          eanSku: p.eanSku,
+          skuHomecenter: known?.skuHomecenter ?? p.eanSku.slice(-6),
+          descripcion: p.description,
+          cantidadSolicitada: 0,
+          costoUnitario: known?.costoUnitario ?? averageCost,
+          tiendas: [],
+        }
+        const cantidad = Number(p.cantidad)
+        product.cantidadSolicitada += cantidad
+        const store = product.tiendas.find(
+          (t) => t.eanTienda === tienda.eanTienda,
+        )
+        if (store) store.cantidad += cantidad
+        else
+          product.tiendas.push({
+            eanTienda: tienda.eanTienda,
+            nombreTienda: tienda.nombreTienda,
+            cantidad,
+          })
+        products.set(p.eanSku, product)
+      }
+    }
+  }
+  // The preview's datetimes are offset-less; the PO seed's are UTC.
+  const fechaTransmision = `${preview.fechaTransmision.slice(0, 19)}Z`
+  return {
+    ordenCompra: preview.ordenCompra,
+    estadoRaw: 'PENDIENTE',
+    transportadora: 'ENVIA',
+    observacionesNpc: null,
+    fechaTransmision,
+    fechaCreacion: fechaTransmision,
+    fechaMinEntrega: `${preview.minimaFechaEntrega.slice(0, 19)}Z`,
+    fechaMaxEntrega: `${preview.maximaFechaEntrega.slice(0, 19)}Z`,
+    fechaEstadoFinal: null,
+    productos: Array.from(products.values()),
+  }
+}
+
+/** Moves a `YYYY-MM-DDTHH:mm:ss[Z]` datetime `days` days, keeping its shape. */
+function shiftDays(iso: string, days: number): string {
+  const d = new Date(`${iso.slice(0, 10)}T00:00:00Z`)
+  d.setUTCDate(d.getUTCDate() + days)
+  return `${isoDate(d)}${iso.slice(10)}`
+}
+
+/** Makes every not-yet-dispatched preview order dispatchable in the mock:
+ *  - each gets a purchase order (the dispatch modal reads the delivery
+ *    window from `GET /ordenes-compra/:id`, which 404'd for previews newer
+ *    than the PO seed);
+ *  - a delivery window that has already closed is moved forward to start
+ *    today (length kept), on both the preview and its PO — the captured
+ *    windows are all in the past, which would block every dispatch. */
+function completeDispatchPreviews(db: MockDb): void {
+  const knownProducts = new Map(
+    SEED_ORDERS.flatMap((o) => o.productos).map((p) => [p.eanSku, p]),
+  )
+  const today = isoDate(new Date())
+  for (const preview of db.dispatchPreviews) {
+    let order = db.purchaseOrders.find(
+      (o) => o.ordenCompra === preview.ordenCompra,
+    )
+    if (!order) {
+      order = buildPurchaseOrder(seedOrderFromPreview(preview, knownProducts))
+      db.purchaseOrders.push(order)
+      const when = new Date(order.ultimaActualizacion)
+      db.logs.push({
+        integracionLogId: nextLogId(db, when),
+        tipo: 'ORDEN_COMPRA_SYNC',
+        fecha: isoDateTime(when),
+        estado: 'EXITOSO',
+        referencia: order.ordenCompra,
+        requestEnviado: purchaseOrderToHomecenterRequest(order),
+        respuestaRecibida: purchaseOrderToHomecenterResponse(order),
+      })
+    }
+
+    if (preview.estado === 'DESPACHADO') continue
+    const max = preview.maximaFechaEntrega.slice(0, 10)
+    if (max >= today) continue
+    const days = Math.round(
+      (Date.parse(today) -
+        Date.parse(preview.minimaFechaEntrega.slice(0, 10))) /
+        86_400_000,
+    )
+    preview.minimaFechaEntrega = shiftDays(preview.minimaFechaEntrega, days)
+    preview.maximaFechaEntrega = shiftDays(preview.maximaFechaEntrega, days)
+    if (order.fechaMinEntrega)
+      order.fechaMinEntrega = shiftDays(order.fechaMinEntrega, days)
+    if (order.fechaMaxEntrega)
+      order.fechaMaxEntrega = shiftDays(order.fechaMaxEntrega, days)
+  }
 }
 
 // --- Singleton ---

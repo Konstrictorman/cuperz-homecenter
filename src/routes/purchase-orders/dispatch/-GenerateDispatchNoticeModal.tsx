@@ -2,6 +2,7 @@ import Box from '@mui/material/Box'
 import CircularProgress from '@mui/material/CircularProgress'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
+import { useState } from 'react'
 import SendIcon from '@mui/icons-material/Send'
 import { useQuery } from '@tanstack/react-query'
 import { useForm } from '@tanstack/react-form'
@@ -77,8 +78,9 @@ interface GenerateDispatchNoticeModalProps {
   /** `null` keeps the modal closed. */
   order: DispatchOrder | null
   onClose: () => void
-  /** Fired with the validated `YYYY-MM-DD` date; the modal closes right
-   *  after — the caller owns the request and its feedback. */
+  /** Fired, once the user confirms, with the validated `YYYY-MM-DD` date;
+   *  the modal closes right after — the caller owns the request and its
+   *  feedback. */
   onSubmit: (order: DispatchOrder, fechaRealDespacho: string) => void
 }
 
@@ -124,7 +126,7 @@ const GenerateDispatchNoticeModal = ({
     }
     return (
       // Keyed so every order starts from a fresh form and its own default.
-      <DispatchDateForm
+      <DispatchNoticeSteps
         key={order.ordenCompra}
         order={order}
         dispatchWindow={toDispatchWindow(
@@ -132,7 +134,7 @@ const GenerateDispatchNoticeModal = ({
           detail.cabecera.fechaMaxEntrega,
         )}
         onCancel={onClose}
-        onSubmit={(fechaRealDespacho) => {
+        onConfirm={(fechaRealDespacho) => {
           onSubmit(order, fechaRealDespacho)
           onClose()
         }}
@@ -152,23 +154,102 @@ const GenerateDispatchNoticeModal = ({
   )
 }
 
-interface DispatchDateFormProps {
+interface DispatchNoticeStepsProps {
   order: DispatchOrder
   dispatchWindow: DispatchWindow
+  onCancel: () => void
+  /** Fired from the confirmation step — only then is the notice sent. */
+  onConfirm: (fechaRealDespacho: string) => void
+}
+
+/** Date step, then a confirmation step summarising what will be sent.
+ *  Cancelling the confirmation goes back to the date, keeping it. */
+const DispatchNoticeSteps = ({
+  order,
+  dispatchWindow,
+  onCancel,
+  onConfirm,
+}: DispatchNoticeStepsProps) => {
+  const [fechaRealDespacho, setFechaRealDespacho] = useState(() =>
+    defaultFechaRealDespacho(order, dispatchWindow),
+  )
+  const [confirming, setConfirming] = useState(false)
+
+  if (confirming) {
+    return (
+      <DispatchNoticeConfirmation
+        order={order}
+        onCancel={() => setConfirming(false)}
+        onConfirm={() => onConfirm(fechaRealDespacho)}
+      />
+    )
+  }
+  return (
+    <DispatchDateForm
+      dispatchWindow={dispatchWindow}
+      initialValue={fechaRealDespacho}
+      onCancel={onCancel}
+      onSubmit={(value) => {
+        setFechaRealDespacho(value)
+        setConfirming(true)
+      }}
+    />
+  )
+}
+
+const formatNumber = (value: number) => value.toLocaleString('es-CO')
+
+interface DispatchNoticeConfirmationProps {
+  order: DispatchOrder
+  onCancel: () => void
+  onConfirm: () => void
+}
+
+const DispatchNoticeConfirmation = ({
+  order,
+  onCancel,
+  onConfirm,
+}: DispatchNoticeConfirmationProps) => (
+  <div className="generate-labels-modal">
+    <Typography>
+      Está a punto de formalizar el despacho correspondiente a la orden{' '}
+      <b>{order.ordenCompra}</b> por un valor de{' '}
+      <b>${formatNumber(Math.round(order.valorTotal))}</b>, son{' '}
+      <b>{formatNumber(order.cantidadTotal)} </b>unidades distribuidas en{' '}
+      <b>{formatNumber(order.cantidadContenedores)}</b> paquetes para{' '}
+      <b>{formatNumber(order.cantidadTiendas)}</b> tiendas.
+    </Typography>
+    <div className="generate-labels-modal__actions">
+      <Button color="neutral" variant="outlined" onClick={onCancel}>
+        Cancelar
+      </Button>
+      <Button
+        variant="contained"
+        startIcon={<SendIcon />}
+        autoFocus
+        onClick={onConfirm}
+      >
+        Confirmar
+      </Button>
+    </div>
+  </div>
+)
+
+interface DispatchDateFormProps {
+  dispatchWindow: DispatchWindow
+  initialValue: string
   onCancel: () => void
   onSubmit: (fechaRealDespacho: string) => void
 }
 
 const DispatchDateForm = ({
-  order,
   dispatchWindow,
+  initialValue,
   onCancel,
   onSubmit,
 }: DispatchDateFormProps) => {
   const form = useForm({
-    defaultValues: {
-      fechaRealDespacho: defaultFechaRealDespacho(order, dispatchWindow),
-    },
+    defaultValues: { fechaRealDespacho: initialValue },
     onSubmit: ({ value }) => onSubmit(value.fechaRealDespacho),
   })
 
@@ -222,8 +303,8 @@ const DispatchDateForm = ({
         <Button color="neutral" variant="outlined" onClick={onCancel}>
           Cancelar
         </Button>
-        <Button type="submit" variant="contained" startIcon={<SendIcon />}>
-          Enviar
+        <Button type="submit" variant="contained">
+          Continuar
         </Button>
       </div>
     </form>

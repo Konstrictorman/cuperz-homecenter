@@ -6,7 +6,9 @@
 // than faker — see dispatch-previews-seed.json. That capture predates the
 // order totals/dates and `codTienda`/`nombreTienda` (2026-10-22), so those
 // were backfilled from the PO seed and the live sample, and synthesised where
-// neither had them. Every order is `ALISTADO` with `fechaRealDespacho: null`,
+// neither had them. At seed time every order also gets a backing PO and an
+// expired delivery window is moved to start today (`completeDispatchPreviews`
+// in data/db.ts), so each one can be dispatched. Every order is `ALISTADO` with `fechaRealDespacho: null`,
 // so `DESPACHADO` and any date range return nothing here until an order is
 // dispatched through the handlers
 // below (also undocumented in the spec; per the Postman collection):
