@@ -1,0 +1,38 @@
+.retry-orders {
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  text-align: center;
+  font-weight: var(--font-weight-medium) !important;
+}
+
+.retry-orders-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  align-items: center;
+  margin-top: var(--space-lg);
+}
+
+.retry-orders__field {
+  width: 25%;
+}
+
+.retry-orders__clear-button {
+  color: var(--color-text-primary) !important;
+}
+
+@container (min-width: 32rem) {
+  .retry-orders-form {
+    flex-direction: row;
+    justify-content: center;
+  }
+}
+
+@media (min-width: 640px) {
+  .retry-orders {
+    padding: var(--space-lg);
+  }
+}

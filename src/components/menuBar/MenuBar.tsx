@@ -74,6 +74,13 @@ const MenuBar = () => {
           >
             Despachos
           </MenuItem>
+          <MenuItem
+            component={Link}
+            to="/purchase-orders/retry"
+            onClick={handleClose}
+          >
+            Reinyectar OC
+          </MenuItem>
         </Menu>
       </div>
     </div>

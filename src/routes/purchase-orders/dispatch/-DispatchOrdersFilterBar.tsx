@@ -93,6 +93,7 @@ const DispatchOrdersFilterBar = ({
                     <IconButton
                       onClick={() => field.handleChange('')}
                       edge="end"
+                      className="filter-bar__clear-button"
                     >
                       {field.state.value ? <ClearIcon /> : null}
                     </IconButton>
@@ -121,6 +122,7 @@ const DispatchOrdersFilterBar = ({
                     <IconButton
                       onClick={() => field.handleChange('')}
                       edge="end"
+                      className="filter-bar__clear-button"
                     >
                       {field.state.value ? <ClearIcon /> : null}
                     </IconButton>

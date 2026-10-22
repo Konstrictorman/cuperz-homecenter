@@ -26,6 +26,10 @@
   gap: var(--space-xs);
 }
 
+.filter-bar__clear-button {
+  color: var(--color-text-primary) !important;
+}
+
 /* Container is `.purchase-orders` (container-type: inline-size). */
 @container (min-width: 32rem) {
   .filter-bar {

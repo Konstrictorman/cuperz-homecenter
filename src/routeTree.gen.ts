@@ -15,6 +15,7 @@ import { Route as PurchaseOrdersIndexRouteImport } from './routes/purchase-order
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as PurchaseOrdersDetailsIndexRouteImport } from './routes/purchase-orders/details/index'
 import { Route as PurchaseOrdersDispatchIndexRouteImport } from './routes/purchase-orders/dispatch/index'
+import { Route as PurchaseOrdersRetryIndexRouteImport } from './routes/purchase-orders/retry/index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -48,6 +49,12 @@ const PurchaseOrdersDispatchIndexRoute =
     path: '/dispatch/',
     getParentRoute: () => PurchaseOrdersRouteRoute,
   } as any)
+const PurchaseOrdersRetryIndexRoute =
+  PurchaseOrdersRetryIndexRouteImport.update({
+    id: '/retry/',
+    path: '/retry/',
+    getParentRoute: () => PurchaseOrdersRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -56,6 +63,7 @@ export interface FileRoutesByFullPath {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/purchase-orders/details/': typeof PurchaseOrdersDetailsIndexRoute
   '/purchase-orders/dispatch/': typeof PurchaseOrdersDispatchIndexRoute
+  '/purchase-orders/retry/': typeof PurchaseOrdersRetryIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -63,6 +71,7 @@ export interface FileRoutesByTo {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/purchase-orders/details': typeof PurchaseOrdersDetailsIndexRoute
   '/purchase-orders/dispatch': typeof PurchaseOrdersDispatchIndexRoute
+  '/purchase-orders/retry': typeof PurchaseOrdersRetryIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -72,6 +81,7 @@ export interface FileRoutesById {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/purchase-orders/details/': typeof PurchaseOrdersDetailsIndexRoute
   '/purchase-orders/dispatch/': typeof PurchaseOrdersDispatchIndexRoute
+  '/purchase-orders/retry/': typeof PurchaseOrdersRetryIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -82,6 +92,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/purchase-orders/details/'
     | '/purchase-orders/dispatch/'
+    | '/purchase-orders/retry/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -89,6 +100,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/purchase-orders/details'
     | '/purchase-orders/dispatch'
+    | '/purchase-orders/retry'
   id:
     | '__root__'
     | '/'
@@ -97,6 +109,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/purchase-orders/details/'
     | '/purchase-orders/dispatch/'
+    | '/purchase-orders/retry/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -149,6 +162,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PurchaseOrdersDispatchIndexRouteImport
       parentRoute: typeof PurchaseOrdersRouteRoute
     }
+    '/purchase-orders/retry/': {
+      id: '/purchase-orders/retry/'
+      path: '/retry'
+      fullPath: '/purchase-orders/retry/'
+      preLoaderRoute: typeof PurchaseOrdersRetryIndexRouteImport
+      parentRoute: typeof PurchaseOrdersRouteRoute
+    }
   }
 }
 
@@ -156,12 +176,14 @@ interface PurchaseOrdersRouteRouteChildren {
   PurchaseOrdersIndexRoute: typeof PurchaseOrdersIndexRoute
   PurchaseOrdersDetailsIndexRoute: typeof PurchaseOrdersDetailsIndexRoute
   PurchaseOrdersDispatchIndexRoute: typeof PurchaseOrdersDispatchIndexRoute
+  PurchaseOrdersRetryIndexRoute: typeof PurchaseOrdersRetryIndexRoute
 }
 
 const PurchaseOrdersRouteRouteChildren: PurchaseOrdersRouteRouteChildren = {
   PurchaseOrdersIndexRoute: PurchaseOrdersIndexRoute,
   PurchaseOrdersDetailsIndexRoute: PurchaseOrdersDetailsIndexRoute,
   PurchaseOrdersDispatchIndexRoute: PurchaseOrdersDispatchIndexRoute,
+  PurchaseOrdersRetryIndexRoute: PurchaseOrdersRetryIndexRoute,
 }
 
 const PurchaseOrdersRouteRouteWithChildren =
