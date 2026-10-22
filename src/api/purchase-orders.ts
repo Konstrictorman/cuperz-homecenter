@@ -10,6 +10,7 @@ import { apiFetch, buildQuery } from './http'
 import { normalizeOrderStatus } from './order-status'
 import { queryKeys } from './query-keys'
 import type {
+  GeneratePurchaseOrdersPdfRequest,
   PurchaseOrderDetail,
   PurchaseOrderLabelsRequest,
   PurchaseOrdersQuery,
@@ -167,23 +168,34 @@ export function useExportPurchaseOrdersCsv() {
   })
 }
 
-/** `GET /api/v1/ordenes-compra/{ordenCompra}/pdf` — the purchase order PDF.
- *  Not in the backend spec; the backend wraps Homecenter's `GenerarPdf` and
- *  answers `502 HOMECENTER_PDF_NO_DISPONIBLE` when Homecenter fails (observed
- *  2026-10-16 — a successful response hasn't been observed yet). */
-function fetchPurchaseOrderPdf(ordenCompra: string): Promise<Blob> {
-  return apiFetch<Blob>(
-    `/ordenes-compra/${encodeURIComponent(ordenCompra)}/pdf`,
-    { headers: { Accept: 'application/pdf' } },
-  )
+/** `POST /api/v1/ordenes-compra/generar-pdf` — a single PDF covering every
+ *  given order that exists (unknown ones are silently skipped; `404` when
+ *  none exist). Not in the backend spec; the backend wraps Homecenter's
+ *  `GenerarPdf` and answers `502 HOMECENTER_GENERAR_PDF_NO_DISPONIBLE` when
+ *  Homecenter fails. */
+function fetchPurchaseOrdersPdf(
+  request: GeneratePurchaseOrdersPdfRequest,
+): Promise<Blob> {
+  return apiFetch<Blob>('/ordenes-compra/generar-pdf', {
+    method: 'POST',
+    body: request,
+    headers: { Accept: 'application/pdf' },
+  })
 }
 
-/** Triggers a browser download of the generated PDF for a purchase order. */
-export async function downloadPurchaseOrderPdf(
-  ordenCompra: string,
+/** Triggers a browser download of the generated PDF for one or more
+ *  purchase orders — `orden-{ordenCompra}.pdf` for a single order,
+ *  `ordenes-compra.pdf` when several are combined. */
+export async function downloadPurchaseOrdersPdf(
+  ordenCompras: Array<string>,
 ): Promise<void> {
-  const blob = await fetchPurchaseOrderPdf(ordenCompra)
-  triggerDownload(blob, `orden-${ordenCompra}.pdf`)
+  const blob = await fetchPurchaseOrdersPdf({ ordenes: ordenCompras })
+  triggerDownload(
+    blob,
+    ordenCompras.length === 1
+      ? `orden-${ordenCompras[0]}.pdf`
+      : 'ordenes-compra.pdf',
+  )
 }
 
 /** `GET /api/v1/ordenes-compra/{ordenCompra}/etiquetas/{numTags}` — the
@@ -204,23 +216,4 @@ export async function downloadPurchaseOrderLabels(
 ): Promise<void> {
   const blob = await fetchPurchaseOrderLabels(request)
   triggerDownload(blob, `etiquetas-${request.ordenCompra}.pdf`)
-}
-
-/**
- * Generates the PDF for each given order and bundles them into a single
- * `purchase-orders-pdf.zip` download — one request per order, same as
- * {@link downloadPurchaseOrderPdf}.
- */
-export async function downloadPurchaseOrdersPdfZip(
-  ordenCompras: Array<string>,
-): Promise<void> {
-  const blobs = await Promise.all(ordenCompras.map(fetchPurchaseOrderPdf))
-
-  const zip = new JSZip()
-  ordenCompras.forEach((ordenCompra, index) => {
-    zip.file(`orden-${ordenCompra}.pdf`, blobs[index])
-  })
-  const zipBlob = await zip.generateAsync({ type: 'blob' })
-
-  triggerDownload(zipBlob, 'purchase-orders-pdf.zip')
 }

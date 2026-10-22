@@ -95,9 +95,10 @@ entries; a full page reload resets everything.
 - A line whose `cantidad` reaches 100% of what was requested comes back as
   `CON_NOVEDAD` (the `isError:false` + `errorMessage` pattern).
 - Name any container `*ERR*` to force `502 HOMECENTER_NO_DISPONIBLE`.
-- `GET /ordenes-compra/{ordenCompra}/pdf` returns a stand-in PDF for seeded
-  orders and `502 HOMECENTER_PDF_NO_DISPONIBLE` for unknown ones (the live
-  backend answered that 502 for every order when sampled on 2026-10-16).
+- `POST /ordenes-compra/generar-pdf` (`{ "ordenes": [...] }`) returns one
+  stand-in PDF with a page per seeded order, silently skipping unknown ones,
+  and `404 ORDEN_NO_ENCONTRADA` when none of them exist (same as the real
+  backend; its error code is assumed).
 - Reprocess only works on `CON_ERROR` orders and respects a 3-attempt cap
   (`409 REINTENTO_NO_PERMITIDO`).
 - Resend only works on `CON_NOVEDAD` / `ERROR_ENVIO` (`409 AVISO_NO_REENVIABLE`).

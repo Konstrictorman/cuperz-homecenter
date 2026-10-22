@@ -316,6 +316,16 @@ export interface PurchaseOrderLabelsRequest {
   numTags: number
 }
 
+/**
+ * Body for `POST /api/v1/ordenes-compra/generar-pdf` — not in the backend
+ * spec; from the Postman collection. Responds `200 application/pdf`
+ * (`ordenes-compra.pdf`, one document for all the orders that exist — unknown
+ * ones are skipped, `404` when none exist); wraps Homecenter's `GenerarPdf`.
+ */
+export interface GeneratePurchaseOrdersPdfRequest {
+  ordenes: Array<string>
+}
+
 // ===========================================================================
 // Process 2 — Dispatch Notices (Platform → Homecenter) · § 2
 // ===========================================================================

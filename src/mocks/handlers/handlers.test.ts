@@ -110,8 +110,12 @@ describe('purchase orders', () => {
     expect(res.status).toBe(422)
   })
 
-  it('generates the purchase order PDF', async () => {
-    const res = await fetch(`${BASE}/ordenes-compra/8467343/pdf`)
+  it('generates one PDF for all the requested orders', async () => {
+    const res = await fetch(`${BASE}/ordenes-compra/generar-pdf`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ordenes: ['8467343'] }),
+    })
     expect(res.status).toBe(200)
     expect(res.headers.get('content-type')).toBe('application/pdf')
     const pdf = await res.text()
@@ -119,12 +123,30 @@ describe('purchase orders', () => {
     expect(pdf).toContain('Orden de compra 8467343')
   })
 
-  it('answers 502 when the PDF of an unknown order cannot be generated', async () => {
+  it('skips unknown orders when generating the PDF', async () => {
+    const res = await fetch(`${BASE}/ordenes-compra/generar-pdf`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ordenes: ['8467343', '999999999'] }),
+    })
+    expect(res.status).toBe(200)
+    const pdf = await res.text()
+    expect(pdf).toContain('/Count 1')
+    expect(pdf).toContain('Orden de compra 8467343')
+    expect(pdf).not.toContain('999999999')
+  })
+
+  it('answers 404 when none of the orders exist', async () => {
     const { status, body } = await json<{ error: { code: string } }>(
-      '/ordenes-compra/999999999/pdf',
+      '/ordenes-compra/generar-pdf',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ordenes: ['999999999'] }),
+      },
     )
-    expect(status).toBe(502)
-    expect(body.error.code).toBe('HOMECENTER_PDF_NO_DISPONIBLE')
+    expect(status).toBe(404)
+    expect(body.error.code).toBe('ORDEN_NO_ENCONTRADA')
   })
 })
 

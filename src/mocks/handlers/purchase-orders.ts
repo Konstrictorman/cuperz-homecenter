@@ -11,9 +11,10 @@ import {
   paginate,
 } from '../data/db'
 import type { PurchaseOrderRecord } from '../data/db'
-import { buildLabelsPdf, buildPurchaseOrderPdf } from '../data/mock-pdf'
+import { buildLabelsPdf, buildPurchaseOrdersPdf } from '../data/mock-pdf'
 import { formatDate } from '#/common/util'
 import type {
+  GeneratePurchaseOrdersPdfRequest,
   PurchaseOrderDetail,
   PurchaseOrderDetailCabecera,
   PurchaseOrderStore,
@@ -366,25 +367,38 @@ export const purchaseOrdersHandlers = [
     },
   ),
 
-  // Not in the spec — the live backend wraps Homecenter's `GenerarPdf` and
-  // answered `502 HOMECENTER_PDF_NO_DISPONIBLE` for every order when sampled
-  // (2026-10-16), existing or not. Here unknown orders get that 502 so the
-  // error path can be exercised; known ones get a stand-in PDF.
-  http.get(`${API}/ordenes-compra/:ordenCompra/pdf`, async ({ params }) => {
+  // Not in the spec — the backend wraps Homecenter's `GenerarPdf` and returns
+  // one PDF combining every order in the body that exists, silently skipping
+  // unknown ones; `404` only when none exist (confirmed with the backend,
+  // 2026-10-22). Its `502 HOMECENTER_GENERAR_PDF_NO_DISPONIBLE` (Homecenter
+  // down) isn't simulated.
+  http.post(`${API}/ordenes-compra/generar-pdf`, async ({ request }) => {
     await latency()
-    const ordenCompra = String(params.ordenCompra)
-    if (!db.purchaseOrders.some((o) => o.ordenCompra === ordenCompra)) {
+    const body =
+      (await request.json()) as Partial<GeneratePurchaseOrdersPdfRequest>
+    const ordenes = body.ordenes
+    if (!Array.isArray(ordenes) || ordenes.length === 0) {
       return apiError(
-        502,
-        'HOMECENTER_PDF_NO_DISPONIBLE',
-        `Homecenter no pudo generar el PDF de la orden ${ordenCompra}.`,
+        422,
+        'PARAMETRO_INVALIDO',
+        'ordenes debe ser una lista no vacía de órdenes de compra.',
       )
     }
-    return new HttpResponse(buildPurchaseOrderPdf(ordenCompra), {
+    const existing = ordenes.filter((ordenCompra) =>
+      db.purchaseOrders.some((o) => o.ordenCompra === ordenCompra),
+    )
+    if (existing.length === 0) {
+      return apiError(
+        404,
+        'ORDEN_NO_ENCONTRADA',
+        'Ninguna de las órdenes de compra solicitadas existe.',
+      )
+    }
+    return new HttpResponse(buildPurchaseOrdersPdf(existing), {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="orden-${ordenCompra}.pdf"`,
+        'Content-Disposition': 'attachment; filename="ordenes-compra.pdf"',
       },
     })
   }),

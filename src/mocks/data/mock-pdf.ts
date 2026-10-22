@@ -62,10 +62,12 @@ export function buildLabelsPdf(ordenCompra: string, numTags: number): string {
   )
 }
 
-/** The purchase order document — a single letter-size page. */
-export function buildPurchaseOrderPdf(ordenCompra: string): string {
-  return buildMockPdf([[`MOCK - Orden de compra ${ordenCompra}`]], {
-    width: 612,
-    height: 792,
-  })
+/** The purchase orders document — one letter-size page per order. */
+export function buildPurchaseOrdersPdf(ordenCompras: Array<string>): string {
+  return buildMockPdf(
+    ordenCompras.map((ordenCompra) => [
+      `MOCK - Orden de compra ${ordenCompra}`,
+    ]),
+    { width: 612, height: 792 },
+  )
 }

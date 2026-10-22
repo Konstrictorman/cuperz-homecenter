@@ -15,8 +15,7 @@ import { toPurchaseOrderRow, toPurchaseOrdersQuery } from './-orderPresentation'
 import type { OrdersFilterValues } from './-OrdersFilterBar'
 import type { PurchaseOrder } from './-PurchaseOrdersTable'
 import {
-  downloadPurchaseOrderPdf,
-  downloadPurchaseOrdersPdfZip,
+  downloadPurchaseOrdersPdf,
   purchaseOrdersListQueryOptions,
   useExportPurchaseOrdersCsv,
 } from '#/api/purchase-orders'
@@ -59,7 +58,7 @@ const PurchaseOrdersPage = () => {
   const rows = (data?.data ?? []).map(toPurchaseOrderRow)
 
   const handleDownloadPdf = (order: PurchaseOrder) =>
-    feedback.run(() => downloadPurchaseOrderPdf(order.ordenCompra), {
+    feedback.run(() => downloadPurchaseOrdersPdf([order.ordenCompra]), {
       success:
         'Se descargó el PDF de la orden de compra satisfactoriamente. Por favor, revisa tu carpeta de descargas.',
       error: `No se pudo generar el PDF de la orden ${order.ordenCompra}.`,
@@ -80,9 +79,9 @@ const PurchaseOrdersPage = () => {
     })
 
   const handleDownloadSelectedPdf = (ordenCompras: Array<string>) =>
-    feedback.run(() => downloadPurchaseOrdersPdfZip(ordenCompras), {
+    feedback.run(() => downloadPurchaseOrdersPdf(ordenCompras), {
       success:
-        'Los PDF de las órdenes seleccionadas se descargaron correctamente. Por favor, revisa tu carpeta de descargas.',
+        'El PDF de las órdenes seleccionadas se descargó correctamente. Por favor, revisa tu carpeta de descargas.',
       error: 'No se pudieron generar los PDF de las órdenes seleccionadas.',
     })
 
