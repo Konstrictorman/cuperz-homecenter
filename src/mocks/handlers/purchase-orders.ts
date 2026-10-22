@@ -263,7 +263,7 @@ export const purchaseOrdersHandlers = [
     await latency()
     const url = new URL(request.url)
     const orders = filterPurchaseOrders(url)
-    // Assumed trigger for `exportada` — see `PurchaseOrderSummary.exportada`.
+    // Export flags the orders `exportada` — see `PurchaseOrderSummary.exportada`.
     for (const order of orders) order.exportada = true
     const body = [CSV_HEADER, ...orders.flatMap(toExportLines)].join('\n')
     return new HttpResponse(body, {

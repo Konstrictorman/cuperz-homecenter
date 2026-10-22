@@ -148,6 +148,25 @@ export async function downloadPurchaseOrdersCsv(
   triggerDownload(zipBlob, 'ordenes-compra.zip')
 }
 
+/**
+ * {@link downloadPurchaseOrdersCsv} as a mutation. The backend flags each
+ * successfully exported order `exportada`, so the order queries are
+ * refetched afterwards — on settle rather than success, because a
+ * multi-order export can fail partway after some orders were already
+ * flagged.
+ */
+export function useExportPurchaseOrdersCsv() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: downloadPurchaseOrdersCsv,
+    onSettled: () => {
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.purchaseOrders.all(),
+      })
+    },
+  })
+}
+
 /** `GET /api/v1/ordenes-compra/{ordenCompra}/pdf` — the purchase order PDF.
  *  Not in the backend spec; the backend wraps Homecenter's `GenerarPdf` and
  *  answers `502 HOMECENTER_PDF_NO_DISPONIBLE` when Homecenter fails (observed

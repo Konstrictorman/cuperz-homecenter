@@ -94,9 +94,8 @@ export interface PurchaseOrderSummary {
    *  sent with. */
   fechaDespacho: IsoDate | null
   /** Platform-only flag (not part of Homecenter's contract), added to the
-   *  response 2026-10-22. Seen `false` on every sampled row so far — what
-   *  sets it (presumably `GET /ordenes-compra/export`, § 1.5) is
-   *  unconfirmed. */
+   *  response 2026-10-22. Set `true` by the backend on a successful
+   *  `GET /ordenes-compra/export` (§ 1.5) for that order. */
   exportada: boolean
   /** Raw `STICKER`; Homecenter's `"-1"` "not assigned" sentinel is seen
    *  un-translated here (contrast `PurchaseOrderDetail.sticker`, which the

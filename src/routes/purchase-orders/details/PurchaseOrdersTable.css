@@ -1,0 +1,11 @@
+.data-table .MuiDataGrid-row.purchase-orders-table__row--unexported {
+  font-weight: var(--font-weight-medium);
+}
+
+/* Accent bar on the row's leading edge (the checkbox cell), drawn as an inset
+ * shadow so it doesn't shift the cell's content or width. */
+.data-table
+  .MuiDataGrid-row.purchase-orders-table__row--unexported
+  > .MuiDataGrid-cellCheckbox {
+  box-shadow: inset 3px 0 0 var(--palette-primary-main);
+}

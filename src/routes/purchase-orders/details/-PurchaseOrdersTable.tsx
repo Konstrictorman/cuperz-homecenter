@@ -9,6 +9,7 @@ import DataTable from '#/components/dataTable/DataTable'
 import type { StatusBadgeTone } from '#/components/statusBadge/StatusBadge'
 import ToolBar from '#/components/toolBar/ToolBar'
 import { usePurchaseOrdersColumns } from './-usePurchaseOrdersColumns'
+import './PurchaseOrdersTable.css'
 
 export interface PurchaseOrder {
   id: string
@@ -112,6 +113,11 @@ const PurchaseOrdersTable = ({
         rowCount={rowCount}
         paginationModel={paginationModel}
         onPaginationModelChange={onPaginationModelChange}
+        // Not-yet-exported orders read like unread mail: bold, with an accent
+        // bar, so new work stands out until it's been exported.
+        getRowClassName={({ row }) =>
+          row.exportada ? '' : 'purchase-orders-table__row--unexported'
+        }
         initialState={{
           columns: { columnVisibilityModel: { cliente: false } },
         }}

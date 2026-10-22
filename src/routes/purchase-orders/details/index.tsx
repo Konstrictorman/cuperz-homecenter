@@ -16,9 +16,9 @@ import type { OrdersFilterValues } from './-OrdersFilterBar'
 import type { PurchaseOrder } from './-PurchaseOrdersTable'
 import {
   downloadPurchaseOrderPdf,
-  downloadPurchaseOrdersCsv,
   downloadPurchaseOrdersPdfZip,
   purchaseOrdersListQueryOptions,
+  useExportPurchaseOrdersCsv,
 } from '#/api/purchase-orders'
 import { queryKeys } from '#/api/query-keys'
 import { useFeedback } from '#/contexts/FeedbackContext'
@@ -38,6 +38,7 @@ const PurchaseOrdersPage = () => {
   const feedback = useFeedback()
 
   const queryClient = useQueryClient()
+  const exportCsv = useExportPurchaseOrdersCsv()
 
   const handleFilter = (values: OrdersFilterValues) => {
     setFilters(values)
@@ -65,14 +66,14 @@ const PurchaseOrdersPage = () => {
     })
 
   const handleDownloadCsv = (order: PurchaseOrder) =>
-    feedback.run(() => downloadPurchaseOrdersCsv([order.ordenCompra]), {
+    feedback.run(() => exportCsv.mutateAsync([order.ordenCompra]), {
       success:
         'Se exportó el CSV de la orden de compra satisfactoriamente. Por favor, revisa tu carpeta de descargas.',
       error: `No se pudo exportar el CSV de la orden ${order.ordenCompra}.`,
     })
 
   const handleExportSelected = (ordenCompras: Array<string>) =>
-    feedback.run(() => downloadPurchaseOrdersCsv(ordenCompras), {
+    feedback.run(() => exportCsv.mutateAsync(ordenCompras), {
       success:
         'Los CSV de las órdenes seleccionadas se exportaron correctamente. Por favor, revisa tu carpeta de descargas.',
       error: 'No se pudieron exportar las órdenes seleccionadas.',
