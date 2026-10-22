@@ -62,14 +62,6 @@ export const usePurchaseOrdersColumns = (
         align: 'center',
       },
       {
-        field: 'ciudadEntrega',
-        headerName: 'Ciudad Entrega',
-        flex: 1,
-        minWidth: 140,
-        headerAlign: 'center',
-        align: 'center',
-      },
-      {
         field: 'cantidadTotal',
         headerName: 'Cant. Total',
         type: 'number',

@@ -20,6 +20,8 @@ export interface PurchaseOrder {
   estadoTone: StatusBadgeTone
   estadoLabel: string
   numPedido: string
+  exportada: boolean
+  observaciones: string
   fechaTransmision: string
   fechaMinEntrega: string
   fechaMaxEntrega: string

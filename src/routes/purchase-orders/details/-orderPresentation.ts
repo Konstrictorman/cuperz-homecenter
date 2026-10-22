@@ -60,6 +60,8 @@ export function toPurchaseOrderRow(o: PurchaseOrderSummary): PurchaseOrder {
     estadoTone: ui.tone,
     estadoLabel: ui.label,
     numPedido: o.numeroPedido ?? '',
+    exportada: o.exportada,
+    observaciones: o.observaciones ?? '',
     fechaTransmision: o.fechaTransmision,
     fechaMinEntrega: o.fechaMinEntrega ?? '',
     fechaMaxEntrega: o.fechaMaxEntrega ?? '',
