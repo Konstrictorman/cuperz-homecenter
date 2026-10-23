@@ -57,6 +57,7 @@ export interface DispatchOrderProductRow {
   cantidad: number
   peso: number
   volumen: number
+  valorUnitario: number
 }
 
 const DispatchOrderProductsTable = ({
@@ -112,6 +113,7 @@ const DispatchOrderProductsTable = ({
         cantidad: Number(producto.cantidad),
         peso: Number(producto.peso),
         volumen: Number(producto.volumen),
+        valorUnitario: Number(producto.valorUnitario),
       })),
     ),
   )
@@ -123,6 +125,7 @@ const DispatchOrderProductsTable = ({
         { field: 'cantidad', fn: 'sum' },
         { field: 'peso', fn: 'sum' },
         { field: 'volumen', fn: 'sum' },
+        { field: 'valorUnitario', fn: 'sum' },
       ]}
       rows={rows}
       columns={columns}

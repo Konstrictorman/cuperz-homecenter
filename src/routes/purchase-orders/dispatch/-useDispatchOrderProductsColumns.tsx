@@ -38,6 +38,15 @@ export const useDispatchOrderProductsColumns =
           minWidth: 100,
         },
         {
+          field: 'valorUnitario',
+          headerName: 'Valor',
+          type: 'number',
+          flex: 0.4,
+          minWidth: 100,
+          valueFormatter: (value: DispatchOrderProductRow['valorUnitario']) =>
+            `$${Math.round(value).toLocaleString('es-CO')}`,
+        },
+        {
           field: 'peso',
           headerName: 'Peso (kg)',
           type: 'number',

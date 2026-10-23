@@ -504,6 +504,8 @@ export interface DispatchPreviewProduct {
   eanSku: string
   description: string
   cantidad: string
+  /** Unit cost (`"35300.00"`). Added to the endpoint 2026-10-23. */
+  valorUnitario: string
   peso: string
   volumen: string
 }

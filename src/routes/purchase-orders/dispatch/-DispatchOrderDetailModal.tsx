@@ -24,6 +24,7 @@ const DispatchOrderDetailModal = ({
       title={`Detalle despacho — Orden ${order.ordenCompra}`}
       onOpen={open}
       onClose={onClose}
+      maxWidth="xl"
     >
       <div className="dispatch-order-detail-modal__summary">
         <div>

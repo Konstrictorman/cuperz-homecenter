@@ -61,6 +61,9 @@ const DispatchOrdersTable = ({
       rowCount={rowCount}
       paginationModel={paginationModel}
       onPaginationModelChange={onPaginationModelChange}
+      initialState={{
+        columns: { columnVisibilityModel: { eanPuntoEntrega: false } },
+      }}
     />
   )
 }

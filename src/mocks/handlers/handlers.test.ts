@@ -231,6 +231,7 @@ describe('dispatch previews', () => {
     expect(order.tiendas[0].contenedores[0].productos[0]).toMatchObject({
       eanSku: expect.any(String),
       cantidad: expect.any(String),
+      valorUnitario: expect.stringMatching(/^\d+\.\d{2}$/),
       peso: expect.any(String),
       volumen: expect.any(String),
     })

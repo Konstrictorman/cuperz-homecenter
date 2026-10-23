@@ -14,10 +14,15 @@
 
 .dispatch-order-detail-modal__lines {
   margin-top: var(--space-lg) !important;
+  width: 100%;
 }
 
 @media (min-width: 640px) {
   .dispatch-order-detail-modal__summary {
     grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+  }
+
+  .dispatch-order-detail-modal__lines {
+    width: 100%;
   }
 }

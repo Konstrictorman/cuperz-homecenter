@@ -71,6 +71,17 @@
   column-gap: 24px;
   row-gap: 4px;
   padding-left: 16px;
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+/* MUI's `TablePagination` root ships `overflow: auto`, so when the footer
+ * row runs out of room it shrinks and grows its own horizontal scrollbar.
+ * MUI X also gives it `flex-grow: 1`, which would split the free space
+ * with the totals and make them wrap early. Pinning it to its natural width
+ * leaves all the free space to the totals, which wrap only when needed. */
+.grouped-data-table .MuiDataGrid-footerContainer .MuiTablePagination-root {
+  flex: 0 0 auto;
 }
 
 /* GroupedDataTableFilterPanel (slots.filterPanel), in GroupedDataTable.tsx —
