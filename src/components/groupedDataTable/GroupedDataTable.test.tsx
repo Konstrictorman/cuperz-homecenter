@@ -151,6 +151,19 @@ describe('GroupedDataTable', () => {
     ).toBeInTheDocument()
   })
 
+  it('names the footer group count after mainGroupLabel', () => {
+    render(
+      <GroupedDataTable
+        rows={rows}
+        columns={columns}
+        groupBy="tienda"
+        mainGroupLabel="tiendas"
+      />,
+    )
+
+    expect(screen.getByText('Total de tiendas: 2')).toBeInTheDocument()
+  })
+
   it("renders no checkboxes by default, matching MUI X Premium's own row-grouping demos", () => {
     render(<GroupedDataTable rows={rows} columns={columns} groupBy="tienda" />)
 

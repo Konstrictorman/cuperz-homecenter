@@ -121,6 +121,7 @@ const DispatchOrderProductsTable = ({
   return (
     <GroupedDataTable
       groupBy={['tienda', 'contenedor']}
+      mainGroupLabel="tiendas"
       aggregations={[
         { field: 'cantidad', fn: 'sum' },
         { field: 'peso', fn: 'sum' },

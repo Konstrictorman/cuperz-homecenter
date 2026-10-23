@@ -95,6 +95,7 @@ const PurchaseOrderStoresTable = ({
   return (
     <GroupedDataTable
       groupBy="tienda"
+      mainGroupLabel="tiendas"
       aggregations={[
         { field: 'valorLinea', fn: 'sum' },
         { field: 'cantidad', fn: 'sum' },

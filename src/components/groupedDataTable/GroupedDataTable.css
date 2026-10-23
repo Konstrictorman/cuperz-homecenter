@@ -91,6 +91,12 @@
   min-width: 0;
 }
 
+.grouped-data-table__total-item {
+  display: flex;
+  flex-direction: row;
+  gap: var(--space-2xs);
+}
+
 /* Set on each item, not the container above: every item is a
  * `variant="body2"` Typography, which sets its own `font-weight` and so
  * never inherits one from its parent. Two classes to outrank MUI's single

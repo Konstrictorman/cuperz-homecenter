@@ -75,6 +75,7 @@ import './GroupedDataTable.css'
 declare module '@mui/x-data-grid' {
   interface FooterPropsOverrides {
     groupCount: number
+    mainGroupLabel: string
     grandTotals: Record<string, number>
     aggregations: Array<{ field: string }>
     columnByField: Map<string, GridColDef>
@@ -314,6 +315,10 @@ type GroupedDataTableProps<TRow extends GridValidRowModel> =
      *  group value alone doesn't show. The chevron itself stays outside it.
      *  @default (group, label) => label */
     renderGroupLabel?: (group: GroupRow, label: string) => ReactNode
+    /** Plural noun for the top-level group in the footer's group count —
+     *  renders as "Total de <mainGroupLabel>: <count>" (e.g. `'tiendas'`).
+     *  @default 'grupos' */
+    mainGroupLabel?: string
   }
 
 /** Built-in aggregation functions, keyed by the `AggregationFn` names
@@ -2015,6 +2020,7 @@ function GroupedDataTableFilterPanel() {
  *  augmentation above. */
 function GroupedDataTableFooter({
   groupCount,
+  mainGroupLabel,
   grandTotals,
   aggregations,
   columnByField,
@@ -2045,31 +2051,40 @@ function GroupedDataTableFooter({
             </IconButton>
           </span>
         )}
-        <Typography
-          variant="body2"
-          component="span"
-          className="grouped-data-table__totals-item"
-        >
-          Total de grupos: {groupCount}
-        </Typography>
+        <div className="grouped-data-table__total-item">
+          <Typography
+            variant="body2"
+            component="span"
+            className="grouped-data-table__totals-item"
+          >
+            Total de {mainGroupLabel}:
+          </Typography>
+          <Typography variant="body2" component="span">
+            {groupCount}
+          </Typography>
+        </div>
         {aggregations.map((aggregation) => {
           const column = columnByField.get(aggregation.field)
           return (
-            <Typography
-              key={aggregation.field}
-              variant="body2"
-              component="span"
-              className="grouped-data-table__totals-item"
-            >
-              Total {column?.headerName ?? aggregation.field}:{' '}
-              {column
-                ? formatAggregateValue(
-                    column,
-                    undefined,
-                    grandTotals[aggregation.field],
-                  )
-                : grandTotals[aggregation.field]}
-            </Typography>
+            <div>
+              <Typography
+                key={aggregation.field}
+                variant="body2"
+                component="span"
+                className="grouped-data-table__totals-item"
+              >
+                Total {column?.headerName ?? aggregation.field}:{' '}
+              </Typography>
+              <Typography variant="body2" component="span">
+                {column
+                  ? formatAggregateValue(
+                      column,
+                      undefined,
+                      grandTotals[aggregation.field],
+                    )
+                  : grandTotals[aggregation.field]}
+              </Typography>
+            </div>
           )
         })}
       </div>
@@ -2104,6 +2119,7 @@ const GroupedDataTable = <TRow extends GridValidRowModel>({
   exportFileName = 'datos',
   tableTitle,
   renderGroupLabel,
+  mainGroupLabel = 'grupos',
   // Bumped only while at least one column is actually aggregated (see
   // `columnHeaderHeight` below) — the extra few pixels a second header line
   // (the active-function label, `GroupedDataTableAggregationHeader`) needs
@@ -2910,6 +2926,7 @@ const GroupedDataTable = <TRow extends GridValidRowModel>({
             },
             footer: {
               groupCount: topLevelRowCount,
+              mainGroupLabel,
               grandTotals,
               aggregations,
               columnByField,
