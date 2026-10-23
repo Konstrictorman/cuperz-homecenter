@@ -12,6 +12,7 @@ import { formatDate, todayIsoDate } from '#/common/util'
 import { purchaseOrderDetailQueryOptions } from '#/api/purchase-orders'
 import type { DispatchOrder } from './-DispatchOrdersTable'
 import WarningAmberIcon from '@mui/icons-material/WarningAmber'
+import CancelIcon from '@mui/icons-material/Cancel'
 import './GenerateLabelsModal.css'
 
 /** Allowed `YYYY-MM-DD` range for the real dispatch date; `undefined` leaves
@@ -224,7 +225,12 @@ const DispatchNoticeConfirmation = ({
       </Typography>
     </div>
     <div className="generate-labels-modal__actions">
-      <Button color="neutral" variant="outlined" onClick={onCancel}>
+      <Button
+        color="neutral"
+        variant="contained"
+        onClick={onCancel}
+        startIcon={<CancelIcon />}
+      >
         Cancelar
       </Button>
       <Button
@@ -304,10 +310,15 @@ const DispatchDateForm = ({
       </form.Field>
 
       <div className="generate-labels-modal__actions">
-        <Button color="neutral" variant="outlined" onClick={onCancel}>
+        <Button
+          color="neutral"
+          variant="outlined"
+          onClick={onCancel}
+          startIcon={<CancelIcon />}
+        >
           Cancelar
         </Button>
-        <Button type="submit" variant="contained">
+        <Button type="submit" variant="contained" startIcon={<SendIcon />}>
           Continuar
         </Button>
       </div>
