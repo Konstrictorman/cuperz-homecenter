@@ -6,6 +6,7 @@
   padding: var(--space-md);
   text-align: center;
   font-weight: var(--font-weight-medium) !important;
+  margin-top: var(--space-lg);
 }
 
 .retry-orders-form {
@@ -13,11 +14,11 @@
   flex-direction: column;
   gap: var(--space-sm);
   align-items: center;
-  margin-top: var(--space-lg);
 }
 
 .retry-orders__field {
   width: 25%;
+  min-width: 130px;
 }
 
 .retry-orders__clear-button {
@@ -28,6 +29,7 @@
   .retry-orders-form {
     flex-direction: row;
     justify-content: center;
+    align-items: flex-start;
   }
 }
 

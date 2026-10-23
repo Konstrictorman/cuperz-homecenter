@@ -78,7 +78,7 @@ const RetryOrdersPage = () => {
                       <IconButton
                         onClick={() => field.handleChange('')}
                         edge="end"
-                        className="filter-bar__clear-button"
+                        className="retry-orders__clear-button"
                       >
                         {field.state.value ? <ClearIcon /> : null}
                       </IconButton>
