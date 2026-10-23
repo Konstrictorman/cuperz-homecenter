@@ -8,6 +8,22 @@
   gap: 4px;
 }
 
+/* Group row expand/collapse chevron and the footer's expand-all/
+ * collapse-all buttons — full text color rather than MUI's muted default,
+ * which reads too faint against the light theme's group-row/footer
+ * background. `!important` to beat MUI's own `IconButton` color rule. */
+.grouped-data-table__group-toggle,
+.grouped-data-table__bulk-toggle .MuiIconButton-root {
+  color: var(--body-text) !important;
+}
+
+/* Same hover tint as the grid's other action icon buttons
+ * (`.data-table .MuiDataGrid-actionsCell` in DataTable.css). */
+.grouped-data-table__group-toggle:hover,
+.grouped-data-table__bulk-toggle .MuiIconButton-root:hover {
+  background-color: var(--line) !important;
+}
+
 /* Group rows reuse DataTable.css's own table tokens (--table-footer-bg is
  * already themed for both light and dark) instead of introducing new ones,
  * so a group row reads visually closer to a totals/summary row. */
@@ -73,6 +89,14 @@
   padding-left: 16px;
   flex: 1 1 0;
   min-width: 0;
+}
+
+/* Set on each item, not the container above: every item is a
+ * `variant="body2"` Typography, which sets its own `font-weight` and so
+ * never inherits one from its parent. Two classes to outrank MUI's single
+ * `.MuiTypography-body2` class without `!important`. */
+.grouped-data-table__totals .grouped-data-table__totals-item {
+  font-weight: var(--font-weight-medium);
 }
 
 /* MUI's `TablePagination` root ships `overflow: auto`, so when the footer

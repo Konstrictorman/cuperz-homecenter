@@ -1021,6 +1021,7 @@ function toGroupAwareColumn<TRow extends GridValidRowModel>(
             >
               <IconButton
                 size="small"
+                className="grouped-data-table__group-toggle"
                 onClick={() => onToggleGroup(key)}
                 aria-label={collapsed ? 'Expandir grupo' : 'Contraer grupo'}
                 aria-expanded={!collapsed}
