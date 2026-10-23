@@ -110,6 +110,12 @@ export async function apiFetch<T>(
   return parseBody(response) as Promise<T>
 }
 
+/** The backend's error `code` (e.g. `ORDEN_NO_ENCONTRADA`) when `error` is a
+ *  failed API response, `undefined` for anything else. */
+export function apiErrorCode(error: unknown): string | undefined {
+  return error instanceof ApiError ? error.code : undefined
+}
+
 /**
  * The text to show a person for a failed request: the backend's own message
  * when it sent one, a plain `Error`'s message (e.g. thrown by our own code

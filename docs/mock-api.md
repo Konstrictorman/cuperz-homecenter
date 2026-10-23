@@ -103,7 +103,8 @@ entries; a full page reload resets everything.
   stand-in PDF with a page per seeded order, silently skipping unknown ones,
   and `404 ORDEN_NO_ENCONTRADA` when none of them exist (same as the real
   backend; its error code is assumed).
-- Reprocess only works on `CON_ERROR` orders and respects a 3-attempt cap
+- Reinject (`/reinyectar`) only works on `PENDIENTE` orders (not `CON_ERROR`
+  as the backend spec says) — the order stays `PENDIENTE` — and respects a 3-attempt cap
   (`409 REINTENTO_NO_PERMITIDO`).
 - Resend only works on `CON_NOVEDAD` / `ERROR_ENVIO` (`409 AVISO_NO_REENVIABLE`).
 

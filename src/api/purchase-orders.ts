@@ -6,7 +6,7 @@ import {
   useQueryClient,
 } from '@tanstack/react-query'
 import JSZip from 'jszip'
-import { apiFetch, buildQuery } from './http'
+import { apiErrorCode, apiFetch, buildQuery } from './http'
 import { normalizeOrderStatus } from './order-status'
 import { queryKeys } from './query-keys'
 import type {
@@ -16,6 +16,7 @@ import type {
   PurchaseOrdersQuery,
   PurchaseOrderSummary,
   Paginated,
+  ReprocessOrderErrorCode,
   ReprocessOrderResponse,
   SyncPurchaseOrdersRequest,
   SyncPurchaseOrdersResponse,
@@ -96,6 +97,32 @@ export function useReprocessOrder() {
       })
     },
   })
+}
+
+const REPROCESS_ERROR_MESSAGES: Record<
+  ReprocessOrderErrorCode,
+  (ordenCompra: string) => string
+> = {
+  ORDEN_NO_ENCONTRADA: (ordenCompra) =>
+    `La orden de compra ${ordenCompra} no existe en el sistema.`,
+  REINTENTO_NO_PERMITIDO: (ordenCompra) =>
+    `La orden de compra ${ordenCompra} no se puede reinyectar: no está en estado PENDIENTE o ya alcanzó el máximo de reintentos.`,
+}
+
+/**
+ * User-facing wording for a failed {@link useReprocessOrder} call, keyed on
+ * the error `code` — the real backend answers `{ detail: { code } }` with no
+ * message of its own. `undefined` for any other failure, so the caller's
+ * generic fallback applies.
+ */
+export function reprocessOrderErrorMessage(
+  error: unknown,
+  ordenCompra: string,
+): string | undefined {
+  const code = apiErrorCode(error)
+  return code && code in REPROCESS_ERROR_MESSAGES
+    ? REPROCESS_ERROR_MESSAGES[code as ReprocessOrderErrorCode](ordenCompra)
+    : undefined
 }
 
 /** `GET /api/v1/ordenes-compra/export` (§ 1.5) — returns CSV as text. */

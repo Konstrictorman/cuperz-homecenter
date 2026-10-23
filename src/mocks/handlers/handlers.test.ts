@@ -9,6 +9,7 @@ import type {
   DispatchPreviewsResponse,
   Paginated,
   PurchaseOrderSummary,
+  ReprocessOrderResponse,
 } from '#/api/types'
 
 const server = setupServer(...handlers)
@@ -74,6 +75,55 @@ describe('purchase orders', () => {
   it('404s an unknown order', async () => {
     const { status, body } = await json<{ error: { code: string } }>(
       '/ordenes-compra/nope',
+    )
+    expect(status).toBe(404)
+    expect(body.error.code).toBe('ORDEN_NO_ENCONTRADA')
+  })
+
+  it('reinjects a PENDIENTE order and counts the attempt', async () => {
+    const list = await json<Paginated<PurchaseOrderSummary>>(
+      '/ordenes-compra?estado=PENDIENTE&pageSize=1',
+    )
+    const { ordenCompra } = list.body.data[0]
+    const { status, body } = await json<ReprocessOrderResponse>(
+      `/ordenes-compra/${ordenCompra}/reinyectar`,
+      { method: 'POST' },
+    )
+    expect(status).toBe(200)
+    expect(body.ordenCompra).toBe(ordenCompra)
+    expect(body.estado).toBe('PROCESANDO')
+    expect(body.intentoNumero).toBe(1)
+
+    // The order stays PENDIENTE, so it can be reinjected again.
+    const after = await json<Paginated<PurchaseOrderSummary>>(
+      `/ordenes-compra?ordenCompra=${ordenCompra}`,
+    )
+    expect(after.body.data[0].estado).toBe('PENDIENTE')
+    const again = await json<ReprocessOrderResponse>(
+      `/ordenes-compra/${ordenCompra}/reinyectar`,
+      { method: 'POST' },
+    )
+    expect(again.status).toBe(200)
+    expect(again.body.intentoNumero).toBe(2)
+  })
+
+  it('refuses a reinject past the attempt cap (409)', async () => {
+    const list = await json<Paginated<PurchaseOrderSummary>>(
+      '/ordenes-compra?estado=PENDIENTE&pageSize=1',
+    )
+    const path = `/ordenes-compra/${list.body.data[0].ordenCompra}/reinyectar`
+    for (let i = 0; i < 3; i++) await fetch(BASE + path, { method: 'POST' })
+    const { status, body } = await json<{ error: { code: string } }>(path, {
+      method: 'POST',
+    })
+    expect(status).toBe(409)
+    expect(body.error.code).toBe('REINTENTO_NO_PERMITIDO')
+  })
+
+  it('404s reinjecting an unknown order', async () => {
+    const { status, body } = await json<{ error: { code: string } }>(
+      '/ordenes-compra/nope/reinyectar',
+      { method: 'POST' },
     )
     expect(status).toBe(404)
     expect(body.error.code).toBe('ORDEN_NO_ENCONTRADA')

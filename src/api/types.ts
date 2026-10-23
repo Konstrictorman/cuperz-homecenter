@@ -299,9 +299,18 @@ export interface SyncPurchaseOrdersResponse {
 /** `200` response for `POST /api/v1/ordenes-compra/{ordenCompra}/reinyectar` (§ 1.4). */
 export interface ReprocessOrderResponse {
   ordenCompra: string
+  /** As in the Postman sample. Not the order's own status — a reinjected
+   *  order stays `PENDIENTE`. */
   estado: 'PROCESANDO'
+  /** 1-based: the retry this request just started (`1` on the first one). */
   intentoNumero: number
 }
+
+/** Error `code`s `POST .../reinyectar` answers with (§ 1.4 + the "Cuperz
+ *  Homecenter API" Postman collection): `404` unknown order, `409` order not
+ *  `PENDIENTE` or out of retries. */
+export type ReprocessOrderErrorCode =
+  'ORDEN_NO_ENCONTRADA' | 'REINTENTO_NO_PERMITIDO'
 
 /**
  * Path params for `GET /api/v1/ordenes-compra/{ordenCompra}/etiquetas/{numTags}`

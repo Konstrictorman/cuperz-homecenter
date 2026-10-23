@@ -302,7 +302,10 @@ export const purchaseOrdersHandlers = [
     )
   }),
 
-  // § 1.4
+  // § 1.4 — despite the spec (which says `CON_ERROR`), the real flow reinjects
+  // orders still `PENDIENTE` (confirmed with the user, 2026-10-22), and the
+  // order stays `PENDIENTE` afterwards — only the attempt count moves. The
+  // response's `estado: 'PROCESANDO'` is the Postman sample's, not the order's.
   http.post(
     `${API}/ordenes-compra/:ordenCompra/reinyectar`,
     async ({ params }) => {
@@ -316,11 +319,11 @@ export const purchaseOrdersHandlers = [
           `La orden de compra ${ordenCompra} no existe en el sistema.`,
         )
       }
-      if (order.estado !== 'CON_ERROR') {
+      if (order.estado !== 'PENDIENTE') {
         return apiError(
           409,
           'REINTENTO_NO_PERMITIDO',
-          `La orden ${ordenCompra} no está en estado CON_ERROR.`,
+          `La orden ${ordenCompra} no está en estado PENDIENTE.`,
         )
       }
       if (order.intentos >= order.maxIntentos) {
@@ -331,12 +334,11 @@ export const purchaseOrdersHandlers = [
         )
       }
       order.intentos += 1
-      order.estado = 'PROCESANDO'
       order.ultimaActualizacion = nowIso()
       return HttpResponse.json<ReprocessOrderResponse>({
         ordenCompra,
         estado: 'PROCESANDO',
-        intentoNumero: order.intentos + 1,
+        intentoNumero: order.intentos,
       })
     },
   ),
