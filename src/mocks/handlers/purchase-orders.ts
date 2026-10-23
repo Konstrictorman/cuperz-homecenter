@@ -79,6 +79,7 @@ function toStoreGroupedProducts(
         store = {
           eanTienda: tienda.eanTienda,
           nombreTienda: tienda.nombreTienda,
+          codTienda: tienda.codTienda,
           productos: [],
         }
         byTienda.set(tienda.eanTienda, store)
@@ -107,6 +108,7 @@ function toStoreGroupedProducts(
 function toCabecera(order: PurchaseOrderRecord): PurchaseOrderDetailCabecera {
   return {
     ordenCompra: order.ordenCompra,
+    exportada: order.exportada,
     cantidadTotOc: totalRequested(order),
     costoTotOc: order.costoTotalOc,
     sticker: order.sticker ?? '-1',

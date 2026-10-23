@@ -162,6 +162,9 @@ interface PurchaseOrderStoreLine {
 export interface PurchaseOrderStore {
   eanTienda: string
   nombreTienda: string
+  /** Homecenter's short store code (e.g. `"10"` for Suba) — added to this
+   *  endpoint 2026-10-23; same field as `DispatchPreviewStore.codTienda`. */
+  codTienda: string
   productos: Array<PurchaseOrderStoreLine>
 }
 
@@ -197,6 +200,9 @@ interface PurchaseOrderNegotiation {
  *  for the same caveat on the list endpoint. */
 export interface PurchaseOrderDetailCabecera {
   ordenCompra: string
+  /** Added to this endpoint 2026-10-23 — same flag as
+   *  `PurchaseOrderSummary.exportada`. */
+  exportada: boolean
   /** Raw `CANTIDAD_TOT_OC`. */
   cantidadTotOc: number
   /** Raw `COSTO_TOT_OC`. */

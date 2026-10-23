@@ -42,6 +42,8 @@ import type {
 interface PurchaseOrderRecordStore {
   eanTienda: string
   nombreTienda: string
+  /** Not in the export the seed is built from — resolved by `codTiendaFor`. */
+  codTienda: string
   cantidad: number
 }
 
@@ -242,6 +244,26 @@ function groupOrderLinesByTienda(
   return Array.from(byTienda, ([eanTienda, items]) => ({ eanTienda, items }))
 }
 
+/** Homecenter store codes by store EAN. The purchase-order export carries no
+ *  store code, so it's borrowed from the real `/avisos-despacho/por-fecha`
+ *  sample (`dispatch-previews-seed.json`), plus the codes that sample leaves
+ *  blank but a real `GET /ordenes-compra/{ordenCompra}` response (2026-10-23)
+ *  supplied. */
+const COD_TIENDA_BY_EAN = new Map<string, string>([
+  ...(dispatchPreviewsSeed as Array<DispatchPreviewOrder>)
+    .flatMap((order) => order.tiendas)
+    .filter((t) => t.codTienda)
+    .map((t): [string, string] => [t.eanTienda, t.codTienda]),
+  ['7703670901228', '22'], // TUNJA
+  ['7703670548331', '33'], // TULUA EL RETIRO
+])
+
+/** `''` for a store with no known code (seen as such on the real dispatch
+ *  previews sample) — currently only CALI MALLPLAZA. */
+function codTiendaFor(eanTienda: string): string {
+  return COD_TIENDA_BY_EAN.get(eanTienda) ?? ''
+}
+
 interface SeedStore {
   eanTienda: string
   nombreTienda: string
@@ -349,6 +371,7 @@ function buildLineItem(
     tiendas: seedProduct.tiendas.map((t) => ({
       eanTienda: t.eanTienda,
       nombreTienda: t.nombreTienda,
+      codTienda: codTiendaFor(t.eanTienda),
       cantidad: t.cantidad,
     })),
   }

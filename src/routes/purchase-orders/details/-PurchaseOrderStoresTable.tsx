@@ -14,6 +14,14 @@ import GroupedDataTable from '#/components/groupedDataTable/GroupedDataTable'
 import type { GroupRow } from '#/components/groupedDataTable/GroupedDataTable'
 import { usePurchaseOrderStoresColumns } from './-usePurchaseOrderStoresColumns'
 
+/** Store group label: `T{codTienda} - {nombreTienda}` (e.g. `T95 - Calle 80`),
+ *  same as the dispatch table's. Just the name when the backend has no code
+ *  for the store. */
+const storeLabel = (tienda: PurchaseOrderStore) =>
+  tienda.codTienda
+    ? `T${tienda.codTienda} - ${tienda.nombreTienda}`
+    : tienda.nombreTienda
+
 interface PurchaseOrderStoresTableProps {
   purchaseOrderNumber: string
   tiendas: Array<PurchaseOrderStore>
@@ -28,6 +36,7 @@ interface PurchaseOrderStoresTableProps {
  *  flattens the real OC 15669499 sample into. */
 export interface PurchaseOrderStoreProductRow {
   id: string
+  /** Display/grouping label built by `storeLabel`. */
   tienda: string
   eanTienda: string
   descripcion: string
@@ -43,16 +52,16 @@ const PurchaseOrderStoresTable = ({
 }: PurchaseOrderStoresTableProps) => {
   const columns = usePurchaseOrderStoresColumns()
 
-  const eanByStoreName = useMemo(
+  const eanByStoreLabel = useMemo(
     () =>
-      new Map(tiendas.map((tienda) => [tienda.nombreTienda, tienda.eanTienda])),
+      new Map(tiendas.map((tienda) => [storeLabel(tienda), tienda.eanTienda])),
     [tiendas],
   )
 
-  // Store group rows only carry the name; the EAN goes in the tooltip.
+  // Store group rows only carry the label; the EAN goes in the tooltip.
   const renderGroupLabel = useCallback(
     (group: GroupRow, label: string) => {
-      const eanTienda = eanByStoreName.get(group.groupValue)
+      const eanTienda = eanByStoreLabel.get(group.groupValue)
       return eanTienda ? (
         <Tooltip title={`EAN tienda: ${eanTienda}`} placement="top-end" arrow>
           <span>{label}</span>
@@ -61,7 +70,7 @@ const PurchaseOrderStoresTable = ({
         label
       )
     },
-    [eanByStoreName],
+    [eanByStoreLabel],
   )
 
   if (loading) {
@@ -83,7 +92,7 @@ const PurchaseOrderStoresTable = ({
   const rows: Array<PurchaseOrderStoreProductRow> = tiendas.flatMap((tienda) =>
     tienda.productos.map((producto) => ({
       id: `${tienda.eanTienda}-${producto.detalleId}`,
-      tienda: tienda.nombreTienda,
+      tienda: storeLabel(tienda),
       eanTienda: tienda.eanTienda,
       descripcion: producto.producto,
       eanProducto: producto.eanProducto,
