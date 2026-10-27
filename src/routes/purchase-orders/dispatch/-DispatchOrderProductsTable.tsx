@@ -113,7 +113,8 @@ const DispatchOrderProductsTable = ({
         cantidad: Number(producto.cantidad),
         peso: Number(producto.peso),
         volumen: Number(producto.volumen),
-        valorUnitario: Number(producto.valorUnitario),
+        valorUnitario:
+          Number(producto.valorUnitario) * Number(producto.cantidad),
       })),
     ),
   )

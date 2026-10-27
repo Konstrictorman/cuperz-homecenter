@@ -47,7 +47,7 @@ export function toDispatchOrderRow(o: DispatchPreviewOrder): DispatchOrder {
     numpedido: o.numpedido || '',
     eanPuntoEntrega: o.eanPuntoEntrega,
     fechaRealDespacho: o.fechaRealDespacho ?? '',
-    fechaTransmision: o.fechaTransmision ?? '',
+    fechaTransmision: o.fechaTransmision,
     cantidadTotal: Number(o.cantidadTotal),
     valorTotal: Number(o.valorTotal),
     cantidadTiendas: o.tiendas.length,
