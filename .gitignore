@@ -45,3 +45,6 @@ coverage
 
 *storybook.log
 storybook-static
+
+# Local-only reference material (real Homecenter data)
+docs/
