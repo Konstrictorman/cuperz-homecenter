@@ -93,6 +93,13 @@ export const Exceeded: Story = {
   },
 }
 
+export const Received: Story = {
+  args: {
+    label: 'Recibido',
+    tone: 'received',
+  },
+}
+
 export const AllTones: Story = {
   args: {
     label: 'Pendiente',
@@ -115,6 +122,7 @@ export const AllTones: Story = {
       <StatusBadge label="Parcial" tone="partial" />
       <StatusBadge label="Cancelada" tone="cancelled" />
       <StatusBadge label="Excede" tone="exceeded" />
+      <StatusBadge label="Recibido" tone="received" />
     </div>
   ),
 }

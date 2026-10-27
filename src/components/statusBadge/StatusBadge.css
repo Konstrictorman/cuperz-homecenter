@@ -3,7 +3,7 @@
   width: var(--space-3xl);
 }
 
-.status-badge--pending {
+.status-badge--received {
   background-color: var(--status-warning-100) !important;
   color: var(--status-warning-800) !important;
 }
@@ -18,12 +18,12 @@
   color: var(--status-error-50) !important;
 }
 
-.status-badge--processing {
+.status-badge--partial {
   background-color: var(--color-grey-100) !important;
   color: var(--color-grey-800) !important;
 }
 
-.status-badge--partial {
+.status-badge--processing {
   background-color: var(--status-info-600) !important;
   color: var(--status-info-25) !important;
 }
@@ -33,42 +33,12 @@
   color: var(--status-error-50) !important;
 }
 
+.status-badge--pending {
+  background-color: var(--color-lime-500) !important;
+  color: var(--color-fuchsia-700) !important;
+}
+
 .status-badge--exceeded {
   background-color: var(--status-warning-400) !important;
   color: var(--status-warning-900) !important;
-}
-
-[data-theme='dark'] .status-badge--pending {
-  background-color: var(--status-warning-100) !important;
-  color: var(--status-warning-800) !important;
-}
-
-[data-theme='dark'] .status-badge--dispatched {
-  background-color: var(--status-success-400) !important;
-  color: var(--status-success-800) !important;
-}
-
-[data-theme='dark'] .status-badge--error {
-  background-color: var(--status-error-500) !important;
-  color: var(--status-error-50) !important;
-}
-
-[data-theme='dark'] .status-badge--processing {
-  background-color: var(--color-grey-900) !important;
-  color: var(--color-grey-200) !important;
-}
-
-[data-theme='dark'] .status-badge--partial {
-  background-color: var(--status-info-600) !important;
-  color: var(--status-info-25) !important;
-}
-
-[data-theme='dark'] .status-badge--cancelled {
-  background-color: var(--status-error-300) !important;
-  color: var(--status-error-100) !important;
-}
-
-[data-theme='dark'] .status-badge--exceeded {
-  background-color: var(--status-warning-600) !important;
-  color: var(--status-warning-200) !important;
 }

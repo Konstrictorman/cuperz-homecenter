@@ -10,6 +10,7 @@ export type StatusBadgeTone =
   | 'partial'
   | 'cancelled'
   | 'exceeded'
+  | 'received'
 
 interface StatusBadgeProps {
   label: string
