@@ -40,6 +40,7 @@ const TONE_TO_ORDER_STATUS: Record<StatusBadgeTone, OrderStatus> = {
   partial: 'PREPARADO',
   cancelled: 'CANCELADA',
   exceeded: 'CON_ERROR',
+  received: 'RECIBIDO',
 }
 
 /** API list row → the shape `PurchaseOrdersTable` renders. */
