@@ -498,12 +498,6 @@ export interface DispatchNoticeAttemptsResponse {
 // per-row detail fetch needed.
 // ===========================================================================
 
-/** Order `estado` values the live backend returns and filters on
- *  (observed 2026-10-16: `?estado=NODESPACHADO` matches nothing). The param
- *  is typed as a free string (≤30 chars) and Postman also shows `PENDIENTE`,
- *  so the full set is unconfirmed. */
-export type DispatchPreviewStatus = 'PREPARADO' | 'DESPACHADO'
-
 /** Numbers arrive as decimal strings (`"6.00"`, `"0.0280"`), exactly as
  *  Homecenter's AvisoDespacho payload carries them. */
 export interface DispatchPreviewProduct {
@@ -544,9 +538,8 @@ export interface DispatchPreviewOrder {
   fechaRealDespacho: IsoDate | null
   /** The order's status — the source of truth for "dispatched".
    *  `fechaRealDespacho` is not: `PREPARADO` (formerly `ALISTADO`) orders
-   *  have been observed with a date set. A free string since values beyond
-   *  `DispatchPreviewStatus` may appear. */
-  estado: string
+   *  have been observed with a date set. */
+  estado: OrderStatus
   numpedido: string | null
   /** Offset-less datetimes (`"2026-10-12T00:00:00"`), time always midnight
    *  so far. */
@@ -568,7 +561,8 @@ export interface DispatchPreviewsResponse {
 export interface DispatchPreviewsQuery extends PaginationQuery {
   ordenCompra?: string
   numpedido?: string
-  estado?: DispatchPreviewStatus
+  /** Accepts any `OrderStatus`, not just `PREPARADO`/`DESPACHADO`. */
+  estado?: OrderStatus
   fechaDesde?: IsoDate
   fechaHasta?: IsoDate
 }

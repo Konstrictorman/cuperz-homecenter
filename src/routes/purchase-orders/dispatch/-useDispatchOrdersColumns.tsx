@@ -70,16 +70,6 @@ export const useDispatchOrdersColumns = (
         align: 'center',
         headerAlign: 'center',
       },
-      // {
-      //   field: 'fechaRealDespacho',
-      //   headerName: 'Fecha transmisión',
-      //   flex: 1,
-      //   minWidth: 130,
-      //   align: 'center',
-      //   headerAlign: 'center',
-      //   valueFormatter: (value: DispatchOrder['fechaRealDespacho']) =>
-      //     formatDate(value) || '—',
-      // },
       {
         field: 'fechaRealDespacho',
         headerName: 'Fecha despacho',
@@ -121,7 +111,7 @@ export const useDispatchOrdersColumns = (
             icon={<LocalShippingOutlinedIcon />}
             label="Generar aviso de despacho"
             onClick={() => onGenerateDispatchNotice?.(params.row)}
-            disabled={params.row.estadoTone !== 'partial'}
+            disabled={params.row.estadoTone !== 'prepared'}
           />,
           <GridActionsCellItem
             icon={<QrCodeIcon />}

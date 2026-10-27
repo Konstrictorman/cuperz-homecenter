@@ -1,46 +1,14 @@
 // Boundary mappers between the API DTOs (`#/api/types`) and the shapes this
 // screen's table / filter bar already speak.
 
-import type { StatusBadgeTone } from '#/components/statusBadge/StatusBadge'
-import type {
-  DispatchPreviewOrder,
-  DispatchPreviewStatus,
-  DispatchPreviewsQuery,
-} from '#/api/types'
+import type { DispatchPreviewOrder, DispatchPreviewsQuery } from '#/api/types'
 import type { DispatchOrdersFilterValues } from './-DispatchOrdersFilterBar'
 import type { DispatchOrder } from './-DispatchOrdersTable'
-
-/** API dispatch status → badge tone + Spanish label. */
-const DISPATCH_ORDER_STATUS_UI: Record<
-  DispatchPreviewStatus,
-  { tone: StatusBadgeTone; label: string }
-> = {
-  PREPARADO: { tone: 'partial', label: 'Preparada' },
-  DESPACHADO: { tone: 'dispatched', label: 'Despachada' },
-}
-
-/** Filter bar uses badge tones; the API query wants the enum. */
-const TONE_TO_DISPATCH_ORDER_STATUS: Record<
-  Exclude<DispatchOrdersFilterValues['estado'], 'all'>,
-  DispatchPreviewStatus
-> = {
-  ready: 'PREPARADO',
-  dispatched: 'DESPACHADO',
-  error: 'DESPACHADO',
-  cancelled: 'DESPACHADO',
-}
-
-/** Trusts the backend's `estado`; a set `fechaRealDespacho` doesn't imply
- *  dispatched (`PREPARADO` orders carry one too). Only when `estado` is
- *  missing or unrecognised does the date serve as a best-effort fallback. */
-const dispatchStatusOf = (o: DispatchPreviewOrder): DispatchPreviewStatus => {
-  if (o.estado === 'PREPARADO' || o.estado === 'DESPACHADO') return o.estado
-  return o.fechaRealDespacho ? 'DESPACHADO' : 'PREPARADO'
-}
+import { TONE_TO_ORDER_STATUS, orderStatusUi } from '../types'
 
 /** API order → the shape `DispatchOrdersTable` renders. */
 export function toDispatchOrderRow(o: DispatchPreviewOrder): DispatchOrder {
-  const ui = DISPATCH_ORDER_STATUS_UI[dispatchStatusOf(o)]
+  const ui = orderStatusUi(o.estado)
   return {
     id: o.ordenCompra,
     ordenCompra: o.ordenCompra,
@@ -74,7 +42,7 @@ export function toDispatchOrdersQuery(
     estado:
       filters.estado === 'all'
         ? undefined
-        : TONE_TO_DISPATCH_ORDER_STATUS[filters.estado],
+        : TONE_TO_ORDER_STATUS[filters.estado],
     fechaDesde: hasRange ? filters.fechaDesde : undefined,
     fechaHasta: hasRange ? filters.fechaHasta : undefined,
   }

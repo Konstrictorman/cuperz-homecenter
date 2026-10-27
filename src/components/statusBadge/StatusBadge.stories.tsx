@@ -16,6 +16,7 @@ const meta = {
         'partial',
         'cancelled',
         'exceeded',
+        'unknown',
       ],
     },
   },
@@ -100,6 +101,21 @@ export const Received: Story = {
   },
 }
 
+export const Unknown: Story = {
+  args: {
+    label: 'Desconocida',
+    tone: 'unknown',
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Fallback for an `estado` the client doesn't recognise (see `orderStatusUi`), so the row still renders instead of crashing. Same colours as the `warning` Button.",
+      },
+    },
+  },
+}
+
 export const AllTones: Story = {
   args: {
     label: 'Pendiente',
@@ -119,10 +135,9 @@ export const AllTones: Story = {
       <StatusBadge label="Despachada" tone="dispatched" />
       <StatusBadge label="Error" tone="error" />
       <StatusBadge label="Procesando" tone="processing" />
-      <StatusBadge label="Parcial" tone="partial" />
       <StatusBadge label="Cancelada" tone="cancelled" />
-      <StatusBadge label="Excede" tone="exceeded" />
       <StatusBadge label="Recibido" tone="received" />
+      <StatusBadge label="Unknown" tone="unknown" />
     </div>
   ),
 }

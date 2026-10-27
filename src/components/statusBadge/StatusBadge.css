@@ -42,3 +42,9 @@
   background-color: var(--status-warning-400) !important;
   color: var(--status-warning-900) !important;
 }
+
+/* Same colours as the `warning` Button (MUI palette, theme-aware). */
+.status-badge--unknown {
+  background-color: var(--palette-warning-main) !important;
+  color: var(--palette-warning-contrastText) !important;
+}

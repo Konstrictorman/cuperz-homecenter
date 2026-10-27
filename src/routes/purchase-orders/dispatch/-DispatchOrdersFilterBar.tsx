@@ -9,12 +9,10 @@ import '../FilterBar.css'
 import InputAdornment from '@mui/material/InputAdornment'
 import IconButton from '@mui/material/IconButton'
 import ClearIcon from '@mui/icons-material/Clear'
+import type { FilterStatusOrder } from '../types'
 
-/** Mirrors `DispatchPreviewStatus` (`#/api/types`) — the endpoint only
- *  distinguishes PREPARADO/DESPACHADO, unlike the richer `StatusBadgeTone`
- *  union the details-route filter bar uses. */
-type DispatchOrdersFilterStatus =
-  'ready' | 'dispatched' | 'all' | 'error' | 'cancelled'
+/** Badge tones; mapped to the API's `OrderStatus` by `TONE_TO_ORDER_STATUS`. */
+type DispatchOrdersFilterStatus = FilterStatusOrder
 
 /** `GET /avisos-despacho` filters by order number (`numpedido`), PO number,
  *  estado and a date range (both ends required together). */
@@ -40,10 +38,11 @@ const STATUS_OPTIONS: Array<{
   label: string
 }> = [
   { value: 'all', label: 'Todos' },
-  { value: 'ready', label: 'Preparada' },
+  { value: 'cancelled', label: 'Cancelada' },
   { value: 'dispatched', label: 'Despachada' },
   { value: 'error', label: 'Error' },
-  { value: 'cancelled', label: 'Cancelada' },
+  { value: 'prepared', label: 'Preparada' },
+  { value: 'received', label: 'Recibida' },
 ]
 
 const INCOMPLETE_RANGE = 'Indique ambas fechas'

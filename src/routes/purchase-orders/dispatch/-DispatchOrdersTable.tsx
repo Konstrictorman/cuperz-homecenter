@@ -1,7 +1,7 @@
 import type { GridPaginationModel } from '@mui/x-data-grid'
 import type { DispatchPreviewOrder } from '#/api/types'
 import DataTable from '#/components/dataTable/DataTable'
-import type { StatusBadgeTone } from '#/components/statusBadge/StatusBadge'
+import type { OrderStatusType } from '../types'
 import { useDispatchOrdersColumns } from './-useDispatchOrdersColumns'
 
 export interface DispatchOrder {
@@ -17,7 +17,7 @@ export interface DispatchOrder {
   cantidadContenedores: number
   cantidadTotal: number
   valorTotal: number
-  estadoTone: StatusBadgeTone
+  estadoTone: OrderStatusType
   estadoLabel: string
   /** The untouched API order — its Tienda→Contenedor→Producto tree feeds the
    *  detail modal without another request. */

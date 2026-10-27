@@ -1,20 +1,11 @@
 import MuiChip from '@mui/material/Chip'
 import clsx from 'clsx'
 import './StatusBadge.css'
-
-export type StatusBadgeTone =
-  | 'pending'
-  | 'dispatched'
-  | 'error'
-  | 'processing'
-  | 'partial'
-  | 'cancelled'
-  | 'exceeded'
-  | 'received'
+import type { OrderStatusType } from '#/routes/purchase-orders/types'
 
 interface StatusBadgeProps {
   label: string
-  tone: StatusBadgeTone
+  tone: OrderStatusType
 }
 
 const StatusBadge = ({ label, tone }: StatusBadgeProps) => {
