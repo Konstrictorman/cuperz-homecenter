@@ -1,15 +1,11 @@
-import Box from '@mui/material/Box'
-import CircularProgress from '@mui/material/CircularProgress'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import { useState } from 'react'
 import SendIcon from '@mui/icons-material/Send'
-import { useQuery } from '@tanstack/react-query'
 import { useForm } from '@tanstack/react-form'
 import Modal from '#/components/modal/Modal'
 import Button from '#/components/button/Button'
 import { formatDate, todayIsoDate } from '#/common/util'
-import { purchaseOrderDetailQueryOptions } from '#/api/purchase-orders'
 import type { DispatchOrder } from './-DispatchOrdersTable'
 import WarningAmberIcon from '@mui/icons-material/WarningAmber'
 import CancelIcon from '@mui/icons-material/Cancel'
@@ -91,49 +87,17 @@ const GenerateDispatchNoticeModal = ({
   onClose,
   onSubmit,
 }: GenerateDispatchNoticeModalProps) => {
-  // The dispatch preview doesn't carry the delivery window — the PO detail
-  // does. Hook runs every render; `enabled` gates the actual request.
-  const {
-    data: detail,
-    isPending,
-    isError,
-  } = useQuery({
-    ...purchaseOrderDetailQueryOptions(order?.ordenCompra ?? ''),
-    enabled: order != null,
-  })
-
   const renderBody = () => {
     if (!order) return null
-    if (isPending) {
-      return (
-        <Box sx={{ display: 'flex', justifyContent: 'center', padding: 2 }}>
-          <CircularProgress size={28} />
-        </Box>
-      )
-    }
-    if (isError) {
-      return (
-        <div className="generate-labels-modal">
-          <Typography color="error">
-            No se pudieron consultar las fechas mínima y máxima de despacho de
-            la orden. Intente de nuevo más tarde.
-          </Typography>
-          <div className="generate-labels-modal__actions">
-            <Button color="neutral" variant="outlined" onClick={onClose}>
-              Cerrar
-            </Button>
-          </div>
-        </div>
-      )
-    }
     return (
       // Keyed so every order starts from a fresh form and its own default.
       <DispatchNoticeSteps
         key={order.ordenCompra}
         order={order}
+        // The dispatch preview already carries the delivery window.
         dispatchWindow={toDispatchWindow(
-          detail.cabecera.fechaMinEntrega,
-          detail.cabecera.fechaMaxEntrega,
+          order.source.minimaFechaEntrega,
+          order.source.maximaFechaEntrega,
         )}
         onCancel={onClose}
         onConfirm={(fechaRealDespacho) => {
