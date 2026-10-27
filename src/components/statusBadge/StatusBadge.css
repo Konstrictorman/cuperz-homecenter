@@ -4,8 +4,8 @@
 }
 
 .status-badge--received {
-  background-color: var(--status-warning-100) !important;
-  color: var(--status-warning-800) !important;
+  background-color: var(--cuperz-neutral-200) !important;
+  color: var(--cuperz-neutral-600) !important;
 }
 
 .status-badge--dispatched {

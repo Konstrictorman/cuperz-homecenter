@@ -21,7 +21,7 @@ const ORDER_STATUS_UI: Record<
   CANCELADA: { tone: 'cancelled', label: 'Cancelada' },
   PROCESANDO: { tone: 'processing', label: 'Procesando' },
   PREPARADO: { tone: 'partial', label: 'Preparada' },
-  RECIBIDO: { tone: 'processing', label: 'Recibido' },
+  RECIBIDO: { tone: 'received', label: 'Recibido' },
 }
 
 /** Filter bar uses badge tones; the API query wants the enum.
