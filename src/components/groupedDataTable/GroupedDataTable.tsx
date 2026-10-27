@@ -2066,14 +2066,16 @@ function GroupedDataTableFooter({
         {aggregations.map((aggregation) => {
           const column = columnByField.get(aggregation.field)
           return (
-            <div>
+            <div
+              key={aggregation.field}
+              className="grouped-data-table__total-item"
+            >
               <Typography
-                key={aggregation.field}
                 variant="body2"
                 component="span"
                 className="grouped-data-table__totals-item"
               >
-                Total {column?.headerName ?? aggregation.field}:{' '}
+                Total {column?.headerName ?? aggregation.field}:
               </Typography>
               <Typography variant="body2" component="span">
                 {column

@@ -6,10 +6,10 @@ import type {
   GridRowSelectionModel,
 } from '@mui/x-data-grid'
 import DataTable from '#/components/dataTable/DataTable'
-import type { StatusBadgeTone } from '#/components/statusBadge/StatusBadge'
 import ToolBar from '#/components/toolBar/ToolBar'
 import { usePurchaseOrdersColumns } from './-usePurchaseOrdersColumns'
 import './PurchaseOrdersTable.css'
+import type { OrderStatusType } from '../types'
 
 export interface PurchaseOrder {
   id: string
@@ -18,7 +18,7 @@ export interface PurchaseOrder {
   ciudadEntrega: string
   cantidadTotal: number
   costoTotalOc: number
-  estadoTone: StatusBadgeTone
+  estadoTone: OrderStatusType
   estadoLabel: string
   numPedido: string
   exportada: boolean

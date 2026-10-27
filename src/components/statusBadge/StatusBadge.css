@@ -8,7 +8,7 @@
   color: var(--cuperz-neutral-600) !important;
 }
 
-.status-badge--dispatched {
+.status-badge--prepared {
   background-color: var(--status-success-400) !important;
   color: var(--status-success-800) !important;
 }
@@ -18,7 +18,7 @@
   color: var(--status-error-50) !important;
 }
 
-.status-badge--partial {
+.status-badge--dispatched {
   background-color: var(--color-grey-100) !important;
   color: var(--color-grey-800) !important;
 }

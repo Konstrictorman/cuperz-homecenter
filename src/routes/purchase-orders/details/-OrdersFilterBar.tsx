@@ -1,7 +1,6 @@
 import MenuItem from '@mui/material/MenuItem'
 import TextField from '@mui/material/TextField'
 import { useForm } from '@tanstack/react-form'
-import type { StatusBadgeTone } from '#/components/statusBadge/StatusBadge'
 import Button from '#/components/button/Button'
 import FilterAltIcon from '@mui/icons-material/FilterAlt'
 import FilterAltOffIcon from '@mui/icons-material/FilterAltOff'
@@ -10,8 +9,9 @@ import '../FilterBar.css'
 import InputAdornment from '@mui/material/InputAdornment'
 import IconButton from '@mui/material/IconButton'
 import ClearIcon from '@mui/icons-material/Clear'
+import type { FilterStatusOrder } from '../types'
 
-type OrdersFilterStatus = StatusBadgeTone | 'all'
+type OrdersFilterStatus = FilterStatusOrder
 
 export interface OrdersFilterValues {
   ordenCompra: string

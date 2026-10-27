@@ -27,7 +27,7 @@ export const ORDER_STATUS_UI: Record<
 
 const UNKNOWN_ORDER_STATUS_UI = {
   tone: 'unknown',
-  label: 'Unknown',
+  label: 'Desconocida',
 } as const
 
 /** `ORDER_STATUS_UI` lookup that never returns `undefined`: an `estado`
@@ -45,14 +45,7 @@ export function orderStatusUi(estado: string): {
 /** `unknown` has no API value to filter by. */
 type FilterableOrderStatusType = Exclude<OrderStatusType, 'unknown'>
 
-/** Filter bar uses badge tones; the API query wants the enum.
- *
- *  `partial`/`cancelled`/`exceeded` are line-level-only tones — `OrdersFilterBar`
- *  never offers them as an `estado` filter option (see `STATUS_OPTIONS`), so
- *  these three entries are unreachable in practice. They exist only to keep
- *  this `Record` exhaustive over the full `StatusBadgeTone` union; the
- *  `OrderStatus` each maps to is an arbitrary nearest-fit, not a real
- *  correspondence. */
+/** Filter bar uses badge tones; the API query wants the enum. */
 export const TONE_TO_ORDER_STATUS: Record<
   FilterableOrderStatusType,
   OrderStatus

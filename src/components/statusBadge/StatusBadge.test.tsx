@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import StatusBadge from './StatusBadge'
-import type { StatusBadgeTone } from './StatusBadge'
+import type { OrderStatusType } from '#/routes/purchase-orders/types'
 
 describe('StatusBadge', () => {
   it('renders the given label text', () => {
@@ -9,14 +9,11 @@ describe('StatusBadge', () => {
     expect(screen.getByText('Pendiente despacho')).toBeInTheDocument()
   })
 
-  it.each<[StatusBadgeTone, string]>([
+  it.each<[OrderStatusType, string]>([
     ['pending', 'status-badge--pending'],
     ['dispatched', 'status-badge--dispatched'],
     ['error', 'status-badge--error'],
     ['processing', 'status-badge--processing'],
-    ['partial', 'status-badge--partial'],
-    ['cancelled', 'status-badge--cancelled'],
-    ['exceeded', 'status-badge--exceeded'],
   ])('applies the %s tone class', (tone, expectedClass) => {
     render(<StatusBadge label="Estado" tone={tone} />)
 

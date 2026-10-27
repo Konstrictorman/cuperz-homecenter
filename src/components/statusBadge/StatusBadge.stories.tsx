@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/tanstack-react'
 import StatusBadge from './StatusBadge'
+import type { OrderStatusType } from '#/routes/purchase-orders/types'
 
 const meta = {
   title: 'Components/StatusBadge',
@@ -13,11 +14,11 @@ const meta = {
         'dispatched',
         'error',
         'processing',
-        'partial',
         'cancelled',
-        'exceeded',
+        'received',
+        'prepared',
         'unknown',
-      ],
+      ] as OrderStatusType[],
     },
   },
   parameters: {
@@ -73,13 +74,6 @@ export const Processing: Story = {
   },
 }
 
-export const Partial: Story = {
-  args: {
-    label: 'Parcial',
-    tone: 'partial',
-  },
-}
-
 export const Cancelled: Story = {
   args: {
     label: 'Cancelada',
@@ -87,17 +81,17 @@ export const Cancelled: Story = {
   },
 }
 
-export const Exceeded: Story = {
+export const Received: Story = {
   args: {
-    label: 'Supera solicitado',
-    tone: 'exceeded',
+    label: 'Recibida',
+    tone: 'received',
   },
 }
 
-export const Received: Story = {
+export const Prepared: Story = {
   args: {
-    label: 'Recibido',
-    tone: 'received',
+    label: 'Preparada',
+    tone: 'prepared',
   },
 }
 
@@ -125,7 +119,7 @@ export const AllTones: Story = {
     docs: {
       description: {
         story:
-          "Every tone side by side — the wireframe's four OC states plus the three line-level-only states (Parcial/Cancelada/Supera solicitado).",
+          'Every tone side by side, one per `OrderStatus` plus the `unknown` fallback.',
       },
     },
   },
@@ -136,8 +130,9 @@ export const AllTones: Story = {
       <StatusBadge label="Error" tone="error" />
       <StatusBadge label="Procesando" tone="processing" />
       <StatusBadge label="Cancelada" tone="cancelled" />
-      <StatusBadge label="Recibido" tone="received" />
-      <StatusBadge label="Unknown" tone="unknown" />
+      <StatusBadge label="Recibida" tone="received" />
+      <StatusBadge label="Preparada" tone="prepared" />
+      <StatusBadge label="Desconocida" tone="unknown" />
     </div>
   ),
 }

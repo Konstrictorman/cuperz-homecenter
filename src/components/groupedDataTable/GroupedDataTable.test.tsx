@@ -5,6 +5,16 @@ import { GridActionsCellItem } from '@mui/x-data-grid'
 import type { GridColDef } from '@mui/x-data-grid'
 import GroupedDataTable, { isGroupRow } from './GroupedDataTable'
 
+/** The footer renders each total as a label span + value span inside one
+ *  `total-item` wrapper; match that wrapper's combined text ("Label: value"). */
+function getFooterTotal(text: string) {
+  return screen.getByText(
+    (_, element) =>
+      element?.classList.contains('grouped-data-table__total-item') === true &&
+      element.textContent.replace(/:\s*/, ': ') === text,
+  )
+}
+
 interface DemoRow {
   id: string
   tienda: string
@@ -145,9 +155,9 @@ describe('GroupedDataTable', () => {
     )
 
     // Both groups start collapsed — the totals below still cover every row.
-    expect(screen.getByText('Total de grupos: 2')).toBeInTheDocument()
+    expect(getFooterTotal('Total de grupos: 2')).toBeInTheDocument()
     expect(
-      screen.getByText(`Total Valor Total Orden: ${119600 + 135000 + 135000}`),
+      getFooterTotal(`Total Valor Total Orden: ${119600 + 135000 + 135000}`),
     ).toBeInTheDocument()
   })
 
@@ -161,7 +171,7 @@ describe('GroupedDataTable', () => {
       />,
     )
 
-    expect(screen.getByText('Total de tiendas: 2')).toBeInTheDocument()
+    expect(getFooterTotal('Total de tiendas: 2')).toBeInTheDocument()
   })
 
   it("renders no checkboxes by default, matching MUI X Premium's own row-grouping demos", () => {
@@ -1755,7 +1765,7 @@ describe('GroupedDataTable', () => {
       expect(storeNames).toHaveLength(32)
 
       expect(
-        screen.getByText(`Total de grupos: ${storeNames.length}`),
+        getFooterTotal(`Total de grupos: ${storeNames.length}`),
       ).toBeInTheDocument()
 
       for (const tienda of storeNames) {
@@ -1776,7 +1786,7 @@ describe('GroupedDataTable', () => {
         0,
       )
       expect(
-        screen.getByText(`Total Valor Total Orden: ${grandTotal}`),
+        getFooterTotal(`Total Valor Total Orden: ${grandTotal}`),
       ).toBeInTheDocument()
     })
   })
@@ -2087,7 +2097,7 @@ describe('GroupedDataTable — custom aggregationFunctions', () => {
     expect(within(subaRow).getByText('127300')).toBeInTheDocument()
 
     expect(
-      screen.getByText('Total Valor Total Orden: 135000'),
+      getFooterTotal('Total Valor Total Orden: 135000'),
     ).toBeInTheDocument()
   })
 })
@@ -2232,7 +2242,7 @@ describe('GroupedDataTable — aggregation header menu', () => {
       ).getByText('avg'),
     ).toBeInTheDocument()
     expect(within(subaRow).getByText('150')).toBeInTheDocument()
-    expect(screen.getByText('Total Valor Total Orden: 150')).toBeInTheDocument()
+    expect(getFooterTotal('Total Valor Total Orden: 150')).toBeInTheDocument()
   })
 
   it('lets the user turn aggregation on for a previously unaggregated column, and off again via "Sin agregación"', async () => {
@@ -2251,7 +2261,7 @@ describe('GroupedDataTable — aggregation header menu', () => {
       .getByText('SOD SUBA (2)')
       .closest('.MuiDataGrid-row') as HTMLElement
     expect(within(subaRow).getByText('10')).toBeInTheDocument()
-    expect(screen.getByText('Total Cantidad Orden: 10')).toBeInTheDocument()
+    expect(getFooterTotal('Total Cantidad Orden: 10')).toBeInTheDocument()
 
     await selectAggregation(user, 'Cantidad Orden', 'Sin agregación')
 
@@ -2675,7 +2685,7 @@ describe('GroupedDataTable — filtering', () => {
     // Only the two "Tapete" rows count: 119600 + 135000 — "Felpudo C"'s
     // 50000 is excluded from the grand total, not just hidden from view.
     expect(
-      screen.getByText(`Total Valor Total Orden: ${119600 + 135000}`),
+      getFooterTotal(`Total Valor Total Orden: ${119600 + 135000}`),
     ).toBeInTheDocument()
   })
 
