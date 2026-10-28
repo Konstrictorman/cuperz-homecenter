@@ -4,11 +4,12 @@ import Typography from '@mui/material/Typography'
 import type { SvgIconProps } from '@mui/material/SvgIcon'
 import type { ComponentType } from 'react'
 import './DashboardCard.css'
+import clsx from 'clsx'
 
 interface DashboardCardProps {
   title: string
   description: string
-  highlight: string | number
+  highlight: number
   icon?: ComponentType<SvgIconProps>
 }
 
@@ -18,6 +19,7 @@ const DashboardCard = ({
   highlight,
   icon: Icon,
 }: DashboardCardProps) => {
+  const pulse = highlight > 0 ? 'pulse' : ''
   return (
     <div className="dashboardCard__wrap">
       <MuiCard className="dashboardCard">
@@ -29,7 +31,7 @@ const DashboardCard = ({
             <Typography
               variant="h1"
               component="h1"
-              className="dashboardCard__value"
+              className={clsx('dashboardCard__value', { pulse })}
             >
               {highlight}
             </Typography>

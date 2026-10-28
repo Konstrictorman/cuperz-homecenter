@@ -44,6 +44,16 @@
   color: var(--cuperz-primary-500);
 }
 
+@keyframes pulse {
+  50% {
+    opacity: 50%;
+  }
+}
+
+.pulse {
+  animation: pulse 2s infinite;
+}
+
 .dashboardCard__value {
   font-weight: var(--font-weight-medium) !important;
   font-size: var(--card-figure-size) !important;

@@ -34,19 +34,19 @@ function Home() {
         <DashboardCard
           title={'Órdenes de compra sin procesar'}
           description={'Órdenes que no han sido cargadas'}
-          highlight={pendingOrders.data?.pagination.total ?? '0'}
+          highlight={pendingOrders.data?.pagination.total ?? 0}
           icon={PendingActionsIcon}
         />
         <DashboardCard
           title={'Despachos sin procesar'}
           description={'Pendientes de enviar a HC'}
-          highlight={processingOrders.data?.pagination.total ?? '0'}
+          highlight={processingOrders.data?.pagination.total ?? 0}
           icon={LocalShippingIcon}
         />
         <DashboardCard
           title={'Avisos de recibo por confirmar'}
           description={'Recepciones pendientes de parte de HC'}
-          highlight={receivedOrders.data?.pagination.total ?? '0'}
+          highlight={receivedOrders.data?.pagination.total ?? 0}
           icon={LocalPostOfficeIcon}
         />
       </div>
