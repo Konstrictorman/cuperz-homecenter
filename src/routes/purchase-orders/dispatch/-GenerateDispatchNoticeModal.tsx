@@ -145,6 +145,7 @@ const DispatchNoticeSteps = ({
     return (
       <DispatchNoticeConfirmation
         order={order}
+        fechaRealDespacho={fechaRealDespacho}
         onCancel={() => setConfirming(false)}
         onConfirm={() => onConfirm(fechaRealDespacho)}
       />
@@ -167,12 +168,15 @@ const formatNumber = (value: number) => value.toLocaleString('es-CO')
 
 interface DispatchNoticeConfirmationProps {
   order: DispatchOrder
+  /** The `YYYY-MM-DD` date picked in the previous step. */
+  fechaRealDespacho: string
   onCancel: () => void
   onConfirm: () => void
 }
 
 const DispatchNoticeConfirmation = ({
   order,
+  fechaRealDespacho,
   onCancel,
   onConfirm,
 }: DispatchNoticeConfirmationProps) => (
@@ -185,7 +189,8 @@ const DispatchNoticeConfirmation = ({
         <b>${formatNumber(Math.round(order.valorTotal))}</b>, son{' '}
         <b>{formatNumber(order.cantidadTotal)} </b>unidades distribuidas en{' '}
         <b>{formatNumber(order.cantidadContenedores)}</b> paquetes para{' '}
-        <b>{formatNumber(order.cantidadTiendas)}</b> tiendas.
+        <b>{formatNumber(order.cantidadTiendas)}</b> tiendas, con fecha de
+        despacho <b>{formatDate(fechaRealDespacho)}</b>.
       </Typography>
     </div>
     <div className="generate-labels-modal__actions">
